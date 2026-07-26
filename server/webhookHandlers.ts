@@ -1,6 +1,6 @@
 import { getUncachableStripeClient } from './stripeClient';
 import { storage } from './storage';
-import { sendAppointmentConfirmation, sendAppointmentCalendarInvite } from './emailService';
+import { sendAppointmentConfirmation, sendAppointmentCalendarInvite, sendPaymentNotification } from './emailService';
 import type Stripe from 'stripe';
 
 export class WebhookHandlers {
@@ -58,7 +58,21 @@ export class WebhookHandlers {
     const appointmentId = session.metadata?.appointment_id;
 
     if (!appointmentId) {
-      console.log('No appointment_id in session metadata, skipping appointment update');
+      console.log('No appointment_id in session metadata, sending generic purchase notification');
+      try {
+        const stripe = await getUncachableStripeClient();
+        const lineItems = await stripe.checkout.sessions.listLineItems(session.id);
+        sendPaymentNotification({
+          customerEmail: session.customer_details?.email || undefined,
+          customerName: session.customer_details?.name || undefined,
+          amount: session.amount_total || 0,
+          currency: session.currency || 'usd',
+          productName: lineItems.data[0]?.description || undefined,
+          sessionId: session.id,
+        });
+      } catch (error: any) {
+        console.error('Error sending purchase notification for session without appointment_id:', error.message);
+      }
       return;
     }
 
