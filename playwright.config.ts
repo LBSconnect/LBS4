@@ -31,6 +31,13 @@ export default defineConfig({
     screenshot: "only-on-failure",
     video: "retain-on-failure",
     actionTimeout: 15_000,
+    // In sandboxed environments that require an outbound proxy (e.g. HTTPS_PROXY
+    // set), route the browser's navigation through it too — otherwise pages
+    // like Stripe's hosted checkout are unreachable even though server-side
+    // fetches work fine. No-op (direct internet access) when HTTPS_PROXY is unset.
+    proxy: process.env.HTTPS_PROXY
+      ? { server: process.env.HTTPS_PROXY, bypass: "localhost,127.0.0.1" }
+      : undefined,
   },
   projects: [
     {

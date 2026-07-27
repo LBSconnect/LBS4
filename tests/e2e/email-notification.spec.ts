@@ -50,12 +50,19 @@ function ctHourToUTC(dateUTC: Date, ctHour: number): number {
   return ctHour + (isCDT(dateUTC) ? 5 : 6);
 }
 
-/** Find the next occurrence of a given day-of-week (always in the future). */
+/**
+ * Find the next occurrence of a given day-of-week (always in the future).
+ *
+ * Offset 5 weeks out so these bookings never land on the same calendar day
+ * as seed.ts's permanent "next Monday 10 AM" concurrency fixture, or as the
+ * dates business-hours.spec.ts (4 weeks out) or the security-pentest /
+ * booking-concurrency suites (2 weeks out) book against.
+ */
 function nextDayOfWeek(targetDow: number): Date {
   const now = new Date();
   const todayDow = now.getUTCDay();
   const daysAhead = (targetDow - todayDow + 7) % 7 || 7;
-  return new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate() + daysAhead));
+  return new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate() + daysAhead + 35));
 }
 
 /** Build an ISO slot string for the given date at the given CT hour. */
