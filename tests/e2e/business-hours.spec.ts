@@ -53,12 +53,18 @@ function ctHourToUTC(dateUTC: Date, ctHour: number): number {
  * Find the next date (from today, potentially including today) whose UTC day
  * of week matches `targetDow` (0 = Sunday … 6 = Saturday).
  * Returns a Date set to midnight UTC on that day.
+ *
+ * Offset 4 weeks out (not just the nearest occurrence) so these read-only
+ * slot-shape checks never land on the same calendar day as seed.ts's
+ * permanent "next Monday 10 AM" concurrency fixture, or as the nearest
+ * Monday/Saturday other spec files (booking-payment, email-notification)
+ * book real appointments against.
  */
 function nextDayOfWeek(targetDow: number): Date {
   const now = new Date();
   const todayDow = now.getUTCDay();
   const daysAhead = (targetDow - todayDow + 7) % 7 || 7; // 1–7 (never 0 — always future)
-  const d = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate() + daysAhead));
+  const d = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate() + daysAhead + 28));
   return d;
 }
 
