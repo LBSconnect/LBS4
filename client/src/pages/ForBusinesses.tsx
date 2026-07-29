@@ -47,7 +47,7 @@ export default function ForBusinesses() {
           <div className="text-center max-w-2xl mx-auto mb-10 space-y-3">
             <h2 className="text-3xl font-bold">Everyday Business Services</h2>
             <p className="text-muted-foreground">
-              Walk in during business hours — no appointment needed for most services.
+              Walk in during business hours. No appointment needed for most services.
             </p>
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">

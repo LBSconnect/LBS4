@@ -168,7 +168,7 @@ export async function sendContactAcknowledgement(data: {
 
     await sendEmail({
       to: data.email,
-      subject: `We received your message — ${BUSINESS_NAME}`,
+      subject: `We received your message: ${BUSINESS_NAME}`,
       html: emailWrapper(content),
     });
     console.log('Contact acknowledgement email sent to', data.email);

@@ -371,7 +371,7 @@ export default function ServiceDetail() {
                 className="text-3xl md:text-4xl font-bold text-white"
                 data-testid="text-detail-title"
               >
-                {isCertiport ? "Testing Center" : service.title}
+                {isCertiport ? "Pearson VUE & Certiport Exam Testing" : service.title}
               </h1>
               <p className="text-lg text-white/80 max-w-2xl">
                 {isCertiport
@@ -443,7 +443,7 @@ export default function ServiceDetail() {
                           : service.price}
                       </div>
                       <div className="text-sm text-muted-foreground">
-                        {service.priceLabel}
+                        {isCertiport ? "Certiport Exam Session" : service.priceLabel}
                       </div>
                     </div>
                   )}
@@ -704,10 +704,10 @@ export default function ServiceDetail() {
                   <div className="w-12 h-12 rounded-md bg-[#0D1B3D]/10 dark:bg-[#0077FF]/20 flex items-center justify-center">
                     <BookOpen className="w-6 h-6 text-[#0D1B3D] dark:text-[#0077FF]" />
                   </div>
-                  <h3 className="font-semibold text-lg">Exam Cram Bootcamps</h3>
+                  <h3 className="font-semibold text-lg">Texas Insurance Exam Cram Bootcamps</h3>
                   <p className="text-sm text-muted-foreground">
                     Intensive Saturday morning Boot Camps for the Texas Life Insurance and
-                    Property &amp; Casualty license exams — $99 per session, taught by expert
+                    Property &amp; Casualty license exams, $99 per session, taught by expert
                     instructors.
                   </p>
                   <Link href="/services?filter=bootcamp">
