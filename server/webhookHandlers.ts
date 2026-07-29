@@ -1,6 +1,8 @@
 import { getUncachableStripeClient } from './stripeClient';
 import { storage } from './storage';
 import { sendAppointmentConfirmation, sendAppointmentCalendarInvite, sendPaymentNotification } from './emailService';
+import { updateCorporateAccountStripe, getCorporateAccount, logAudit } from './corporateStorage';
+import { sendActivationEmail } from './corporateEmailService';
 import type Stripe from 'stripe';
 
 export class WebhookHandlers {
@@ -59,6 +61,27 @@ export class WebhookHandlers {
     // on the account. Only act on sessions this app itself created.
     if (session.metadata?.app !== 'lbs4') {
       console.log(`Ignoring checkout.session.completed for session ${session.id} — not an lbs4 session`);
+      return;
+    }
+
+    // Corporate Notary Division: activate the account's subscription
+    const corporateAccountId = parseInt(session.client_reference_id || session.metadata?.corporateAccountId || '', 10);
+    if (!isNaN(corporateAccountId)) {
+      try {
+        await updateCorporateAccountStripe(
+          corporateAccountId,
+          session.customer as string,
+          session.subscription as string
+        );
+        await logAudit('account', String(corporateAccountId), 'subscription_activated', 'stripe', {
+          stripeCustomer: session.customer,
+          stripeSubscription: session.subscription,
+        });
+        const activated = await getCorporateAccount(corporateAccountId);
+        if (activated) sendActivationEmail(activated).catch(console.error);
+      } catch (error: any) {
+        console.error('Error activating corporate account for session:', session.id, error.message);
+      }
       return;
     }
 
