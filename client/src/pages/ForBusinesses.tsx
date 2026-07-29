@@ -14,7 +14,24 @@ import {
   CheckCircle2,
 } from "lucide-react";
 
-const businessServices = services.filter((s) => s.category === "business");
+const notaryService = services.find((s) => s.id === "notary")!;
+const passportService = services.find((s) => s.id === "passport")!;
+const printingCopiesService = services.find((s) => s.id === "printing-copies")!;
+const scanningService = services.find((s) => s.id === "scanning")!;
+const resumeService = services.find((s) => s.id === "resume-services")!;
+
+const gridServices = [
+  notaryService,
+  passportService,
+  {
+    ...printingCopiesService,
+    title: "Printing, Copies & Faxing",
+    shortTitle: "Printing, Copies & Faxing",
+    description: "Black-and-white and color printing, document copies, and fax services. No appointment needed.",
+  },
+  scanningService,
+  resumeService,
+];
 
 export default function ForBusinesses() {
   return (
@@ -51,7 +68,7 @@ export default function ForBusinesses() {
             </p>
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            {businessServices.map((service) => (
+            {gridServices.map((service) => (
               <ServiceCard
                 key={service.id}
                 title={service.title}
@@ -63,6 +80,14 @@ export default function ForBusinesses() {
                 icon={<service.icon className="w-5 h-5" />}
               />
             ))}
+            <ServiceCard
+              title="Website Design"
+              description="Practical website design for Houston small businesses and entrepreneurs. Request a free quote."
+              slug="website-design"
+              href="/contact?service=website-design"
+              icon={<Globe className="w-5 h-5" />}
+              buttonLabel="Request a Quote"
+            />
           </div>
         </div>
       </section>
