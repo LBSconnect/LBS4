@@ -81,11 +81,21 @@ export default {
           busy: "rgb(239 68 68)",
           offline: "rgb(156 163 175)",
         },
+        // LBS Business Services Center brand palette (from approved brand sheet)
+        brand: {
+          orange: "#FF6A00",
+          pink: "#FF2D55",
+          purple: "#8A2BE2",
+          blue: "#0077FF",
+          navy: "#0D1B3D",
+          offwhite: "#F7F9FC",
+        },
       },
       fontFamily: {
         sans: ["var(--font-sans)"],
         serif: ["var(--font-serif)"],
         mono: ["var(--font-mono)"],
+        poppins: ["'Poppins'", "sans-serif"],
       },
       keyframes: {
         "accordion-down": {

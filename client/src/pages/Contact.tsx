@@ -160,7 +160,7 @@ export default function Contact() {
       />
       <Header />
 
-      <section className="relative py-12 bg-gradient-to-br from-[#1a2d52] to-[#2a4f8e]" data-testid="section-contact-hero">
+      <section className="relative py-12 bg-gradient-to-br from-[#0D1B3D] to-[#1A237E]" data-testid="section-contact-hero">
         <div className="absolute inset-0 bg-[url('/images/hero-testing-center.png')] bg-cover bg-center opacity-10" />
         <div className="relative z-10 max-w-7xl mx-auto px-6 text-center space-y-4">
           <h1 className="text-4xl md:text-5xl font-bold text-white" data-testid="text-contact-title">
@@ -193,8 +193,8 @@ export default function Contact() {
                   className="flex items-start gap-4 p-4 rounded-md bg-muted/30 transition-colors hover:bg-muted/50"
                   data-testid="link-contact-address"
                 >
-                  <div className="w-12 h-12 rounded-md bg-[#1e3a6e]/10 dark:bg-[#4a72c4]/20 flex items-center justify-center shrink-0">
-                    <MapPin className="w-6 h-6 text-[#1e3a6e] dark:text-[#6b9aed]" />
+                  <div className="w-12 h-12 rounded-md bg-[#0D1B3D]/10 dark:bg-[#0077FF]/20 flex items-center justify-center shrink-0">
+                    <MapPin className="w-6 h-6 text-[#0D1B3D] dark:text-[#0077FF]" />
                   </div>
                   <div>
                     <h3 className="font-semibold text-sm">Location</h3>
@@ -213,8 +213,8 @@ export default function Contact() {
                   className="flex items-start gap-4 p-4 rounded-md bg-muted/30 transition-colors hover:bg-muted/50"
                   data-testid="link-contact-phone"
                 >
-                  <div className="w-12 h-12 rounded-md bg-[#1e3a6e]/10 dark:bg-[#4a72c4]/20 flex items-center justify-center shrink-0">
-                    <Phone className="w-6 h-6 text-[#1e3a6e] dark:text-[#6b9aed]" />
+                  <div className="w-12 h-12 rounded-md bg-[#0D1B3D]/10 dark:bg-[#0077FF]/20 flex items-center justify-center shrink-0">
+                    <Phone className="w-6 h-6 text-[#0D1B3D] dark:text-[#0077FF]" />
                   </div>
                   <div>
                     <h3 className="font-semibold text-sm">Phone</h3>
@@ -229,8 +229,8 @@ export default function Contact() {
                   className="flex items-start gap-4 p-4 rounded-md bg-muted/30 transition-colors hover:bg-muted/50"
                   data-testid="link-contact-email"
                 >
-                  <div className="w-12 h-12 rounded-md bg-[#1e3a6e]/10 dark:bg-[#4a72c4]/20 flex items-center justify-center shrink-0">
-                    <Mail className="w-6 h-6 text-[#1e3a6e] dark:text-[#6b9aed]" />
+                  <div className="w-12 h-12 rounded-md bg-[#0D1B3D]/10 dark:bg-[#0077FF]/20 flex items-center justify-center shrink-0">
+                    <Mail className="w-6 h-6 text-[#0D1B3D] dark:text-[#0077FF]" />
                   </div>
                   <div>
                     <h3 className="font-semibold text-sm">Email</h3>
@@ -241,8 +241,8 @@ export default function Contact() {
                 </a>
 
                 <div className="flex items-start gap-4 p-4 rounded-md bg-muted/30">
-                  <div className="w-12 h-12 rounded-md bg-[#1e3a6e]/10 dark:bg-[#4a72c4]/20 flex items-center justify-center shrink-0">
-                    <Clock className="w-6 h-6 text-[#1e3a6e] dark:text-[#6b9aed]" />
+                  <div className="w-12 h-12 rounded-md bg-[#0D1B3D]/10 dark:bg-[#0077FF]/20 flex items-center justify-center shrink-0">
+                    <Clock className="w-6 h-6 text-[#0D1B3D] dark:text-[#0077FF]" />
                   </div>
                   <div>
                     <h3 className="font-semibold text-sm">Business Hours</h3>
@@ -427,7 +427,7 @@ export default function Contact() {
 
                       <Button
                         type="submit"
-                        className="w-full bg-gradient-to-r from-[#e85d40] to-[#f07050] text-white"
+                        className="w-full bg-gradient-to-r from-[#FF6A00] to-[#FF2D55] text-white rounded-full"
                         disabled={contactMutation.isPending || (RECAPTCHA_SITE_KEY ? !captchaToken : false)}
                         data-testid="button-submit-contact"
                       >

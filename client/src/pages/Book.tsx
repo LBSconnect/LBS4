@@ -16,11 +16,11 @@ export default function Book() {
       />
       <Header />
 
-      <section className="relative py-12 bg-gradient-to-br from-[#1a2d52] to-[#2a4f8e]">
+      <section className="relative py-12 bg-gradient-to-br from-[#0D1B3D] to-[#1A237E]">
         <div className="absolute inset-0 bg-[url('/images/hero-testing-center.png')] bg-cover bg-center opacity-10" />
         <div className="relative z-10 max-w-7xl mx-auto px-6 text-center space-y-4">
           <div className="inline-flex items-center gap-2 bg-white/10 backdrop-blur-sm border border-white/20 rounded-full px-4 py-1.5 text-sm text-white/90">
-            <CalendarCheck className="w-4 h-4 text-[#f07050]" />
+            <CalendarCheck className="w-4 h-4 text-[#FF2D55]" />
             Schedule an Appointment
           </div>
           <h1 className="text-4xl md:text-5xl font-bold text-white">
@@ -36,9 +36,9 @@ export default function Book() {
         <div className="max-w-3xl mx-auto px-6 space-y-4">
           {services.map((service) => (
             <Link key={service.id} href={`/services/${service.slug}`}>
-              <div className="group flex items-center justify-between gap-4 p-5 rounded-lg border border-border/50 bg-card hover:border-[#1e3a6e]/40 hover:shadow-md transition-all cursor-pointer">
+              <div className="group flex items-center justify-between gap-4 p-5 rounded-lg border border-border/50 bg-card hover:border-[#0D1B3D]/40 hover:shadow-md transition-all cursor-pointer">
                 <div className="flex items-center gap-4">
-                  <div className="shrink-0 w-11 h-11 rounded-md bg-[#1e3a6e]/10 dark:bg-[#4a72c4]/20 flex items-center justify-center text-[#1e3a6e] dark:text-[#6b9aed]">
+                  <div className="shrink-0 w-11 h-11 rounded-md bg-[#0D1B3D]/10 dark:bg-[#0077FF]/20 flex items-center justify-center text-[#0D1B3D] dark:text-[#0077FF]">
                     <service.icon className="w-5 h-5" />
                   </div>
                   <div>
@@ -48,20 +48,20 @@ export default function Book() {
                 </div>
                 <div className="flex items-center gap-3 shrink-0">
                   {service.price && (
-                    <span className="text-sm font-semibold text-[#1e3a6e] dark:text-[#6b9aed] whitespace-nowrap">
+                    <span className="text-sm font-semibold text-[#0D1B3D] dark:text-[#0077FF] whitespace-nowrap">
                       {service.price}{service.priceLabel}
                     </span>
                   )}
-                  <ArrowRight className="w-5 h-5 text-muted-foreground group-hover:text-[#1e3a6e] group-hover:translate-x-0.5 transition-all" />
+                  <ArrowRight className="w-5 h-5 text-muted-foreground group-hover:text-[#0D1B3D] group-hover:translate-x-0.5 transition-all" />
                 </div>
               </div>
             </Link>
           ))}
 
           <a href="https://www.myeasypass.net" target="_blank" rel="noopener noreferrer">
-            <div className="group flex items-center justify-between gap-4 p-5 rounded-lg border border-border/50 bg-card hover:border-[#1e3a6e]/40 hover:shadow-md transition-all cursor-pointer">
+            <div className="group flex items-center justify-between gap-4 p-5 rounded-lg border border-border/50 bg-card hover:border-[#0D1B3D]/40 hover:shadow-md transition-all cursor-pointer">
               <div className="flex items-center gap-4">
-                <div className="shrink-0 w-11 h-11 rounded-md bg-[#1e3a6e]/10 dark:bg-[#4a72c4]/20 flex items-center justify-center">
+                <div className="shrink-0 w-11 h-11 rounded-md bg-[#0D1B3D]/10 dark:bg-[#0077FF]/20 flex items-center justify-center">
                   <img src="/images/myeasypass-logo.png" alt="MyEasyPass" className="w-8 h-8 object-contain" />
                 </div>
                 <div>
@@ -70,8 +70,8 @@ export default function Book() {
                 </div>
               </div>
               <div className="flex items-center gap-3 shrink-0">
-                <span className="text-sm font-semibold text-[#1e3a6e] dark:text-[#6b9aed] whitespace-nowrap">$19.99/mo</span>
-                <ExternalLink className="w-5 h-5 text-muted-foreground group-hover:text-[#1e3a6e] transition-colors" />
+                <span className="text-sm font-semibold text-[#0D1B3D] dark:text-[#0077FF] whitespace-nowrap">$19.99/mo</span>
+                <ExternalLink className="w-5 h-5 text-muted-foreground group-hover:text-[#0D1B3D] transition-colors" />
               </div>
             </div>
           </a>

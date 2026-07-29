@@ -26,10 +26,10 @@ export default function ForBusinesses() {
       />
       <Header />
 
-      <section className="relative py-14 bg-gradient-to-br from-[#1a2d52] to-[#2a4f8e]" data-testid="section-for-businesses-hero">
+      <section className="relative py-14 bg-gradient-to-br from-[#0D1B3D] to-[#1A237E]" data-testid="section-for-businesses-hero">
         <div className="relative z-10 max-w-7xl mx-auto px-6 text-center space-y-4">
           <div className="inline-flex items-center gap-2 bg-white/10 backdrop-blur-sm border border-white/20 rounded-full px-4 py-1.5 text-sm text-white/90">
-            <Building2 className="w-4 h-4 text-[#f07050]" />
+            <Building2 className="w-4 h-4 text-[#FF2D55]" />
             For Businesses
           </div>
           <h1 className="text-4xl md:text-5xl font-bold text-white" data-testid="text-for-businesses-title">
@@ -71,7 +71,7 @@ export default function ForBusinesses() {
         <div className="max-w-7xl mx-auto px-6">
           <div className="bg-card border border-border/50 rounded-md p-8 md:p-10 grid grid-cols-1 lg:grid-cols-2 gap-8 items-center">
             <div className="space-y-4">
-              <div className="inline-flex items-center gap-2 bg-[#1e3a6e]/10 dark:bg-[#4a72c4]/20 text-[#1e3a6e] dark:text-[#6b9aed] rounded-full px-3 py-1 text-xs font-semibold uppercase tracking-wide">
+              <div className="inline-flex items-center gap-2 bg-[#0D1B3D]/10 dark:bg-[#0077FF]/20 text-[#0D1B3D] dark:text-[#0077FF] rounded-full px-3 py-1 text-xs font-semibold uppercase tracking-wide">
                 <Stamp className="w-3.5 h-3.5" /> Ongoing Support
               </div>
               <h2 className="text-2xl md:text-3xl font-bold">Corporate Notary Program</h2>
@@ -87,14 +87,14 @@ export default function ForBusinesses() {
                   "Priority scheduling for enrolled businesses",
                 ].map((item) => (
                   <li key={item} className="flex items-start gap-2 text-sm">
-                    <CheckCircle2 className="w-4 h-4 text-[#e85d40] mt-0.5 shrink-0" />
+                    <CheckCircle2 className="w-4 h-4 text-[#FF6A00] mt-0.5 shrink-0" />
                     <span>{item}</span>
                   </li>
                 ))}
               </ul>
               <Link href="/corporate">
                 <Button
-                  className="bg-gradient-to-r from-[#e85d40] to-[#f07050] text-white"
+                  className="bg-gradient-to-r from-[#FF6A00] to-[#FF2D55] text-white rounded-full"
                   data-testid="button-corporate-notary-learn-more"
                 >
                   View Plans & Pricing
@@ -102,7 +102,7 @@ export default function ForBusinesses() {
                 </Button>
               </Link>
             </div>
-            <div className="h-56 md:h-64 rounded-md bg-gradient-to-br from-[#1e3a6e] to-[#2a4f8e] flex items-center justify-center">
+            <div className="h-56 md:h-64 rounded-md bg-gradient-to-br from-[#0D1B3D] to-[#1A237E] flex items-center justify-center">
               <div className="w-20 h-20 rounded-2xl bg-white/10 backdrop-blur-sm flex items-center justify-center text-white">
                 <Stamp className="w-10 h-10" />
               </div>
@@ -121,8 +121,8 @@ export default function ForBusinesses() {
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-3xl mx-auto">
             <div className="border border-border/50 rounded-md p-6 space-y-3 text-center">
-              <div className="w-14 h-14 rounded-full bg-[#1e3a6e]/10 dark:bg-[#4a72c4]/20 flex items-center justify-center mx-auto">
-                <Globe className="w-7 h-7 text-[#1e3a6e] dark:text-[#6b9aed]" />
+              <div className="w-14 h-14 rounded-full bg-[#0D1B3D]/10 dark:bg-[#0077FF]/20 flex items-center justify-center mx-auto">
+                <Globe className="w-7 h-7 text-[#0D1B3D] dark:text-[#0077FF]" />
               </div>
               <h3 className="font-semibold text-lg">Website Design</h3>
               <p className="text-sm text-muted-foreground">
@@ -132,7 +132,7 @@ export default function ForBusinesses() {
               <Link href="/contact?service=website-design">
                 <Button
                   size="sm"
-                  className="w-full mt-2 bg-gradient-to-r from-[#e85d40] to-[#f07050] text-white"
+                  className="w-full mt-2 bg-gradient-to-r from-[#FF6A00] to-[#FF2D55] text-white rounded-full"
                   data-testid="button-quote-website-design"
                 >
                   Request a Quote
@@ -141,8 +141,8 @@ export default function ForBusinesses() {
               </Link>
             </div>
             <div className="border border-border/50 rounded-md p-6 space-y-3 text-center">
-              <div className="w-14 h-14 rounded-full bg-[#1e3a6e]/10 dark:bg-[#4a72c4]/20 flex items-center justify-center mx-auto">
-                <FileText className="w-7 h-7 text-[#1e3a6e] dark:text-[#6b9aed]" />
+              <div className="w-14 h-14 rounded-full bg-[#0D1B3D]/10 dark:bg-[#0077FF]/20 flex items-center justify-center mx-auto">
+                <FileText className="w-7 h-7 text-[#0D1B3D] dark:text-[#0077FF]" />
               </div>
               <h3 className="font-semibold text-lg">Resume Services</h3>
               <p className="text-sm text-muted-foreground">

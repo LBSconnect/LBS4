@@ -7,10 +7,10 @@ export default function PrivacyPolicy() {
     <div className="min-h-screen flex flex-col bg-background">
       <Header />
 
-      <section className="relative py-16 bg-gradient-to-br from-[#1a2d52] to-[#2a4f8e]">
+      <section className="relative py-16 bg-gradient-to-br from-[#0D1B3D] to-[#1A237E]">
         <div className="relative z-10 max-w-4xl mx-auto px-6 text-center space-y-4">
           <div className="inline-flex items-center gap-2 bg-white/10 backdrop-blur-sm border border-white/20 rounded-full px-4 py-1.5 text-sm text-white/90">
-            <Shield className="w-4 h-4 text-[#f07050]" />
+            <Shield className="w-4 h-4 text-[#FF2D55]" />
             Legal
           </div>
           <h1 className="text-3xl md:text-4xl font-bold text-white">
@@ -27,7 +27,7 @@ export default function PrivacyPolicy() {
           <div className="prose prose-slate dark:prose-invert max-w-none space-y-8">
 
             <div className="space-y-4">
-              <h2 className="text-2xl font-bold text-[#1e3a6e] dark:text-white">Introduction</h2>
+              <h2 className="text-2xl font-bold text-[#0D1B3D] dark:text-white">Introduction</h2>
               <p className="text-muted-foreground leading-relaxed">
                 Linton Business Solutions LLC, doing business as LBS Test & Exam Center ("LBS," "we," "us," or "our"),
                 is committed to protecting your privacy and personal information. This Privacy Policy explains how we
@@ -41,7 +41,7 @@ export default function PrivacyPolicy() {
             </div>
 
             <div className="space-y-4">
-              <h2 className="text-2xl font-bold text-[#1e3a6e] dark:text-white">Information We Collect</h2>
+              <h2 className="text-2xl font-bold text-[#0D1B3D] dark:text-white">Information We Collect</h2>
 
               <h3 className="text-lg font-semibold">Personal Information</h3>
               <p className="text-muted-foreground leading-relaxed">
@@ -77,7 +77,7 @@ export default function PrivacyPolicy() {
             </div>
 
             <div className="space-y-4">
-              <h2 className="text-2xl font-bold text-[#1e3a6e] dark:text-white">How We Use Your Information</h2>
+              <h2 className="text-2xl font-bold text-[#0D1B3D] dark:text-white">How We Use Your Information</h2>
               <p className="text-muted-foreground leading-relaxed">
                 We use the information we collect to:
               </p>
@@ -96,7 +96,7 @@ export default function PrivacyPolicy() {
             </div>
 
             <div className="space-y-4">
-              <h2 className="text-2xl font-bold text-[#1e3a6e] dark:text-white">Testing and Proctoring Services</h2>
+              <h2 className="text-2xl font-bold text-[#0D1B3D] dark:text-white">Testing and Proctoring Services</h2>
               <p className="text-muted-foreground leading-relaxed">
                 As an authorized testing center for various certification programs, we are required to collect and
                 share certain information with testing organizations. This may include:
@@ -114,7 +114,7 @@ export default function PrivacyPolicy() {
             </div>
 
             <div className="space-y-4">
-              <h2 className="text-2xl font-bold text-[#1e3a6e] dark:text-white">Information Sharing</h2>
+              <h2 className="text-2xl font-bold text-[#0D1B3D] dark:text-white">Information Sharing</h2>
               <p className="text-muted-foreground leading-relaxed">
                 We may share your information with:
               </p>
@@ -130,7 +130,7 @@ export default function PrivacyPolicy() {
             </div>
 
             <div className="space-y-4">
-              <h2 className="text-2xl font-bold text-[#1e3a6e] dark:text-white">Data Security</h2>
+              <h2 className="text-2xl font-bold text-[#0D1B3D] dark:text-white">Data Security</h2>
               <p className="text-muted-foreground leading-relaxed">
                 We implement appropriate technical and organizational security measures to protect your personal
                 information against unauthorized access, alteration, disclosure, or destruction. These measures include:
@@ -148,7 +148,7 @@ export default function PrivacyPolicy() {
             </div>
 
             <div className="space-y-4">
-              <h2 className="text-2xl font-bold text-[#1e3a6e] dark:text-white">Cookies and Tracking</h2>
+              <h2 className="text-2xl font-bold text-[#0D1B3D] dark:text-white">Cookies and Tracking</h2>
               <p className="text-muted-foreground leading-relaxed">
                 Our website may use cookies and similar tracking technologies to enhance your browsing experience.
                 Cookies are small files stored on your device that help us:
@@ -164,7 +164,7 @@ export default function PrivacyPolicy() {
             </div>
 
             <div className="space-y-4">
-              <h2 className="text-2xl font-bold text-[#1e3a6e] dark:text-white">Your Rights</h2>
+              <h2 className="text-2xl font-bold text-[#0D1B3D] dark:text-white">Your Rights</h2>
               <p className="text-muted-foreground leading-relaxed">
                 Depending on your location, you may have certain rights regarding your personal information, including:
               </p>
@@ -180,7 +180,7 @@ export default function PrivacyPolicy() {
             </div>
 
             <div className="space-y-4">
-              <h2 className="text-2xl font-bold text-[#1e3a6e] dark:text-white">Data Retention</h2>
+              <h2 className="text-2xl font-bold text-[#0D1B3D] dark:text-white">Data Retention</h2>
               <p className="text-muted-foreground leading-relaxed">
                 We retain your personal information for as long as necessary to fulfill the purposes for which it
                 was collected, including to satisfy legal, accounting, or reporting requirements. Retention periods
@@ -189,7 +189,7 @@ export default function PrivacyPolicy() {
             </div>
 
             <div className="space-y-4">
-              <h2 className="text-2xl font-bold text-[#1e3a6e] dark:text-white">Children's Privacy</h2>
+              <h2 className="text-2xl font-bold text-[#0D1B3D] dark:text-white">Children's Privacy</h2>
               <p className="text-muted-foreground leading-relaxed">
                 Our services are not directed to individuals under the age of 13. We do not knowingly collect
                 personal information from children under 13. If you believe we have collected information from a
@@ -198,7 +198,7 @@ export default function PrivacyPolicy() {
             </div>
 
             <div className="space-y-4">
-              <h2 className="text-2xl font-bold text-[#1e3a6e] dark:text-white">Changes to This Policy</h2>
+              <h2 className="text-2xl font-bold text-[#0D1B3D] dark:text-white">Changes to This Policy</h2>
               <p className="text-muted-foreground leading-relaxed">
                 We may update this Privacy Policy from time to time. Changes will be posted on this page with an
                 updated "Last Updated" date. We encourage you to review this Privacy Policy periodically.
@@ -206,12 +206,12 @@ export default function PrivacyPolicy() {
             </div>
 
             <div className="space-y-4">
-              <h2 className="text-2xl font-bold text-[#1e3a6e] dark:text-white">Contact Us</h2>
+              <h2 className="text-2xl font-bold text-[#0D1B3D] dark:text-white">Contact Us</h2>
               <p className="text-muted-foreground leading-relaxed">
                 If you have questions about this Privacy Policy or our privacy practices, please contact us:
               </p>
               <div className="bg-muted/30 rounded-lg p-6 space-y-2">
-                <p className="font-semibold text-[#1e3a6e] dark:text-white">Linton Business Solutions LLC</p>
+                <p className="font-semibold text-[#0D1B3D] dark:text-white">Linton Business Solutions LLC</p>
                 <p className="text-muted-foreground">DBA: LBS Test & Exam Center</p>
                 <p className="text-muted-foreground">616 FM 1960 Rd W, Ste 101</p>
                 <p className="text-muted-foreground">Houston, TX 77090-3048</p>

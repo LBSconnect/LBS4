@@ -68,7 +68,7 @@ export default function Resources() {
       />
       <Header />
 
-      <section className="relative py-14 bg-gradient-to-br from-[#1a2d52] to-[#2a4f8e]" data-testid="section-resources-hero">
+      <section className="relative py-14 bg-gradient-to-br from-[#0D1B3D] to-[#1A237E]" data-testid="section-resources-hero">
         <div className="relative z-10 max-w-7xl mx-auto px-6 text-center space-y-4">
           <h1 className="text-4xl md:text-5xl font-bold text-white" data-testid="text-resources-title">
             Resources
@@ -86,15 +86,15 @@ export default function Resources() {
               const testId = `link-resource-${item.title.toLowerCase().replace(/\s/g, "-")}`;
               const content = (
                 <div
-                  className="h-full border border-border/50 rounded-md p-6 space-y-3 hover:border-[#1e3a6e]/40 hover:shadow-md transition-all cursor-pointer"
+                  className="h-full border border-border/50 rounded-md p-6 space-y-3 hover:border-[#0D1B3D]/40 hover:shadow-md transition-all cursor-pointer"
                   data-testid={testId}
                 >
-                  <div className="w-12 h-12 rounded-md bg-[#1e3a6e]/10 dark:bg-[#4a72c4]/20 flex items-center justify-center">
-                    <item.icon className="w-6 h-6 text-[#1e3a6e] dark:text-[#6b9aed]" />
+                  <div className="w-12 h-12 rounded-md bg-[#0D1B3D]/10 dark:bg-[#0077FF]/20 flex items-center justify-center">
+                    <item.icon className="w-6 h-6 text-[#0D1B3D] dark:text-[#0077FF]" />
                   </div>
                   <h3 className="font-semibold text-lg">{item.title}</h3>
                   <p className="text-sm text-muted-foreground">{item.description}</p>
-                  <div className="flex items-center gap-1.5 text-sm font-semibold text-[#e85d40]">
+                  <div className="flex items-center gap-1.5 text-sm font-semibold text-[#FF6A00]">
                     {item.external ? "Visit site" : "Learn more"}
                     {item.external ? (
                       <ExternalLink className="w-3.5 h-3.5" />

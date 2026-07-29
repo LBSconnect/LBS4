@@ -24,7 +24,7 @@ export default function About() {
       />
       <Header />
 
-      <section className="relative py-12 bg-gradient-to-br from-[#1a2d52] to-[#2a4f8e]" data-testid="section-about-hero">
+      <section className="relative py-12 bg-gradient-to-br from-[#0D1B3D] to-[#1A237E]" data-testid="section-about-hero">
         <div className="absolute inset-0 bg-[url('/images/hero-testing-center.png')] bg-cover bg-center opacity-10" />
         <div className="relative z-10 max-w-7xl mx-auto px-6 text-center space-y-4">
           <h1 className="text-4xl md:text-5xl font-bold text-white" data-testid="text-about-title">
@@ -73,7 +73,7 @@ export default function About() {
                     data-testid="img-about-logo"
                   />
                   <div>
-                    <h3 className="text-xl font-bold text-[#1e3a6e] dark:text-white">
+                    <h3 className="text-xl font-bold text-[#0D1B3D] dark:text-white">
                       Linton Business Solutions
                     </h3>
                     <p className="text-sm text-muted-foreground mt-1">
@@ -125,8 +125,8 @@ export default function About() {
             ].map((value) => (
               <Card key={value.title} className="border-border/50">
                 <CardContent className="p-6 text-center space-y-4">
-                  <div className="w-14 h-14 rounded-full bg-[#1e3a6e]/10 dark:bg-[#4a72c4]/20 flex items-center justify-center mx-auto">
-                    <value.icon className="w-7 h-7 text-[#1e3a6e] dark:text-[#6b9aed]" />
+                  <div className="w-14 h-14 rounded-full bg-[#0D1B3D]/10 dark:bg-[#0077FF]/20 flex items-center justify-center mx-auto">
+                    <value.icon className="w-7 h-7 text-[#0D1B3D] dark:text-[#0077FF]" />
                   </div>
                   <h3 className="font-semibold text-lg">{value.title}</h3>
                   <p className="text-sm text-muted-foreground">{value.desc}</p>
@@ -165,7 +165,7 @@ export default function About() {
                 className="bg-card border border-border/50 rounded-md p-6 space-y-3"
                 data-testid={`card-partner-${partner.name.toLowerCase().replace(/\s/g, "-")}`}
               >
-                <CheckCircle2 className="w-8 h-8 text-[#e85d40]" />
+                <CheckCircle2 className="w-8 h-8 text-[#FF6A00]" />
                 <h3 className="font-semibold text-lg">{partner.name}</h3>
                 <p className="text-sm text-muted-foreground">{partner.desc}</p>
               </div>
@@ -174,7 +174,7 @@ export default function About() {
         </div>
       </section>
 
-      <section className="py-12 bg-gradient-to-r from-[#1e3a6e] to-[#2a4f8e]">
+      <section className="py-12 bg-gradient-to-r from-[#0D1B3D] to-[#1A237E]">
         <div className="max-w-4xl mx-auto px-6 text-center space-y-6">
           <h2 className="text-3xl font-bold text-white">
             Ready to Experience the Difference?
@@ -186,7 +186,7 @@ export default function About() {
             <Link href="/services">
               <Button
                 size="lg"
-                className="bg-gradient-to-r from-[#e85d40] to-[#f07050] text-white"
+                className="bg-gradient-to-r from-[#FF6A00] to-[#FF2D55] text-white rounded-full"
                 data-testid="button-about-cta-services"
               >
                 Explore Services

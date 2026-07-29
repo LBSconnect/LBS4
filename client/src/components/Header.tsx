@@ -24,8 +24,8 @@ const corporateMainLinks = [
 ];
 
 const corporateAccountLinks = [
-  { href: "/corporate/portal", label: "Client Portal", bg: "bg-[#c9a84c] hover:bg-[#b8973b]", text: "text-[#0d1b35] font-semibold" },
-  { href: "/admin/corporate", label: "Admin Dashboard", bg: "bg-[#0d1b35] hover:bg-[#1a2d52]", text: "text-white font-semibold" },
+  { href: "/corporate/portal", label: "Client Portal", bg: "bg-[#FF6A00] hover:bg-[#b8973b]", text: "text-[#0D1B3D] font-semibold" },
+  { href: "/admin/corporate", label: "Admin Dashboard", bg: "bg-[#0D1B3D] hover:bg-[#0D1B3D]", text: "text-white font-semibold" },
 ];
 
 export default function Header() {
@@ -46,7 +46,7 @@ export default function Header() {
 
   return (
     <header className="sticky top-0 z-50">
-      <div className="bg-[#1e3a6e] text-white/90 text-sm hidden md:block">
+      <div className="bg-[#0D1B3D] text-white/90 text-sm hidden md:block">
         <div className="max-w-7xl mx-auto px-6 py-2 flex items-center justify-between gap-4 flex-wrap">
           <div className="flex items-center gap-6 flex-wrap">
             <a
@@ -83,7 +83,7 @@ export default function Header() {
                 className="h-12 w-12 object-contain rounded-md"
               />
               <div className="flex flex-col">
-                <span className="text-xl font-bold tracking-tight text-[#1e3a6e] dark:text-white leading-tight">
+                <span className="text-xl font-bold tracking-tight text-[#0D1B3D] dark:text-white leading-tight">
                   LBS
                 </span>
                 <span className="text-[11px] text-muted-foreground leading-tight">
@@ -101,7 +101,7 @@ export default function Header() {
                   size="sm"
                   className={
                     location === link.href
-                      ? "bg-[#1e3a6e] text-white"
+                      ? "bg-[#0D1B3D] text-white"
                       : "text-foreground"
                   }
                   data-testid={`link-nav-${link.label.toLowerCase().replace(/\s/g, "-")}`}
@@ -165,7 +165,7 @@ export default function Header() {
             <Link href="/book">
               <Button
                 size="sm"
-                className="ml-2 bg-gradient-to-r from-[#e85d40] to-[#f07050] text-white"
+                className="ml-2 bg-gradient-to-r from-[#FF6A00] to-[#FF2D55] text-white rounded-full"
                 data-testid="button-book-now"
               >
                 Book a Service
@@ -189,7 +189,7 @@ export default function Header() {
                       className="h-10 w-10 object-contain rounded-md"
                     />
                     <div>
-                      <div className="font-bold text-[#1e3a6e] dark:text-white">LBS</div>
+                      <div className="font-bold text-[#0D1B3D] dark:text-white">LBS</div>
                       <div className="text-xs text-muted-foreground">Business Services Center</div>
                     </div>
                   </div>
@@ -199,7 +199,7 @@ export default function Header() {
                     <Link key={link.href} href={link.href}>
                       <Button
                         variant={location === link.href ? "default" : "ghost"}
-                        className={`w-full justify-start ${location === link.href ? "bg-[#1e3a6e] text-white" : ""}`}
+                        className={`w-full justify-start ${location === link.href ? "bg-[#0D1B3D] text-white" : ""}`}
                         onClick={() => setMobileOpen(false)}
                         data-testid={`link-mobile-${link.label.toLowerCase().replace(/\s/g, "-")}`}
                       >
@@ -254,7 +254,7 @@ export default function Header() {
                   </a>
                   <Link href="/book">
                     <Button
-                      className="w-full mt-3 bg-gradient-to-r from-[#e85d40] to-[#f07050] text-white"
+                      className="w-full mt-3 bg-gradient-to-r from-[#FF6A00] to-[#FF2D55] text-white rounded-full"
                       onClick={() => setMobileOpen(false)}
                       data-testid="button-mobile-book"
                     >
