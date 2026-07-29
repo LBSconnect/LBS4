@@ -207,6 +207,7 @@ export async function registerRoutes(
         mode: 'payment',
         success_url: `${req.protocol}://${req.get('host')}/checkout/success`,
         cancel_url: `${req.protocol}://${req.get('host')}/checkout/cancel`,
+        metadata: { app: 'lbs4' },
       });
 
       res.json({ url: session.url });
@@ -409,6 +410,7 @@ export async function registerRoutes(
             cancel_url: `${req.protocol}://${req.get('host')}/checkout/cancel?appointment_id=${appointment.id}${data.serviceSlug ? `&service=${encodeURIComponent(data.serviceSlug)}` : ''}`,
             metadata: {
               appointment_id: appointment.id,
+              app: 'lbs4',
             },
             customer_email: data.customerEmail,
           });
