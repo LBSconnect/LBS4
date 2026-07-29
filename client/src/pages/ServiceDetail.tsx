@@ -592,6 +592,7 @@ export default function ServiceDetail() {
                             className="w-full bg-gradient-to-r from-[#FF6A00] to-[#FF2D55] text-white rounded-full"
                             onClick={handleBookAppointment}
                             disabled={bookingMutation.isPending}
+                            data-testid="button-submit-booking"
                           >
                             {bookingMutation.isPending ? (
                               <>

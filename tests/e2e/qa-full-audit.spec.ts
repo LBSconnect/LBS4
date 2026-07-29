@@ -294,75 +294,57 @@ test.describe("Home page — sections and CTAs", () => {
     await expect(page).toHaveURL(`${BASE}/book`);
   });
 
-  test("hero phone button = tel:2818365357", async ({ page }) => {
+  test("hero trust indicators render", async ({ page }) => {
     await goto(page, "/");
-    const href = await page
-      .locator('[data-testid="button-hero-call"]')
-      .getAttribute("href");
-    expect(href).toBe("tel:2818365357");
+    await expect(page.locator('[data-testid="section-hero"]')).toContainText("Fast & Reliable Service");
+    await expect(page.locator('[data-testid="section-hero"]')).toContainText("Trusted by Our Community");
   });
 
-  test("trust bar renders", async ({ page }) => {
+  test("hero Browse Services button links to /services", async ({ page }) => {
     await goto(page, "/");
-    await expect(page.locator('[data-testid="section-trust-bar"]')).toBeVisible();
-  });
-
-  test("Google rating shows 5.0 in trust bar", async ({ page }) => {
-    await goto(page, "/");
-    await expect(page.locator('[data-testid="section-trust-bar"]')).toContainText("5.0");
-  });
-
-  test("3 path cards render", async ({ page }) => {
-    await goto(page, "/");
-    await expect(page.locator('[data-testid="section-paths"]')).toBeVisible();
-    await expect(page.locator('[data-testid="card-path-certiport"]')).toBeVisible();
-    await expect(page.locator('[data-testid="card-path-bootcamp"]')).toBeVisible();
-    await expect(page.locator('[data-testid="card-path-business"]')).toBeVisible();
-  });
-
-  test("Card 1 (Certiport) → /services/certification-exam-testing", async ({
-    page,
-  }) => {
-    await goto(page, "/");
-    await page.click('[data-testid="card-path-certiport"]');
-    await expect(page).toHaveURL(/certification-exam-testing/);
-  });
-
-  test("Card 2 (Bootcamp) → /services?filter=bootcamp", async ({ page }) => {
-    await goto(page, "/");
-    await page.click('[data-testid="card-path-bootcamp"]');
-    await expect(page).toHaveURL(/filter=bootcamp/);
-  });
-
-  test("Card 3 (Business) → /services?filter=business", async ({ page }) => {
-    await goto(page, "/");
-    await page.click('[data-testid="card-path-business"]');
-    await expect(page).toHaveURL(/filter=business/);
-  });
-
-  test("Card 3: Notary and Passport bold", async ({ page }) => {
-    await goto(page, "/");
-    const card = page.locator('[data-testid="card-path-business"]');
-    await expect(card.locator("strong").filter({ hasText: "Notary" })).toBeVisible();
-    await expect(card.locator("strong").filter({ hasText: "Passport" })).toBeVisible();
-  });
-
-  test("View all services → /services", async ({ page }) => {
-    await goto(page, "/");
-    await page.click('[data-testid="button-view-all-services"]');
+    await page.click('[data-testid="button-hero-browse"]');
     await expect(page).toHaveURL(`${BASE}/services`);
   });
 
-  test("How It Works section renders", async ({ page }) => {
+  test("Core Business Services icon strip renders all 7 services", async ({ page }) => {
     await goto(page, "/");
-    await expect(page.locator('[data-testid="section-how-it-works"]')).toBeVisible();
+    await expect(page.locator('[data-testid="section-core-services"]')).toBeVisible();
+    for (const slug of [
+      "printing-copies",
+      "scanning",
+      "notary-service",
+      "passport-photos",
+      "faxing",
+      "resume-services",
+    ]) {
+      await expect(page.locator(`a[href="/services/${slug}"]`)).toBeVisible();
+    }
+    await expect(page.locator('a[href="/for-businesses"]').filter({ hasText: "Website Design" })).toBeVisible();
   });
 
-  test("Book Step 2 Now → /services/certification-exam-testing", async ({
+  test("clicking a core service icon navigates to its detail page", async ({ page }) => {
+    await goto(page, "/");
+    await page.click('[data-testid="link-core-service-notary"]');
+    await expect(page).toHaveURL(/notary-service/);
+  });
+
+  test("View all business services → /services?filter=business", async ({ page }) => {
+    await goto(page, "/");
+    await page.click('[data-testid="button-view-all-services"]');
+    await expect(page).toHaveURL(/\/services\?filter=business/);
+  });
+
+  test("Exam Testing Services secondary section renders", async ({ page }) => {
+    await goto(page, "/");
+    await expect(page.locator('[data-testid="section-testing-services"]')).toBeVisible();
+    await expect(page.locator('[data-testid="section-testing-services"]')).toContainText("Secondary Operation");
+  });
+
+  test("View Testing Info → /services/certification-exam-testing", async ({
     page,
   }) => {
     await goto(page, "/");
-    await page.click('[data-testid="button-how-book"]');
+    await page.click('[data-testid="button-view-testing-info"]');
     await expect(page).toHaveURL(/certification-exam-testing/);
   });
 
@@ -571,11 +553,11 @@ test.describe("Services page", () => {
 // ═══════════════════════════════════════════════════════════════════════════
 
 test.describe("ServiceDetail — Certiport Exam Testing", () => {
-  test("title contains Certiport", async ({ page }) => {
+  test("title contains Testing Center", async ({ page }) => {
     await goto(page, "/services/certification-exam-testing");
     await expect(
       page.locator('[data-testid="text-detail-title"]')
-    ).toContainText("Certiport");
+    ).toContainText("Testing Center");
   });
 
   test("service image renders", async ({ page }) => {
@@ -611,8 +593,8 @@ test.describe("ServiceDetail — Certiport Exam Testing", () => {
       await page.fill('input[id="name"]', "Test User");
       await page.fill('input[id="email"]', "test@example.com");
       await page.fill('input[id="phone"]', "(713) 555-0100");
-      // Skip exam — click book button
-      await page.locator('button:has-text("Book")').last().click();
+      // Skip exam — click the actual booking form's submit button
+      await page.locator('[data-testid="button-submit-booking"]').click();
       await expect(
         page.locator('[role="status"]').filter({ hasText: /exam|missing/i })
       ).toBeVisible({ timeout: 5000 });
