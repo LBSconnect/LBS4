@@ -54,6 +54,14 @@ export class WebhookHandlers {
   private static async handleCheckoutCompleted(session: Stripe.Checkout.Session): Promise<void> {
     console.log('Processing checkout.session.completed for session:', session.id);
 
+    // This Stripe account is shared across multiple sites/apps, all of which can
+    // register their own webhook endpoint but still receive every event fired
+    // on the account. Only act on sessions this app itself created.
+    if (session.metadata?.app !== 'lbs4') {
+      console.log(`Ignoring checkout.session.completed for session ${session.id} — not an lbs4 session`);
+      return;
+    }
+
     // Get appointment_id from session metadata (set during checkout creation)
     const appointmentId = session.metadata?.appointment_id;
 
@@ -134,6 +142,11 @@ export class WebhookHandlers {
    */
   private static async handleCheckoutExpired(session: Stripe.Checkout.Session): Promise<void> {
     console.log('Processing checkout.session.expired for session:', session.id);
+
+    if (session.metadata?.app !== 'lbs4') {
+      console.log(`Ignoring checkout.session.expired for session ${session.id} — not an lbs4 session`);
+      return;
+    }
 
     const appointmentId = session.metadata?.appointment_id;
     if (!appointmentId) {
