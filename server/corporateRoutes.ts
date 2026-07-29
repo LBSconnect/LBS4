@@ -208,7 +208,7 @@ export async function registerCorporateRoutes(app: Express): Promise<void> {
               customer_email: accountBefore.primaryContactEmail,
               client_reference_id: String(accountBefore.id),
               line_items: [{ price: priceId, quantity: 1 }],
-              metadata: { corporateAccountId: String(accountBefore.id), accountCode: accountBefore.accountCode },
+              metadata: { corporateAccountId: String(accountBefore.id), accountCode: accountBefore.accountCode, app: 'lbs4' },
               success_url: `${baseUrl}/corporate/activated?account=${accountBefore.accountCode}`,
               cancel_url: `${baseUrl}/corporate/enroll`,
             });
@@ -290,7 +290,7 @@ export async function registerCorporateRoutes(app: Express): Promise<void> {
         customer_email: account.primaryContactEmail,
         client_reference_id: String(account.id),
         line_items: [{ price: priceId, quantity: 1 }],
-        metadata: { corporateAccountId: String(account.id), accountCode: account.accountCode },
+        metadata: { corporateAccountId: String(account.id), accountCode: account.accountCode, app: 'lbs4' },
         success_url: `${baseUrl}/corporate/activated?account=${account.accountCode}`,
         cancel_url: `${baseUrl}/corporate/enroll`,
       });
@@ -307,55 +307,10 @@ export async function registerCorporateRoutes(app: Express): Promise<void> {
     }
   });
 
-  // ── Stripe Webhook: Activate on Payment ────────────────────────────────────
-
-  app.post("/api/webhooks/stripe/corporate", async (req: Request, res: Response) => {
-    try {
-      const stripe = await getUncachableStripeClient().catch(() => null);
-      if (!stripe) return res.status(500).json({ error: "Stripe not configured" });
-
-      const sig = req.headers["stripe-signature"] as string;
-      const webhookSecret = process.env.STRIPE_CORPORATE_WEBHOOK_SECRET;
-
-      let event: any;
-      if (webhookSecret && sig) {
-        try {
-          event = stripe.webhooks.constructEvent(
-            (req as any).rawBody || JSON.stringify(req.body),
-            sig,
-            webhookSecret
-          );
-        } catch {
-          return res.status(400).json({ error: "Invalid webhook signature" });
-        }
-      } else {
-        event = req.body;
-      }
-
-      if (event.type === "checkout.session.completed") {
-        const session = event.data.object;
-        const accountId = parseInt(session.client_reference_id || session.metadata?.corporateAccountId, 10);
-        if (!isNaN(accountId)) {
-          await updateCorporateAccountStripe(
-            accountId,
-            session.customer as string,
-            session.subscription as string
-          );
-          await logAudit("account", String(accountId), "subscription_activated", "stripe", {
-            stripeCustomer: session.customer,
-            stripeSubscription: session.subscription,
-          });
-          const activated = await getCorporateAccount(accountId);
-          if (activated) sendActivationEmail(activated).catch(console.error);
-        }
-      }
-
-      return res.json({ received: true });
-    } catch (err) {
-      console.error("Stripe webhook error:", err);
-      return res.status(500).json({ error: "Webhook processing failed" });
-    }
-  });
+  // Note: corporate subscription activation on payment is handled by the single,
+  // shared /api/stripe/webhook endpoint (see WebhookHandlers.handleCheckoutCompleted
+  // in server/webhookHandlers.ts) — not a separate route here. This app only
+  // registers one Stripe webhook endpoint.
 
   // ── Admin: Resend Approval Email (for already-approved accounts) ───────────
 
@@ -388,7 +343,7 @@ export async function registerCorporateRoutes(app: Express): Promise<void> {
               customer_email: account.primaryContactEmail,
               client_reference_id: String(account.id),
               line_items: [{ price: priceId, quantity: 1 }],
-              metadata: { corporateAccountId: String(account.id), accountCode: account.accountCode },
+              metadata: { corporateAccountId: String(account.id), accountCode: account.accountCode, app: 'lbs4' },
               success_url: `${baseUrl}/corporate/activated?account=${account.accountCode}`,
               cancel_url: `${baseUrl}/corporate/enroll`,
             });
