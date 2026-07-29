@@ -156,11 +156,11 @@ export default function Contact() {
       <SEO
         title="Contact LBS Business Services Center Houston TX | (281) 836-5357"
         canonical="/contact"
-        description="Contact LBS Business Services Center at 616 FM 1960 Rd W, Ste 101, Houston, TX 77090. Call (281) 836-5357 or email info@lbsconnect.net. Open Mon–Fri 8 AM–5 PM, Sat 8 AM–4 PM."
+        description="Contact LBS Business Services Center at 616 FM 1960 Rd W, Ste 101, Houston, TX 77090. Call (281) 836-5357 or email info@lbs4.com. Open Mon–Fri 8:30 AM–6 PM, Sat 9 AM–3 PM."
       />
       <Header />
 
-      <section className="relative py-12 bg-gradient-to-br from-[#1a2d52] to-[#2a4f8e]" data-testid="section-contact-hero">
+      <section className="relative py-12 bg-gradient-to-br from-[#0D1B3D] to-[#1A237E]" data-testid="section-contact-hero">
         <div className="absolute inset-0 bg-[url('/images/hero-testing-center.png')] bg-cover bg-center opacity-10" />
         <div className="relative z-10 max-w-7xl mx-auto px-6 text-center space-y-4">
           <h1 className="text-4xl md:text-5xl font-bold text-white" data-testid="text-contact-title">
@@ -193,8 +193,8 @@ export default function Contact() {
                   className="flex items-start gap-4 p-4 rounded-md bg-muted/30 transition-colors hover:bg-muted/50"
                   data-testid="link-contact-address"
                 >
-                  <div className="w-12 h-12 rounded-md bg-[#1e3a6e]/10 dark:bg-[#4a72c4]/20 flex items-center justify-center shrink-0">
-                    <MapPin className="w-6 h-6 text-[#1e3a6e] dark:text-[#6b9aed]" />
+                  <div className="w-12 h-12 rounded-md bg-[#0D1B3D]/10 dark:bg-[#0077FF]/20 flex items-center justify-center shrink-0">
+                    <MapPin className="w-6 h-6 text-[#0D1B3D] dark:text-[#0077FF]" />
                   </div>
                   <div>
                     <h3 className="font-semibold text-sm">Location</h3>
@@ -213,8 +213,8 @@ export default function Contact() {
                   className="flex items-start gap-4 p-4 rounded-md bg-muted/30 transition-colors hover:bg-muted/50"
                   data-testid="link-contact-phone"
                 >
-                  <div className="w-12 h-12 rounded-md bg-[#1e3a6e]/10 dark:bg-[#4a72c4]/20 flex items-center justify-center shrink-0">
-                    <Phone className="w-6 h-6 text-[#1e3a6e] dark:text-[#6b9aed]" />
+                  <div className="w-12 h-12 rounded-md bg-[#0D1B3D]/10 dark:bg-[#0077FF]/20 flex items-center justify-center shrink-0">
+                    <Phone className="w-6 h-6 text-[#0D1B3D] dark:text-[#0077FF]" />
                   </div>
                   <div>
                     <h3 className="font-semibold text-sm">Phone</h3>
@@ -225,30 +225,30 @@ export default function Contact() {
                 </a>
 
                 <a
-                  href="mailto:info@lbsconnect.net"
+                  href="mailto:info@lbs4.com"
                   className="flex items-start gap-4 p-4 rounded-md bg-muted/30 transition-colors hover:bg-muted/50"
                   data-testid="link-contact-email"
                 >
-                  <div className="w-12 h-12 rounded-md bg-[#1e3a6e]/10 dark:bg-[#4a72c4]/20 flex items-center justify-center shrink-0">
-                    <Mail className="w-6 h-6 text-[#1e3a6e] dark:text-[#6b9aed]" />
+                  <div className="w-12 h-12 rounded-md bg-[#0D1B3D]/10 dark:bg-[#0077FF]/20 flex items-center justify-center shrink-0">
+                    <Mail className="w-6 h-6 text-[#0D1B3D] dark:text-[#0077FF]" />
                   </div>
                   <div>
                     <h3 className="font-semibold text-sm">Email</h3>
                     <p className="text-sm text-muted-foreground mt-1">
-                      info@lbsconnect.net
+                      info@lbs4.com
                     </p>
                   </div>
                 </a>
 
                 <div className="flex items-start gap-4 p-4 rounded-md bg-muted/30">
-                  <div className="w-12 h-12 rounded-md bg-[#1e3a6e]/10 dark:bg-[#4a72c4]/20 flex items-center justify-center shrink-0">
-                    <Clock className="w-6 h-6 text-[#1e3a6e] dark:text-[#6b9aed]" />
+                  <div className="w-12 h-12 rounded-md bg-[#0D1B3D]/10 dark:bg-[#0077FF]/20 flex items-center justify-center shrink-0">
+                    <Clock className="w-6 h-6 text-[#0D1B3D] dark:text-[#0077FF]" />
                   </div>
                   <div>
                     <h3 className="font-semibold text-sm">Business Hours</h3>
                     <div className="text-sm text-muted-foreground mt-1 space-y-1">
-                      <p>Monday – Friday: 8:00 AM – 5:00 PM</p>
-                      <p>Saturday: 8:00 AM – 4:00 PM</p>
+                      <p>Monday – Friday: 8:30 AM – 6:00 PM</p>
+                      <p>Saturday: 9:00 AM – 3:00 PM</p>
                       <p>Sunday: Closed</p>
                     </div>
                   </div>
@@ -427,7 +427,7 @@ export default function Contact() {
 
                       <Button
                         type="submit"
-                        className="w-full bg-gradient-to-r from-[#e85d40] to-[#f07050] text-white"
+                        className="w-full bg-gradient-to-r from-[#FF6A00] to-[#FF2D55] text-white rounded-full"
                         disabled={contactMutation.isPending || (RECAPTCHA_SITE_KEY ? !captchaToken : false)}
                         data-testid="button-submit-contact"
                       >

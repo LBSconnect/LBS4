@@ -4,7 +4,6 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import {
   ArrowRight,
-  CheckCircle2,
   MapPin,
   Phone,
   Shield,
@@ -14,16 +13,55 @@ import {
   ChevronDown,
   Zap,
   Headset,
-  Building2,
+  Globe,
+  BadgeCheck,
+  Lock,
+  Smile,
 } from "lucide-react";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import SEO from "@/components/SEO";
-import ServiceCard from "@/components/ServiceCard";
 import { services } from "@/lib/services";
 import logoImg from "@assets/Linton_Business_Solutions.gif_1771618422350.jpg";
 
 const businessServices = services.filter((s) => s.category === "business");
+
+const SERVICE_ICON_COLORS: Record<string, string> = {
+  "printing-copies": "#FF6A00",
+  "scanning": "#FF6A00",
+  "notary": "#8A2BE2",
+  "passport": "#8A2BE2",
+  "faxing": "#0077FF",
+  "resume-services": "#FF2D55",
+  "website-design": "#0077FF",
+};
+
+const CORE_SERVICE_ORDER = ["printing-copies", "scanning", "notary", "passport", "faxing", "resume-services"];
+
+const coreServiceStrip = [
+  ...CORE_SERVICE_ORDER.map((id) => businessServices.find((s) => s.id === id)!).map((s) => ({
+    icon: s.icon,
+    title: s.shortTitle,
+    tagline:
+      s.id === "printing-copies" ? "B&W & Color" :
+      s.id === "scanning" ? "Digitize Documents" :
+      s.id === "notary" ? "Certified & Confidential" :
+      s.id === "passport" ? "Fast & Compliant" :
+      s.id === "faxing" ? "Send & Receive" :
+      s.id === "resume-services" ? "Stand Out" :
+      "",
+    href: `/services/${s.slug}`,
+    color: SERVICE_ICON_COLORS[s.id],
+  })),
+  { icon: Globe, title: "Website Design", tagline: "Modern & Effective", href: "/for-businesses", color: SERVICE_ICON_COLORS["website-design"] },
+];
+
+const whyChooseItems = [
+  { icon: BadgeCheck, title: "Professional & Reliable", description: "Quality services you can count on, every time." },
+  { icon: Users, title: "Experienced Team", description: "Skilled professionals ready to help." },
+  { icon: Lock, title: "Secure & Confidential", description: "Your documents and information are safe." },
+  { icon: MapPin, title: "Convenient & Local", description: "Serving our community with pride." },
+];
 
 const faqs = [
   {
@@ -36,7 +74,7 @@ const faqs = [
   },
   {
     q: "Can I walk in for notary or passport photos?",
-    a: "Yes. Walk-ins are always welcome for notary services and passport photos during regular business hours (Mon–Fri 8 AM–5 PM, Sat 8 AM–4 PM). No appointment needed.",
+    a: "Yes. Walk-ins are always welcome for notary services and passport photos during regular business hours (Mon–Fri 8:30 AM–6 PM, Sat 9 AM–3 PM). No appointment needed.",
   },
   {
     q: "How far in advance do I need to schedule a testing appointment?",
@@ -88,101 +126,102 @@ export default function Home() {
       <Header />
 
       {/* ── HERO ── */}
-      <section className="relative min-h-[480px] md:min-h-[560px] flex items-center bg-gradient-to-br from-[#0f1f3d] via-[#1a2d52] to-[#2a4f8e]" data-testid="section-hero">
-        <div className="relative z-10 max-w-7xl mx-auto px-6 py-20 w-full">
-          <div className="max-w-2xl space-y-5">
-            <div className="inline-flex items-center gap-2 bg-white/10 backdrop-blur-sm border border-white/20 rounded-full px-4 py-1.5 text-sm text-white/90">
-              <Shield className="w-4 h-4 text-[#f07050]" />
-              One Stop. Many Solutions.
+      <section className="relative bg-gradient-to-br from-[#0D1B3D] to-[#1A237E]" data-testid="section-hero">
+        <div className="relative z-10 max-w-7xl mx-auto px-6 py-16 md:py-20">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 items-center">
+            <div className="space-y-5">
+              <div className="inline-flex items-center gap-2 bg-white/10 backdrop-blur-sm border border-white/20 rounded-full px-4 py-1.5 text-sm text-white/90">
+                <Shield className="w-4 h-4 text-[#FF2D55]" />
+                One Stop. Many Solutions.
+              </div>
+              <h1
+                className="text-4xl md:text-5xl lg:text-6xl font-bold text-white leading-tight"
+                data-testid="text-hero-title"
+              >
+                Your{" "}
+                <span className="bg-gradient-to-r from-[#FF6A00] via-[#FF2D55] to-[#8A2BE2] bg-clip-text text-transparent">
+                  Business.
+                </span>
+                <br className="hidden sm:block" /> Our Solutions.
+              </h1>
+              <p
+                className="text-lg md:text-xl text-white/80 leading-relaxed max-w-lg"
+                data-testid="text-hero-subtitle"
+              >
+                Professional services that help you save time, stay productive, and keep your business moving — right here in Houston, TX.
+              </p>
+              <div className="flex flex-col sm:flex-row gap-3 pt-2">
+                <Link href="/book">
+                  <Button
+                    size="lg"
+                    className="bg-gradient-to-r from-[#FF6A00] to-[#FF2D55] text-white text-base px-8 rounded-full"
+                    data-testid="button-hero-book"
+                  >
+                    Book a Service
+                    <ArrowRight className="w-5 h-5 ml-2" />
+                  </Button>
+                </Link>
+                <Link href="/services">
+                  <Button
+                    size="lg"
+                    variant="outline"
+                    className="border-white/30 text-white bg-white/5 backdrop-blur-sm rounded-full"
+                    data-testid="button-hero-browse"
+                  >
+                    Browse Services
+                  </Button>
+                </Link>
+              </div>
+              <div className="flex flex-wrap items-center gap-x-6 gap-y-2 pt-4">
+                {[
+                  { icon: Zap, label: "Fast & Reliable Service" },
+                  { icon: Headset, label: "Professional Support" },
+                  { icon: Users, label: "Trusted by Our Community" },
+                ].map((item) => (
+                  <div key={item.label} className="flex items-center gap-2 text-sm text-white/80">
+                    <item.icon className="w-4 h-4 text-[#FF2D55]" />
+                    {item.label}
+                  </div>
+                ))}
+              </div>
             </div>
-            <h1
-              className="text-4xl md:text-5xl lg:text-6xl font-bold text-white leading-tight"
-              data-testid="text-hero-title"
-            >
-              Your{" "}
-              <span className="bg-gradient-to-r from-[#e85d40] via-[#c9a84c] to-[#e8c86c] bg-clip-text text-transparent">
-                Business.
-              </span>
-              <br className="hidden sm:block" /> Our Solutions.
-            </h1>
-            <p
-              className="text-lg md:text-xl text-white/80 leading-relaxed max-w-lg"
-              data-testid="text-hero-subtitle"
-            >
-              Professional services that help you save time, stay productive, and keep your business moving — right here in Houston, TX.
-            </p>
-            <div className="flex flex-col sm:flex-row gap-3 pt-2">
-              <Link href="/book">
-                <Button
-                  size="lg"
-                  className="bg-gradient-to-r from-[#e85d40] to-[#f07050] text-white text-base px-8"
-                  data-testid="button-hero-book"
-                >
-                  Book a Service
-                  <ArrowRight className="w-5 h-5 ml-2" />
-                </Button>
-              </Link>
-              <Link href="/services">
-                <Button
-                  size="lg"
-                  variant="outline"
-                  className="border-white/30 text-white bg-white/5 backdrop-blur-sm"
-                  data-testid="button-hero-browse"
-                >
-                  Browse Services
-                </Button>
-              </Link>
-            </div>
-            <div className="flex flex-wrap items-center gap-x-6 gap-y-2 pt-4">
-              {[
-                { icon: Zap, label: "Fast & Reliable Service" },
-                { icon: Headset, label: "Professional Support" },
-                { icon: Users, label: "Trusted by Our Community" },
-              ].map((item) => (
-                <div key={item.label} className="flex items-center gap-2 text-sm text-white/80">
-                  <item.icon className="w-4 h-4 text-[#e8c86c]" />
-                  {item.label}
-                </div>
-              ))}
+            <div className="hidden lg:block">
+              <div className="rounded-2xl overflow-hidden shadow-2xl ring-1 ring-white/10">
+                <img
+                  src="/images/hero-office-reception.png"
+                  alt="Modern office interior"
+                  className="w-full h-[420px] object-cover"
+                  data-testid="img-hero"
+                />
+              </div>
             </div>
           </div>
         </div>
       </section>
 
       {/* ── CORE BUSINESS SERVICES ── */}
-      <section className="py-14 bg-muted/30" data-testid="section-core-services">
+      <section className="py-8 bg-background border-b border-border/50" data-testid="section-core-services">
         <div className="max-w-7xl mx-auto px-6">
-          <div className="text-center max-w-2xl mx-auto mb-10 space-y-3">
-            <p className="text-xs font-bold uppercase tracking-widest text-[#c9a84c]">What We Offer</p>
-            <h2 className="text-3xl md:text-4xl font-bold" data-testid="text-core-services-heading">
-              Explore Our Services
-            </h2>
-            <p className="text-muted-foreground text-lg">
-              Everyday business essentials, all under one roof in Houston, TX.
-            </p>
-          </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-            {businessServices.map((service) => (
-              <ServiceCard
-                key={service.id}
-                title={service.title}
-                description={service.description}
-                image={service.image}
-                price={service.price}
-                priceLabel={service.priceLabel}
-                slug={service.slug}
-                icon={<service.icon className="w-5 h-5" />}
-              />
+          <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-7 gap-x-4 gap-y-8">
+            {coreServiceStrip.map((item) => (
+              <Link key={item.title} href={item.href}>
+                <div
+                  className="flex flex-col items-center text-center gap-2 cursor-pointer group"
+                  data-testid={`link-core-service-${item.title.toLowerCase().replace(/\s/g, "-")}`}
+                >
+                  <div
+                    className="w-14 h-14 rounded-2xl border-2 flex items-center justify-center transition-colors"
+                    style={{ borderColor: `${item.color}26`, color: item.color }}
+                  >
+                    <item.icon className="w-6 h-6" />
+                  </div>
+                  <div>
+                    <p className="text-sm font-semibold leading-tight">{item.title}</p>
+                    <p className="text-xs text-muted-foreground mt-0.5">{item.tagline}</p>
+                  </div>
+                </div>
+              </Link>
             ))}
-            {/* Website Design — quote-based, not a bookable calendar service */}
-            <ServiceCard
-              title="Website Design"
-              description="Practical website design for Houston small businesses and entrepreneurs. Request a free quote."
-              slug="website-design"
-              href="/for-businesses"
-              icon={<Building2 className="w-5 h-5" />}
-              buttonLabel="Request a Quote"
-            />
           </div>
           <div className="text-center mt-8">
             <Link href="/services?filter=business">
@@ -198,10 +237,10 @@ export default function Home() {
       {/* ── EXAM TESTING SERVICES (secondary operation) ── */}
       <section className="py-14 bg-background border-y border-border/50" data-testid="section-testing-services">
         <div className="max-w-7xl mx-auto px-6">
-          <div className="rounded-2xl bg-gradient-to-br from-[#1a2d52] to-[#2a4f8e] p-8 md:p-10">
+          <div className="rounded-2xl bg-gradient-to-br from-[#0D1B3D] to-[#1A237E] p-8 md:p-10">
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-center">
               <div className="lg:col-span-2 space-y-4">
-                <p className="text-xs font-bold uppercase tracking-widest text-[#e8c86c]">Secondary Operation</p>
+                <p className="text-xs font-bold uppercase tracking-widest text-[#FF2D55]">Secondary Operation</p>
                 <h2 className="text-2xl md:text-3xl font-bold text-white">Exam Testing Services</h2>
                 <p className="text-white/75 leading-relaxed max-w-2xl">
                   Professional exam testing and preparation services provided in a quiet, secure, and focused
@@ -213,16 +252,16 @@ export default function Home() {
                     aria-label="View Pearson VUE testing information"
                     className="bg-white rounded-lg px-4 py-2.5 flex items-center gap-2 hover-elevate"
                   >
-                    <Shield className="w-5 h-5 text-[#1e3a6e]" />
-                    <span className="text-sm font-semibold text-[#1e3a6e]">Pearson VUE</span>
+                    <Shield className="w-5 h-5 text-[#0D1B3D]" />
+                    <span className="text-sm font-semibold text-[#0D1B3D]">Pearson VUE</span>
                   </Link>
                   <Link
                     href="/services/certification-exam-testing"
                     aria-label="View Certiport testing information"
                     className="bg-white rounded-lg px-4 py-2.5 flex items-center gap-2 hover-elevate"
                   >
-                    <Award className="w-5 h-5 text-[#1e3a6e]" />
-                    <span className="text-sm font-semibold text-[#1e3a6e]">Certiport</span>
+                    <Award className="w-5 h-5 text-[#0D1B3D]" />
+                    <span className="text-sm font-semibold text-[#0D1B3D]">Certiport</span>
                   </Link>
                 </div>
               </div>
@@ -231,7 +270,7 @@ export default function Home() {
                   <Button
                     size="lg"
                     variant="outline"
-                    className="border-white/30 text-white bg-white/5 backdrop-blur-sm"
+                    className="border-white/30 text-white bg-white/5 backdrop-blur-sm rounded-full"
                     data-testid="button-view-testing-info"
                   >
                     View Testing Info
@@ -248,7 +287,7 @@ export default function Home() {
       <section className="py-14 bg-muted/30" data-testid="section-testimonials">
         <div className="max-w-7xl mx-auto px-6">
           <div className="text-center max-w-2xl mx-auto mb-10 space-y-3">
-            <p className="text-xs font-bold uppercase tracking-widest text-[#c9a84c]">What Our Clients Say</p>
+            <p className="text-xs font-bold uppercase tracking-widest text-[#FF6A00]">What Our Clients Say</p>
             <h2 className="text-3xl md:text-4xl font-bold">Real Results, Real People</h2>
             <p className="text-muted-foreground text-lg">
               Join hundreds of Houston professionals who passed their exams at LBS.
@@ -263,7 +302,7 @@ export default function Home() {
                     "{t.quote}"
                   </p>
                   <div className="flex items-center gap-3 border-t border-border/50 pt-4">
-                    <div className="w-9 h-9 rounded-full bg-[#1e3a6e] flex items-center justify-center text-white text-xs font-bold shrink-0">
+                    <div className="w-9 h-9 rounded-full bg-[#0D1B3D] flex items-center justify-center text-white text-xs font-bold shrink-0">
                       {t.initials}
                     </div>
                     <div>
@@ -281,7 +320,7 @@ export default function Home() {
               href="https://g.page/r/lbs-test-exam-center/review"
               target="_blank"
               rel="noopener noreferrer"
-              className="text-[#1e3a6e] dark:text-[#6b9aed] font-medium hover:underline"
+              className="text-[#0D1B3D] dark:text-[#0077FF] font-medium hover:underline"
             >
               Google
             </a>
@@ -292,88 +331,75 @@ export default function Home() {
       {/* ── WHY CHOOSE LBS ── */}
       <section className="py-14 bg-background" data-testid="section-why-choose">
         <div className="max-w-7xl mx-auto px-6">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
-            <div className="space-y-6">
-              <h2 className="text-3xl md:text-4xl font-bold" data-testid="text-why-heading">
-                Why Choose LBS?
-              </h2>
-              <p className="text-muted-foreground text-lg leading-relaxed">
-                Quality services you can count on, from a team that knows what it takes to help your business succeed.
-              </p>
-              <div className="space-y-4">
-                {[
-                  "Professional and reliable — quality services you can count on, every time",
-                  "Experienced team of skilled professionals ready to help",
-                  "Secure and confidential handling of your documents and information",
-                  "Convenient and local — serving Houston, TX with pride",
-                  "Walk-in printing, notary, and passport photos — no appointment needed",
-                  "Multiple professional business services under one roof",
-                ].map((item) => (
-                  <div key={item} className="flex items-start gap-3">
-                    <CheckCircle2 className="w-5 h-5 text-[#e85d40] mt-0.5 shrink-0" />
-                    <span className="text-sm">{item}</span>
-                  </div>
-                ))}
+          <div className="flex items-center justify-center gap-4 mb-10">
+            <div className="h-px flex-1 max-w-16 bg-gradient-to-r from-transparent to-[#FF6A00]" />
+            <h2 className="text-2xl md:text-3xl font-bold text-center" data-testid="text-why-heading">
+              Why Choose LBS?
+            </h2>
+            <div className="h-px flex-1 max-w-16 bg-gradient-to-l from-transparent to-[#FF6A00]" />
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
+            {whyChooseItems.map((item) => (
+              <div key={item.title} className="text-center space-y-3" data-testid={`card-why-${item.title.toLowerCase().replace(/[^a-z]+/g, "-")}`}>
+                <div className="w-16 h-16 mx-auto rounded-2xl border-2 border-[#0D1B3D]/15 dark:border-[#0077FF]/30 flex items-center justify-center text-[#0D1B3D] dark:text-[#0077FF]">
+                  <item.icon className="w-7 h-7" />
+                </div>
+                <h3 className="font-semibold">{item.title}</h3>
+                <p className="text-sm text-muted-foreground">{item.description}</p>
               </div>
-              <Link href="/about">
-                <Button variant="outline" size="lg" className="mt-4" data-testid="button-learn-about">
-                  Learn More About Us
-                  <ArrowRight className="w-4 h-4 ml-2" />
-                </Button>
-              </Link>
-            </div>
-            <div className="relative">
-              <Card className="border-border/50">
-                <CardContent className="p-8 space-y-6">
-                  <div className="flex items-center gap-4 mb-4">
-                    <img src={logoImg} alt="LBS" className="w-16 h-16 object-contain rounded-md" />
+            ))}
+          </div>
+          <div className="max-w-md mx-auto">
+            <Card className="border-border/50">
+              <CardContent className="p-8 space-y-6">
+                <div className="flex items-center gap-4 mb-2">
+                  <img src={logoImg} alt="LBS" className="w-14 h-14 object-contain rounded-md" />
+                  <div>
+                    <h3 className="text-lg font-bold text-[#0D1B3D] dark:text-white">Visit Us Today</h3>
+                    <p className="text-sm text-muted-foreground">Walk-ins welcome for most services</p>
+                  </div>
+                </div>
+                <div className="space-y-4">
+                  <div className="flex items-start gap-3">
+                    <MapPin className="w-5 h-5 text-[#FF6A00] mt-0.5 shrink-0" />
                     <div>
-                      <h3 className="text-xl font-bold text-[#1e3a6e] dark:text-white">Visit Us Today</h3>
-                      <p className="text-sm text-muted-foreground">Walk-ins welcome for most services</p>
+                      <p className="font-medium text-sm">Address</p>
+                      <p className="text-sm text-muted-foreground">
+                        616 FM 1960 Rd W, Ste 101<br />Houston, TX 77090-3048
+                      </p>
                     </div>
                   </div>
-                  <div className="space-y-4">
-                    <div className="flex items-start gap-3">
-                      <MapPin className="w-5 h-5 text-[#e85d40] mt-0.5 shrink-0" />
-                      <div>
-                        <p className="font-medium text-sm">Address</p>
-                        <p className="text-sm text-muted-foreground">
-                          616 FM 1960 Rd W, Ste 101<br />Houston, TX 77090-3048
-                        </p>
-                      </div>
-                    </div>
-                    <div className="flex items-start gap-3">
-                      <Phone className="w-5 h-5 text-[#e85d40] mt-0.5 shrink-0" />
-                      <div>
-                        <p className="font-medium text-sm">Phone</p>
-                        <a href="tel:2818365357" className="text-sm text-muted-foreground hover:text-foreground">
-                          (281) 836-5357
-                        </a>
-                      </div>
-                    </div>
-                    <div className="flex items-start gap-3">
-                      <Clock className="w-5 h-5 text-[#e85d40] mt-0.5 shrink-0" />
-                      <div>
-                        <p className="font-medium text-sm">Hours</p>
-                        <p className="text-sm text-muted-foreground">
-                          Mon – Fri: 8:00 AM – 5:00 PM<br />
-                          Sat: 8:00 AM – 4:00 PM<br />
-                          Closed Sun
-                        </p>
-                      </div>
+                  <div className="flex items-start gap-3">
+                    <Phone className="w-5 h-5 text-[#FF6A00] mt-0.5 shrink-0" />
+                    <div>
+                      <p className="font-medium text-sm">Phone</p>
+                      <a href="tel:2818365357" className="text-sm text-muted-foreground hover:text-foreground">
+                        (281) 836-5357
+                      </a>
                     </div>
                   </div>
-                  <Link href="/contact">
-                    <Button
-                      className="w-full bg-gradient-to-r from-[#e85d40] to-[#f07050] text-white mt-4"
-                      data-testid="button-contact-cta"
-                    >
-                      Get Directions & Contact
-                    </Button>
-                  </Link>
-                </CardContent>
-              </Card>
-            </div>
+                  <div className="flex items-start gap-3">
+                    <Clock className="w-5 h-5 text-[#FF6A00] mt-0.5 shrink-0" />
+                    <div>
+                      <p className="font-medium text-sm">Hours</p>
+                      <p className="text-sm text-muted-foreground">
+                        Mon – Fri: 8:30 AM – 6:00 PM<br />
+                        Sat: 9:00 AM – 3:00 PM<br />
+                        Closed Sun
+                      </p>
+                    </div>
+                  </div>
+                </div>
+                <Link href="/contact">
+                  <Button
+                    className="w-full bg-gradient-to-r from-[#FF6A00] to-[#FF2D55] text-white mt-4 rounded-full"
+                    data-testid="button-contact-cta"
+                  >
+                    Get Directions & Contact
+                  </Button>
+                </Link>
+              </CardContent>
+            </Card>
           </div>
         </div>
       </section>
@@ -383,7 +409,7 @@ export default function Home() {
         <div className="max-w-7xl mx-auto px-6">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 items-center bg-muted/30 rounded-2xl p-8 md:p-12">
             <div className="space-y-5">
-              <p className="text-xs font-bold uppercase tracking-widest text-[#c9a84c]">Solutions for Your Business</p>
+              <p className="text-xs font-bold uppercase tracking-widest text-[#FF6A00]">Solutions for Your Business</p>
               <h2 className="text-3xl md:text-4xl font-bold" data-testid="text-business-solutions-heading">
                 Services That Help Your Business Grow.
               </h2>
@@ -394,7 +420,7 @@ export default function Home() {
               <Link href="/for-businesses">
                 <Button
                   size="lg"
-                  className="bg-gradient-to-r from-[#e85d40] to-[#f07050] text-white"
+                  className="bg-gradient-to-r from-[#FF6A00] to-[#FF2D55] text-white rounded-full"
                   data-testid="button-explore-business-solutions"
                 >
                   Explore Business Solutions
@@ -402,18 +428,13 @@ export default function Home() {
                 </Button>
               </Link>
             </div>
-            <div className="grid grid-cols-2 gap-4">
-              {[
-                { icon: Building2, label: "Corporate Notary Program" },
-                { icon: Award, label: "Website Design" },
-                { icon: Users, label: "Resume Services" },
-                { icon: Headset, label: "Ongoing Business Support" },
-              ].map((item) => (
-                <div key={item.label} className="bg-card border border-border/50 rounded-xl p-5 text-center space-y-2">
-                  <item.icon className="w-6 h-6 mx-auto text-[#1e3a6e] dark:text-[#6b9aed]" />
-                  <p className="text-sm font-medium">{item.label}</p>
-                </div>
-              ))}
+            <div className="rounded-2xl overflow-hidden shadow-lg">
+              <img
+                src="/images/business-collaboration.png"
+                alt="Business professionals collaborating"
+                className="w-full h-72 md:h-80 object-cover"
+                data-testid="img-business-solutions"
+              />
             </div>
           </div>
         </div>
@@ -423,7 +444,7 @@ export default function Home() {
       <section className="py-14 bg-muted/30" data-testid="section-faq">
         <div className="max-w-7xl mx-auto px-6">
           <div className="text-center max-w-2xl mx-auto mb-10 space-y-3">
-            <p className="text-xs font-bold uppercase tracking-widest text-[#c9a84c]">Common Questions</p>
+            <p className="text-xs font-bold uppercase tracking-widest text-[#FF6A00]">Common Questions</p>
             <h2 className="text-3xl md:text-4xl font-bold">Frequently Asked Questions</h2>
             <p className="text-muted-foreground text-lg">Everything you need to know before you arrive.</p>
           </div>
@@ -437,7 +458,7 @@ export default function Home() {
                 >
                   <span>{faq.q}</span>
                   <ChevronDown
-                    className={`w-4 h-4 shrink-0 text-[#c9a84c] transition-transform duration-200 ${openFaq === i ? "rotate-180" : ""}`}
+                    className={`w-4 h-4 shrink-0 text-[#FF6A00] transition-transform duration-200 ${openFaq === i ? "rotate-180" : ""}`}
                   />
                 </button>
                 {openFaq === i && (
@@ -451,7 +472,7 @@ export default function Home() {
           <div className="text-center mt-8">
             <p className="text-sm text-muted-foreground">
               Still have questions?{" "}
-              <a href="tel:2818365357" className="text-[#e85d40] font-semibold hover:underline">
+              <a href="tel:2818365357" className="text-[#FF6A00] font-semibold hover:underline">
                 Call us at (281) 836-5357
               </a>
             </p>
@@ -459,37 +480,29 @@ export default function Home() {
         </div>
       </section>
 
-      {/* ── BOTTOM CTA ── */}
-      <section className="py-14 bg-gradient-to-r from-[#1e3a6e] to-[#2a4f8e]" data-testid="section-cta">
-        <div className="max-w-4xl mx-auto px-6 text-center space-y-6">
-          <p className="text-xs font-bold uppercase tracking-widest text-[#c9a84c]">Ready When You Are</p>
-          <h2 className="text-3xl md:text-4xl font-bold text-white">
-            Visit LBS Business Services Center
-          </h2>
-          <p className="text-lg text-white/80 max-w-2xl mx-auto">
-            Printing, notary, passport photos, faxing, resume help, website design, and exam testing — all at one Houston location.
-          </p>
-          <div className="flex flex-col sm:flex-row gap-3 justify-center pt-2">
-            <Link href="/book">
-              <Button
-                size="lg"
-                className="bg-gradient-to-r from-[#e85d40] to-[#f07050] text-white text-base px-8"
-                data-testid="button-cta-book"
-              >
-                Book a Service
-                <ArrowRight className="w-5 h-5 ml-2" />
-              </Button>
-            </Link>
-            <a href="tel:2818365357" data-testid="button-cta-call">
-              <Button
-                size="lg"
-                variant="outline"
-                className="border-white/30 text-white bg-white/5"
-              >
-                <Phone className="w-4 h-4 mr-2" />
-                Call (281) 836-5357
-              </Button>
+      {/* ── BOTTOM CONTACT BAR ── */}
+      <section className="py-8 bg-[#0D1B3D]" data-testid="section-cta">
+        <div className="max-w-7xl mx-auto px-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
+            <a href="tel:2818365357" className="flex items-center gap-4" data-testid="button-cta-call">
+              <div className="w-14 h-14 rounded-full bg-gradient-to-br from-[#FF6A00] to-[#FF2D55] flex items-center justify-center shrink-0">
+                <Phone className="w-6 h-6 text-white" />
+              </div>
+              <div>
+                <p className="text-xs font-bold uppercase tracking-widest text-[#FF2D55]">We're Here to Help</p>
+                <p className="text-2xl font-bold text-white">(281) 836-5357</p>
+                <p className="text-sm text-[#FF2D55] font-medium">Walk-ins Welcome &nbsp;|&nbsp; Open to the Public</p>
+              </div>
             </a>
+            <div className="flex items-center gap-4 md:justify-end">
+              <div className="w-14 h-14 rounded-full border-2 border-white/30 flex items-center justify-center shrink-0">
+                <Smile className="w-7 h-7 text-white" />
+              </div>
+              <div>
+                <p className="text-sm font-bold uppercase tracking-wider text-white">Friendly. Local. Professional.</p>
+                <p className="text-sm text-white/70">Our goal is simple: deliver exceptional service with a personal touch.</p>
+              </div>
+            </div>
           </div>
         </div>
       </section>
@@ -499,14 +512,14 @@ export default function Home() {
       {/* ── MOBILE STICKY CTA BAR ── */}
       <div className="md:hidden fixed bottom-0 left-0 right-0 z-50 flex gap-2.5 p-3 bg-background/95 backdrop-blur-md border-t border-border/50 shadow-lg" data-testid="mobile-sticky-bar">
         <a href="tel:2818365357" className="flex-1">
-          <Button variant="outline" className="w-full gap-2 font-semibold text-sm h-11" size="sm">
+          <Button variant="outline" className="w-full gap-2 font-semibold text-sm h-11 rounded-full" size="sm">
             <Phone className="w-4 h-4" />
             Call
           </Button>
         </a>
         <Link href="/book" className="flex-[2]">
           <Button
-            className="w-full bg-gradient-to-r from-[#e85d40] to-[#f07050] text-white font-bold text-sm h-11"
+            className="w-full bg-gradient-to-r from-[#FF6A00] to-[#FF2D55] text-white font-bold text-sm h-11 rounded-full"
             size="sm"
           >
             Book a Service

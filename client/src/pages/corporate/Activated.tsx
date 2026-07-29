@@ -41,8 +41,8 @@ export default function CorporateActivated() {
             <a href="tel:2818365357" className="flex items-center justify-center gap-1.5 hover:text-foreground transition-colors">
               <Phone className="w-4 h-4" /> (281) 836-5357
             </a>
-            <a href="mailto:info@lbsconnect.net" className="flex items-center justify-center gap-1.5 hover:text-foreground transition-colors">
-              <Mail className="w-4 h-4" /> info@lbsconnect.net
+            <a href="mailto:info@lbs4.com" className="flex items-center justify-center gap-1.5 hover:text-foreground transition-colors">
+              <Mail className="w-4 h-4" /> info@lbs4.com
             </a>
           </div>
         </div>

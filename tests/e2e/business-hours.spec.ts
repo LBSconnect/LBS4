@@ -3,8 +3,8 @@
  *
  * Verifies the booking calendar and API enforce correct business hours:
  *
- *   Monday – Friday  —  8 AM – 5 PM CT (slots 8 AM – 4 PM)
- *   Saturday         —  8 AM – 4 PM CT (slots 8 AM – 3 PM)
+ *   Monday – Friday  —  8:30 AM – 6 PM CT (slots 9 AM – 5 PM)
+ *   Saturday         —  9 AM – 3 PM CT (slots 9 AM – 2 PM)
  *   Sunday           —  CLOSED (no slots)
  *
  * Tests run at the API level (no browser needed) so they are fast and
@@ -116,12 +116,12 @@ test.describe("Thursday — open (same hours as Monday)", () => {
     expect(slots).toHaveLength(9);
   });
 
-  test("last slot is 4 PM CT on Thursday", async () => {
+  test("last slot is 5 PM CT on Thursday", async () => {
     const thu = nextDayOfWeek(4);
     const slots = await fetchSlots(thu.toISOString());
     expect(slots.length).toBeGreaterThan(0);
     const lastCTHour = slotToCTHour(slots[slots.length - 1], thu);
-    expect(lastCTHour).toBe(16);
+    expect(lastCTHour).toBe(17);
   });
 });
 
@@ -147,122 +147,122 @@ test.describe("Sunday — closed all day", () => {
   });
 });
 
-test.describe("Saturday — 8 AM to 4 PM (last slot 3 PM)", () => {
-  test("first slot is 8 AM CT", async () => {
+test.describe("Saturday — 9 AM to 3 PM (last slot 2 PM)", () => {
+  test("first slot is 9 AM CT", async () => {
     const sat = nextDayOfWeek(6);
     const slots = await fetchSlots(sat.toISOString());
     expect(slots.length).toBeGreaterThan(0);
     const firstCTHour = slotToCTHour(slots[0], sat);
-    expect(firstCTHour).toBe(8);
+    expect(firstCTHour).toBe(9);
   });
 
-  test("last slot is 3 PM CT (not 4 PM or later)", async () => {
+  test("last slot is 2 PM CT (not 3 PM or later)", async () => {
     const sat = nextDayOfWeek(6);
     const slots = await fetchSlots(sat.toISOString());
     expect(slots.length).toBeGreaterThan(0);
     const lastCTHour = slotToCTHour(slots[slots.length - 1], sat);
-    expect(lastCTHour).toBe(15); // 3 PM
+    expect(lastCTHour).toBe(14); // 2 PM
   });
 
-  test("has exactly 8 slots (8 AM through 3 PM inclusive)", async () => {
+  test("has exactly 6 slots (9 AM through 2 PM inclusive)", async () => {
     const sat = nextDayOfWeek(6);
     const slots = await fetchSlots(sat.toISOString());
-    expect(slots).toHaveLength(8); // 8,9,10,11,12,13,14,15
+    expect(slots).toHaveLength(6); // 9,10,11,12,13,14
   });
 
-  test("a 4 PM slot is not in the Saturday list", async () => {
+  test("a 3 PM slot is not in the Saturday list", async () => {
     const sat = nextDayOfWeek(6);
     const slots = await fetchSlots(sat.toISOString());
-    const slot4pm = slotISO(sat, 16); // 4 PM CT
-    expect(slots).not.toContain(slot4pm);
+    const slot3pm = slotISO(sat, 15); // 3 PM CT
+    expect(slots).not.toContain(slot3pm);
   });
 
-  test("rejects a direct API booking at 4 PM Saturday with 400", async () => {
+  test("rejects a direct API booking at 3 PM Saturday with 400", async () => {
     const sat = nextDayOfWeek(6);
     const res = await postBooking({
-      customerName: "Test Sat 4pm",
-      customerEmail: `sat4pm+${Date.now()}@e2e.test`,
+      customerName: "Test Sat 3pm",
+      customerEmail: `sat3pm+${Date.now()}@e2e.test`,
       customerPhone: "(713) 555-0003",
       serviceName: "Notary Service",
-      appointmentDate: slotISO(sat, 16), // 4 PM CT — past last slot
+      appointmentDate: slotISO(sat, 15), // 3 PM CT — past last slot
       payNow: true,
-      notes: `${TEST_TAG}:sat-4pm-reject`,
+      notes: `${TEST_TAG}:sat-3pm-reject`,
     });
     expect(res.status).toBe(400);
   });
 });
 
-test.describe("Monday — 8 AM to 5 PM (last slot 4 PM)", () => {
-  test("first slot is 8 AM CT", async () => {
+test.describe("Monday — 8:30 AM to 6 PM (last slot 5 PM)", () => {
+  test("first slot is 9 AM CT", async () => {
     const mon = nextDayOfWeek(1);
     const slots = await fetchSlots(mon.toISOString());
     expect(slots.length).toBeGreaterThan(0);
     const firstCTHour = slotToCTHour(slots[0], mon);
-    expect(firstCTHour).toBe(8);
+    expect(firstCTHour).toBe(9);
   });
 
-  test("last slot is 4 PM CT (not 5 PM or later)", async () => {
+  test("last slot is 5 PM CT (not 6 PM or later)", async () => {
     const mon = nextDayOfWeek(1);
     const slots = await fetchSlots(mon.toISOString());
     const lastCTHour = slotToCTHour(slots[slots.length - 1], mon);
-    expect(lastCTHour).toBe(16); // 4 PM
+    expect(lastCTHour).toBe(17); // 5 PM
   });
 
-  test("has exactly 9 slots (8 AM through 4 PM inclusive)", async () => {
+  test("has exactly 9 slots (9 AM through 5 PM inclusive)", async () => {
     const mon = nextDayOfWeek(1);
     const slots = await fetchSlots(mon.toISOString());
-    expect(slots).toHaveLength(9); // 8,9,10,11,12,13,14,15,16
+    expect(slots).toHaveLength(9); // 9,10,11,12,13,14,15,16,17
   });
 
-  test("a 5 PM slot is not in the Monday list", async () => {
+  test("a 6 PM slot is not in the Monday list", async () => {
     const mon = nextDayOfWeek(1);
     const slots = await fetchSlots(mon.toISOString());
-    const slot5pm = slotISO(mon, 17); // 5 PM CT
-    expect(slots).not.toContain(slot5pm);
+    const slot6pm = slotISO(mon, 18); // 6 PM CT
+    expect(slots).not.toContain(slot6pm);
   });
 
-  test("rejects a direct API booking at 5 PM Monday with 400", async () => {
+  test("rejects a direct API booking at 6 PM Monday with 400", async () => {
     const mon = nextDayOfWeek(1);
     const res = await postBooking({
-      customerName: "Test Mon 5pm",
-      customerEmail: `mon5pm+${Date.now()}@e2e.test`,
+      customerName: "Test Mon 6pm",
+      customerEmail: `mon6pm+${Date.now()}@e2e.test`,
       customerPhone: "(713) 555-0004",
       serviceName: "Notary Service",
-      appointmentDate: slotISO(mon, 17), // 5 PM CT — past closing
+      appointmentDate: slotISO(mon, 18), // 6 PM CT — past closing
       payNow: true,
-      notes: `${TEST_TAG}:mon-5pm-reject`,
+      notes: `${TEST_TAG}:mon-6pm-reject`,
     });
     expect(res.status).toBe(400);
   });
 });
 
 test.describe("Tuesday — same hours as Monday", () => {
-  test("last slot is 4 PM CT", async () => {
+  test("last slot is 5 PM CT", async () => {
     const tue = nextDayOfWeek(2);
     const slots = await fetchSlots(tue.toISOString());
     expect(slots.length).toBeGreaterThan(0);
     const lastCTHour = slotToCTHour(slots[slots.length - 1], tue);
-    expect(lastCTHour).toBe(16);
+    expect(lastCTHour).toBe(17);
   });
 });
 
 test.describe("Wednesday — same hours as Monday", () => {
-  test("last slot is 4 PM CT", async () => {
+  test("last slot is 5 PM CT", async () => {
     const wed = nextDayOfWeek(3);
     const slots = await fetchSlots(wed.toISOString());
     expect(slots.length).toBeGreaterThan(0);
     const lastCTHour = slotToCTHour(slots[slots.length - 1], wed);
-    expect(lastCTHour).toBe(16);
+    expect(lastCTHour).toBe(17);
   });
 });
 
-test.describe("Friday — 8 AM to 5 PM (last slot 4 PM)", () => {
-  test("last slot is 4 PM CT", async () => {
+test.describe("Friday — 8:30 AM to 6 PM (last slot 5 PM)", () => {
+  test("last slot is 5 PM CT", async () => {
     const fri = nextDayOfWeek(5);
     const slots = await fetchSlots(fri.toISOString());
     expect(slots.length).toBeGreaterThan(0);
     const lastCTHour = slotToCTHour(slots[slots.length - 1], fri);
-    expect(lastCTHour).toBe(16);
+    expect(lastCTHour).toBe(17);
   });
 
   test("has exactly 9 slots", async () => {
@@ -280,14 +280,14 @@ test.describe("All services return correct slots", () => {
   ];
 
   for (const slug of services) {
-    test(`${slug}: Monday slots are 8 AM–4 PM`, async ({ page }) => {
+    test(`${slug}: Monday slots are 9 AM–5 PM`, async ({ page }) => {
       const mon = nextDayOfWeek(1);
       const slots = await fetchSlots(mon.toISOString());
       expect(slots.length).toBeGreaterThan(0);
 
       const ctHours = slots.map((s) => slotToCTHour(s, mon));
-      expect(Math.min(...ctHours)).toBe(8);
-      expect(Math.max(...ctHours)).toBe(16);
+      expect(Math.min(...ctHours)).toBe(9);
+      expect(Math.max(...ctHours)).toBe(17);
     });
 
     test(`${slug}: calendar page does not disable Thursday`, async ({ page }) => {
@@ -328,14 +328,14 @@ test.describe("All services return correct slots", () => {
 });
 
 test.describe("Before-hours and after-hours API rejection", () => {
-  test("rejects booking at 7 AM CT on a weekday (before open)", async () => {
+  test("rejects booking at 8 AM CT on a weekday (before open)", async () => {
     const mon = nextDayOfWeek(1);
     const res = await postBooking({
       customerName: "Early Bird",
       customerEmail: `early+${Date.now()}@e2e.test`,
       customerPhone: "(713) 555-0010",
       serviceName: "Notary Service",
-      appointmentDate: slotISO(mon, 7), // 7 AM CT
+      appointmentDate: slotISO(mon, 8), // 8 AM CT — before 9 AM open
       payNow: true,
       notes: `${TEST_TAG}:before-hours`,
     });

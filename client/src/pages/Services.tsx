@@ -50,11 +50,11 @@ export default function Services() {
       />
       <Header />
 
-      <section className="relative py-12 bg-gradient-to-br from-[#1a2d52] to-[#2a4f8e]" data-testid="section-services-hero">
+      <section className="relative py-12 bg-gradient-to-br from-[#0D1B3D] to-[#1A237E]" data-testid="section-services-hero">
         <div className="absolute inset-0 bg-[url('/images/hero-testing-center.png')] bg-cover bg-center opacity-10" />
         <div className="relative z-10 max-w-7xl mx-auto px-6 text-center space-y-4">
           <div className="inline-flex items-center gap-2 bg-white/10 backdrop-blur-sm border border-white/20 rounded-full px-4 py-1.5 text-sm text-white/90">
-            <Shield className="w-4 h-4 text-[#f07050]" />
+            <Shield className="w-4 h-4 text-[#FF2D55]" />
             Professional Services
           </div>
           <h1
@@ -86,20 +86,20 @@ export default function Services() {
                 className="group border-border/50 bg-card transition-all duration-300 hover-elevate"
                 data-testid="card-service-exam-cram"
               >
-                <div className="relative aspect-[4/3] overflow-hidden rounded-t-md bg-white border-2 border-[#1e3a6e]">
+                <div className="relative aspect-[4/3] overflow-hidden rounded-t-md bg-white border-2 border-[#0D1B3D]">
                   <img
                     src="/images/myeasypass-logo.png"
                     alt="MyEasyPass - Exam Cram"
                     className="w-full h-full object-contain p-6"
                   />
                   <div className="absolute bottom-3 left-3 bg-white/95 dark:bg-card/95 backdrop-blur-sm rounded-md px-3 py-1.5 shadow-sm">
-                    <span className="text-lg font-bold text-[#1e3a6e] dark:text-white">$19.99</span>
+                    <span className="text-lg font-bold text-[#0D1B3D] dark:text-white">$19.99</span>
                     <span className="text-xs text-muted-foreground ml-1">/month</span>
                   </div>
                 </div>
                 <CardContent className="p-5 space-y-3">
                   <div className="flex items-start gap-3">
-                    <div className="shrink-0 w-10 h-10 rounded-md bg-[#1e3a6e]/10 dark:bg-[#4a72c4]/20 flex items-center justify-center text-[#1e3a6e] dark:text-[#6b9aed]">
+                    <div className="shrink-0 w-10 h-10 rounded-md bg-[#0D1B3D]/10 dark:bg-[#0077FF]/20 flex items-center justify-center text-[#0D1B3D] dark:text-[#0077FF]">
                       <GraduationCap className="w-5 h-5" />
                     </div>
                     <div className="space-y-1.5 min-w-0">
@@ -114,7 +114,7 @@ export default function Services() {
                   <a href="https://www.myeasypass.net" target="_blank" rel="noopener noreferrer">
                     <Button
                       size="sm"
-                      className="w-full mt-2 group/btn bg-gradient-to-r from-[#e85d40] to-[#f07050] text-white border-0"
+                      className="w-full mt-2 group/btn bg-gradient-to-r from-[#FF6A00] to-[#FF2D55] text-white border-0 rounded-full"
                       data-testid="button-learn-more-exam-cram"
                     >
                       Learn More
@@ -172,8 +172,8 @@ export default function Services() {
                 className="bg-card border border-border/50 rounded-md p-6 space-y-3 text-center"
                 data-testid={`card-program-${program.name.toLowerCase().replace(/\s/g, "-")}`}
               >
-                <div className="w-14 h-14 rounded-full bg-[#1e3a6e]/10 dark:bg-[#4a72c4]/20 flex items-center justify-center mx-auto">
-                  <Shield className="w-7 h-7 text-[#1e3a6e] dark:text-[#6b9aed]" />
+                <div className="w-14 h-14 rounded-full bg-[#0D1B3D]/10 dark:bg-[#0077FF]/20 flex items-center justify-center mx-auto">
+                  <Shield className="w-7 h-7 text-[#0D1B3D] dark:text-[#0077FF]" />
                 </div>
                 <h3 className="font-semibold text-lg">{program.name}</h3>
                 <p className="text-sm text-muted-foreground">{program.desc}</p>

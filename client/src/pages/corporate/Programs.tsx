@@ -211,8 +211,8 @@ export default function CorporatePrograms() {
             <a href="tel:2818365357" className="flex items-center justify-center gap-2 text-white/80 hover:text-white transition-colors">
               <Phone className="w-4 h-4" /> (281) 836-5357
             </a>
-            <a href="mailto:info@lbsconnect.net" className="flex items-center justify-center gap-2 text-white/80 hover:text-white transition-colors">
-              <Mail className="w-4 h-4" /> info@lbsconnect.net
+            <a href="mailto:info@lbs4.com" className="flex items-center justify-center gap-2 text-white/80 hover:text-white transition-colors">
+              <Mail className="w-4 h-4" /> info@lbs4.com
             </a>
           </div>
           <Link href="/corporate/enroll">

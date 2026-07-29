@@ -7,10 +7,10 @@ export default function TermsOfUse() {
     <div className="min-h-screen flex flex-col bg-background">
       <Header />
 
-      <section className="relative py-16 bg-gradient-to-br from-[#1a2d52] to-[#2a4f8e]">
+      <section className="relative py-16 bg-gradient-to-br from-[#0D1B3D] to-[#1A237E]">
         <div className="relative z-10 max-w-4xl mx-auto px-6 text-center space-y-4">
           <div className="inline-flex items-center gap-2 bg-white/10 backdrop-blur-sm border border-white/20 rounded-full px-4 py-1.5 text-sm text-white/90">
-            <FileText className="w-4 h-4 text-[#f07050]" />
+            <FileText className="w-4 h-4 text-[#FF2D55]" />
             Legal
           </div>
           <h1 className="text-3xl md:text-4xl font-bold text-white">
@@ -27,7 +27,7 @@ export default function TermsOfUse() {
           <div className="prose prose-slate dark:prose-invert max-w-none space-y-8">
 
             <div className="space-y-4">
-              <h2 className="text-2xl font-bold text-[#1e3a6e] dark:text-white">Agreement to Terms</h2>
+              <h2 className="text-2xl font-bold text-[#0D1B3D] dark:text-white">Agreement to Terms</h2>
               <p className="text-muted-foreground leading-relaxed">
                 These Terms of Use ("Terms") constitute a legally binding agreement between you and Linton Business
                 Solutions LLC, doing business as LBS Test & Exam Center ("LBS," "we," "us," or "our"), governing
@@ -41,7 +41,7 @@ export default function TermsOfUse() {
             </div>
 
             <div className="space-y-4">
-              <h2 className="text-2xl font-bold text-[#1e3a6e] dark:text-white">Services Description</h2>
+              <h2 className="text-2xl font-bold text-[#0D1B3D] dark:text-white">Services Description</h2>
               <p className="text-muted-foreground leading-relaxed">
                 LBS Test & Exam Center provides the following services:
               </p>
@@ -55,7 +55,7 @@ export default function TermsOfUse() {
             </div>
 
             <div className="space-y-4">
-              <h2 className="text-2xl font-bold text-[#1e3a6e] dark:text-white">Appointment Scheduling and Cancellation</h2>
+              <h2 className="text-2xl font-bold text-[#0D1B3D] dark:text-white">Appointment Scheduling and Cancellation</h2>
 
               <h3 className="text-lg font-semibold">Scheduling</h3>
               <p className="text-muted-foreground leading-relaxed">
@@ -82,7 +82,7 @@ export default function TermsOfUse() {
             </div>
 
             <div className="space-y-4">
-              <h2 className="text-2xl font-bold text-[#1e3a6e] dark:text-white">Certification Exam Requirements</h2>
+              <h2 className="text-2xl font-bold text-[#0D1B3D] dark:text-white">Certification Exam Requirements</h2>
               <p className="text-muted-foreground leading-relaxed">
                 For certification exam testing, you must:
               </p>
@@ -100,7 +100,7 @@ export default function TermsOfUse() {
             </div>
 
             <div className="space-y-4">
-              <h2 className="text-2xl font-bold text-[#1e3a6e] dark:text-white">Proctoring Services</h2>
+              <h2 className="text-2xl font-bold text-[#0D1B3D] dark:text-white">Proctoring Services</h2>
               <p className="text-muted-foreground leading-relaxed">
                 When using our remote proctoring services, you agree to:
               </p>
@@ -117,7 +117,7 @@ export default function TermsOfUse() {
             </div>
 
             <div className="space-y-4">
-              <h2 className="text-2xl font-bold text-[#1e3a6e] dark:text-white">Notary Services</h2>
+              <h2 className="text-2xl font-bold text-[#0D1B3D] dark:text-white">Notary Services</h2>
               <p className="text-muted-foreground leading-relaxed">
                 Our notary services are provided in accordance with Texas law. By using our notary services, you:
               </p>
@@ -130,7 +130,7 @@ export default function TermsOfUse() {
             </div>
 
             <div className="space-y-4">
-              <h2 className="text-2xl font-bold text-[#1e3a6e] dark:text-white">Payment Terms</h2>
+              <h2 className="text-2xl font-bold text-[#0D1B3D] dark:text-white">Payment Terms</h2>
               <p className="text-muted-foreground leading-relaxed">
                 Payment is required at the time of service or as specified during booking. We accept major credit
                 cards and process payments securely through Stripe. By making a payment, you agree to Stripe's
@@ -153,7 +153,7 @@ export default function TermsOfUse() {
             </div>
 
             <div className="space-y-4">
-              <h2 className="text-2xl font-bold text-[#1e3a6e] dark:text-white">User Conduct</h2>
+              <h2 className="text-2xl font-bold text-[#0D1B3D] dark:text-white">User Conduct</h2>
               <p className="text-muted-foreground leading-relaxed">
                 When visiting our facility or using our website, you agree not to:
               </p>
@@ -171,7 +171,7 @@ export default function TermsOfUse() {
             </div>
 
             <div className="space-y-4">
-              <h2 className="text-2xl font-bold text-[#1e3a6e] dark:text-white">Intellectual Property</h2>
+              <h2 className="text-2xl font-bold text-[#0D1B3D] dark:text-white">Intellectual Property</h2>
               <p className="text-muted-foreground leading-relaxed">
                 All content on our website, including text, graphics, logos, images, and software, is the property
                 of Linton Business Solutions LLC or its content suppliers and is protected by copyright and trademark
@@ -185,7 +185,7 @@ export default function TermsOfUse() {
             </div>
 
             <div className="space-y-4">
-              <h2 className="text-2xl font-bold text-[#1e3a6e] dark:text-white">Disclaimer of Warranties</h2>
+              <h2 className="text-2xl font-bold text-[#0D1B3D] dark:text-white">Disclaimer of Warranties</h2>
               <p className="text-muted-foreground leading-relaxed">
                 OUR WEBSITE AND SERVICES ARE PROVIDED "AS IS" AND "AS AVAILABLE" WITHOUT WARRANTIES OF ANY KIND,
                 EITHER EXPRESS OR IMPLIED. TO THE FULLEST EXTENT PERMITTED BY LAW, WE DISCLAIM ALL WARRANTIES,
@@ -199,7 +199,7 @@ export default function TermsOfUse() {
             </div>
 
             <div className="space-y-4">
-              <h2 className="text-2xl font-bold text-[#1e3a6e] dark:text-white">Limitation of Liability</h2>
+              <h2 className="text-2xl font-bold text-[#0D1B3D] dark:text-white">Limitation of Liability</h2>
               <p className="text-muted-foreground leading-relaxed">
                 TO THE MAXIMUM EXTENT PERMITTED BY LAW, LINTON BUSINESS SOLUTIONS LLC AND ITS OFFICERS, DIRECTORS,
                 EMPLOYEES, AND AGENTS SHALL NOT BE LIABLE FOR ANY INDIRECT, INCIDENTAL, SPECIAL, CONSEQUENTIAL, OR
@@ -213,7 +213,7 @@ export default function TermsOfUse() {
             </div>
 
             <div className="space-y-4">
-              <h2 className="text-2xl font-bold text-[#1e3a6e] dark:text-white">Indemnification</h2>
+              <h2 className="text-2xl font-bold text-[#0D1B3D] dark:text-white">Indemnification</h2>
               <p className="text-muted-foreground leading-relaxed">
                 You agree to indemnify, defend, and hold harmless Linton Business Solutions LLC, its officers,
                 directors, employees, agents, and affiliates from and against any claims, liabilities, damages,
@@ -223,7 +223,7 @@ export default function TermsOfUse() {
             </div>
 
             <div className="space-y-4">
-              <h2 className="text-2xl font-bold text-[#1e3a6e] dark:text-white">Third-Party Services</h2>
+              <h2 className="text-2xl font-bold text-[#0D1B3D] dark:text-white">Third-Party Services</h2>
               <p className="text-muted-foreground leading-relaxed">
                 Our services may involve third-party providers, including testing organizations and payment processors.
                 Your use of third-party services is subject to their respective terms and conditions. We are not
@@ -232,7 +232,7 @@ export default function TermsOfUse() {
             </div>
 
             <div className="space-y-4">
-              <h2 className="text-2xl font-bold text-[#1e3a6e] dark:text-white">Governing Law</h2>
+              <h2 className="text-2xl font-bold text-[#0D1B3D] dark:text-white">Governing Law</h2>
               <p className="text-muted-foreground leading-relaxed">
                 These Terms shall be governed by and construed in accordance with the laws of the State of Texas,
                 without regard to its conflict of law provisions. Any disputes arising under these Terms shall be
@@ -241,7 +241,7 @@ export default function TermsOfUse() {
             </div>
 
             <div className="space-y-4">
-              <h2 className="text-2xl font-bold text-[#1e3a6e] dark:text-white">Changes to Terms</h2>
+              <h2 className="text-2xl font-bold text-[#0D1B3D] dark:text-white">Changes to Terms</h2>
               <p className="text-muted-foreground leading-relaxed">
                 We reserve the right to modify these Terms at any time. Changes will be effective immediately upon
                 posting to our website. Your continued use of our website or services after any changes constitutes
@@ -250,7 +250,7 @@ export default function TermsOfUse() {
             </div>
 
             <div className="space-y-4">
-              <h2 className="text-2xl font-bold text-[#1e3a6e] dark:text-white">Severability</h2>
+              <h2 className="text-2xl font-bold text-[#0D1B3D] dark:text-white">Severability</h2>
               <p className="text-muted-foreground leading-relaxed">
                 If any provision of these Terms is found to be unenforceable or invalid, that provision shall be
                 limited or eliminated to the minimum extent necessary, and the remaining provisions shall remain
@@ -259,17 +259,17 @@ export default function TermsOfUse() {
             </div>
 
             <div className="space-y-4">
-              <h2 className="text-2xl font-bold text-[#1e3a6e] dark:text-white">Contact Us</h2>
+              <h2 className="text-2xl font-bold text-[#0D1B3D] dark:text-white">Contact Us</h2>
               <p className="text-muted-foreground leading-relaxed">
                 If you have questions about these Terms of Use, please contact us:
               </p>
               <div className="bg-muted/30 rounded-lg p-6 space-y-2">
-                <p className="font-semibold text-[#1e3a6e] dark:text-white">Linton Business Solutions LLC</p>
+                <p className="font-semibold text-[#0D1B3D] dark:text-white">Linton Business Solutions LLC</p>
                 <p className="text-muted-foreground">DBA: LBS Test & Exam Center</p>
                 <p className="text-muted-foreground">616 FM 1960 Rd W, Ste 101</p>
                 <p className="text-muted-foreground">Houston, TX 77090-3048</p>
                 <p className="text-muted-foreground">Phone: (281) 836-5357</p>
-                <p className="text-muted-foreground">Email: info@lbsconnect.net</p>
+                <p className="text-muted-foreground">Email: info@lbs4.com</p>
               </div>
             </div>
 

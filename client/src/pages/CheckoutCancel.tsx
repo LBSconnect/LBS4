@@ -40,7 +40,7 @@ export default function CheckoutCancel() {
             <div className="space-y-3 pt-2">
               <Link href={tryAgainHref}>
                 <Button
-                  className="w-full bg-gradient-to-r from-[#e85d40] to-[#f07050] text-white"
+                  className="w-full bg-gradient-to-r from-[#FF6A00] to-[#FF2D55] text-white rounded-full"
                   data-testid="button-try-again"
                 >
                   Try Again

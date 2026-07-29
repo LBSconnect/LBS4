@@ -177,11 +177,11 @@ test.describe("Email data integrity — appointment time in DB matches booked sl
   });
 
 
-  test("Passport Photos — Wednesday 8 AM (first slot) is stored correctly", async () => {
+  test("Passport Photos — Wednesday 9 AM (first slot) is stored correctly", async () => {
     test.skip(NO_DB, "Requires live DATABASE_URL to persist and verify appointment records");
     test.skip(NO_STRIPE_WEBHOOK, "Requires STRIPE_WEBHOOK_SECRET to send signed webhook events to live server");
     const wed = nextDayOfWeek(3);
-    const expectedSlot = slotISO(wed, 8); // 8 AM CT Wednesday
+    const expectedSlot = slotISO(wed, 9); // 9 AM CT Wednesday
     const email = `notify-passport+${Date.now()}@e2e.test`;
 
     const body = await createBooking({
@@ -208,15 +208,15 @@ test.describe("Email data integrity — appointment time in DB matches booked sl
     const offset = isCDT(storedDate) ? 5 : 6;
     const ctHour = (storedDate.getUTCHours() - offset + 24) % 24;
 
-    expect(ctHour).toBe(8); // first slot of the day
+    expect(ctHour).toBe(9); // first slot of the day
     expect(row.service_name).toBe("Passport Photos");
   });
 
-  test("Private Exam Testing — Saturday 3 PM (last slot) is stored correctly", async () => {
+  test("Private Exam Testing — Saturday 2 PM (last slot) is stored correctly", async () => {
     test.skip(NO_DB, "Requires live DATABASE_URL to persist and verify appointment records");
     test.skip(NO_STRIPE_WEBHOOK, "Requires STRIPE_WEBHOOK_SECRET to send signed webhook events to live server");
     const sat = nextDayOfWeek(6);
-    const expectedSlot = slotISO(sat, 15); // 3 PM CT Saturday — last valid slot
+    const expectedSlot = slotISO(sat, 14); // 2 PM CT Saturday — last valid slot
     const email = `notify-proctoring+${Date.now()}@e2e.test`;
 
     const body = await createBooking({
@@ -243,16 +243,16 @@ test.describe("Email data integrity — appointment time in DB matches booked sl
     const offset = isCDT(storedDate) ? 5 : 6;
     const ctHour = (storedDate.getUTCHours() - offset + 24) % 24;
 
-    expect(ctHour).toBe(15); // 3 PM — last Saturday slot
+    expect(ctHour).toBe(14); // 2 PM — last Saturday slot
     expect(row.service_name).toBe("Private Exam Testing");
     expect(row.payment_status).toBe("paid");
   });
 
-  test("Certiport Exam Testing — Monday 4 PM (last weekday slot) is stored correctly", async () => {
+  test("Certiport Exam Testing — Monday 5 PM (last weekday slot) is stored correctly", async () => {
     test.skip(NO_DB, "Requires live DATABASE_URL to persist and verify appointment records");
     test.skip(NO_STRIPE_WEBHOOK, "Requires STRIPE_WEBHOOK_SECRET to send signed webhook events to live server");
     const mon = nextDayOfWeek(1);
-    const expectedSlot = slotISO(mon, 16); // 4 PM CT Monday — last valid slot
+    const expectedSlot = slotISO(mon, 17); // 5 PM CT Monday — last valid slot
     const email = `notify-cert+${Date.now()}@e2e.test`;
 
     const body = await createBooking({
@@ -279,7 +279,7 @@ test.describe("Email data integrity — appointment time in DB matches booked sl
     const offset = isCDT(storedDate) ? 5 : 6;
     const ctHour = (storedDate.getUTCHours() - offset + 24) % 24;
 
-    expect(ctHour).toBe(16); // 4 PM — last weekday slot
+    expect(ctHour).toBe(17); // 5 PM — last weekday slot
     expect(row.service_name).toBe("Certiport Exam Testing");
     expect(row.payment_status).toBe("paid");
   });

@@ -58,7 +58,7 @@ const TESTING_CENTER_FAQS = [
   },
   {
     q: "What are the hours for the LBS Testing Center?",
-    a: "The LBS Testing Center is open Monday through Friday from 8:00 AM to 5:00 PM and Saturday from 8:00 AM to 4:00 PM. Closed Sunday.",
+    a: "The LBS Testing Center is open Monday through Friday from 8:30 AM to 6:00 PM and Saturday from 9:00 AM to 3:00 PM. Closed Sunday.",
   },
   {
     q: "Is there a testing center on FM 1960 in Houston?",
@@ -343,7 +343,7 @@ export default function ServiceDetail() {
       />
       <Header />
 
-      <section className="relative py-14 bg-gradient-to-br from-[#1a2d52] to-[#2a4f8e]">
+      <section className="relative py-14 bg-gradient-to-br from-[#0D1B3D] to-[#1A237E]">
         {service.image && (
           <div
             className="absolute inset-0 bg-cover bg-center opacity-15"
@@ -398,7 +398,7 @@ export default function ServiceDetail() {
                 </div>
               ) : (
                 <div
-                  className="rounded-md overflow-hidden h-64 md:h-80 bg-gradient-to-br from-[#1e3a6e] to-[#2a4f8e] flex items-center justify-center"
+                  className="rounded-md overflow-hidden h-64 md:h-80 bg-gradient-to-br from-[#0D1B3D] to-[#1A237E] flex items-center justify-center"
                   data-testid="img-service-detail"
                 >
                   <div className="w-20 h-20 rounded-2xl bg-white/10 backdrop-blur-sm flex items-center justify-center">
@@ -424,7 +424,7 @@ export default function ServiceDetail() {
                       key={feature}
                       className="flex items-start gap-3 p-3 rounded-md bg-muted/30"
                     >
-                      <CheckCircle2 className="w-5 h-5 text-[#e85d40] mt-0.5 shrink-0" />
+                      <CheckCircle2 className="w-5 h-5 text-[#FF6A00] mt-0.5 shrink-0" />
                       <span className="text-sm">{feature}</span>
                     </div>
                   ))}
@@ -437,7 +437,7 @@ export default function ServiceDetail() {
                 <CardContent className="p-6 space-y-5">
                   {!isPayAtOffice && (
                     <div className="text-center space-y-1">
-                      <div className="text-3xl font-bold text-[#1e3a6e] dark:text-white">
+                      <div className="text-3xl font-bold text-[#0D1B3D] dark:text-white">
                         {price
                           ? `$${(price.unit_amount / 100).toFixed(2)}`
                           : service.price}
@@ -455,7 +455,7 @@ export default function ServiceDetail() {
 
                   <div className="border-t border-border/50 pt-5">
                     <h3 className="font-semibold text-lg mb-4 flex items-center gap-2">
-                      <CalendarDays className="w-5 h-5 text-[#e85d40]" />
+                      <CalendarDays className="w-5 h-5 text-[#FF6A00]" />
                       Book an Appointment
                     </h3>
 
@@ -504,7 +504,7 @@ export default function ServiceDetail() {
                                   data-testid="btn-time-slot"
                                   variant={selectedTime === slot ? "default" : "outline"}
                                   size="sm"
-                                  className={selectedTime === slot ? "bg-[#1e3a6e]" : ""}
+                                  className={selectedTime === slot ? "bg-[#0D1B3D]" : ""}
                                   onClick={() => setSelectedTime(slot)}
                                 >
                                   {formatTime(slot)}
@@ -518,7 +518,7 @@ export default function ServiceDetail() {
                           )}
                           {!service?.saturdayOnly && (
                             <p className="text-xs text-muted-foreground mt-1">
-                              Mon–Fri: 8AM–4PM | Sat: 8AM–3PM
+                              Mon–Fri: 9AM–5PM | Sat: 9AM–2PM
                             </p>
                           )}
                         </div>
@@ -589,7 +589,7 @@ export default function ServiceDetail() {
 
                           {/* Book Button */}
                           <Button
-                            className="w-full bg-gradient-to-r from-[#e85d40] to-[#f07050] text-white"
+                            className="w-full bg-gradient-to-r from-[#FF6A00] to-[#FF2D55] text-white rounded-full"
                             onClick={handleBookAppointment}
                             disabled={bookingMutation.isPending}
                           >
@@ -615,7 +615,7 @@ export default function ServiceDetail() {
                     <h3 className="font-semibold text-sm">Visit Us</h3>
                     <div className="space-y-3 text-sm text-muted-foreground">
                       <div className="flex items-start gap-2">
-                        <MapPin className="w-4 h-4 mt-0.5 shrink-0 text-[#e85d40]" />
+                        <MapPin className="w-4 h-4 mt-0.5 shrink-0 text-[#FF6A00]" />
                         <span>
                           616 FM 1960 Rd W, Ste 101
                           <br />
@@ -623,15 +623,15 @@ export default function ServiceDetail() {
                         </span>
                       </div>
                       <div className="flex items-center gap-2">
-                        <Phone className="w-4 h-4 shrink-0 text-[#e85d40]" />
+                        <Phone className="w-4 h-4 shrink-0 text-[#FF6A00]" />
                         <a href="tel:2818365357">(281) 836-5357</a>
                       </div>
                       <div className="flex items-start gap-2">
-                        <Clock className="w-4 h-4 mt-0.5 shrink-0 text-[#e85d40]" />
+                        <Clock className="w-4 h-4 mt-0.5 shrink-0 text-[#FF6A00]" />
                         <span>
-                          Mon – Fri: 8 AM – 5 PM
+                          Mon – Fri: 8:30 AM – 6 PM
                           <br />
-                          Sat: 8 AM – 4 PM
+                          Sat: 9 AM – 3 PM
                           <br />
                           Closed Sun
                         </span>
@@ -650,7 +650,7 @@ export default function ServiceDetail() {
           <section className="py-14 bg-muted/30" data-testid="section-testing-center-overview">
             <div className="max-w-7xl mx-auto px-6">
               <div className="text-center max-w-3xl mx-auto mb-10 space-y-3">
-                <p className="text-xs font-bold uppercase tracking-widest text-[#c9a84c]">Testing Center</p>
+                <p className="text-xs font-bold uppercase tracking-widest text-[#FF6A00]">Testing Center</p>
                 <h2 className="text-3xl md:text-4xl font-bold">
                   Testing, Preparation and Support in One Convenient Location
                 </h2>
@@ -662,8 +662,8 @@ export default function ServiceDetail() {
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-10">
                 <div className="bg-card border border-border/50 rounded-md p-6 space-y-3" data-testid="card-testing-pearson-vue">
-                  <div className="w-12 h-12 rounded-md bg-[#1e3a6e]/10 dark:bg-[#4a72c4]/20 flex items-center justify-center">
-                    <ShieldCheck className="w-6 h-6 text-[#1e3a6e] dark:text-[#6b9aed]" />
+                  <div className="w-12 h-12 rounded-md bg-[#0D1B3D]/10 dark:bg-[#0077FF]/20 flex items-center justify-center">
+                    <ShieldCheck className="w-6 h-6 text-[#0D1B3D] dark:text-[#0077FF]" />
                   </div>
                   <h3 className="font-semibold text-lg">Pearson VUE</h3>
                   <p className="text-sm text-muted-foreground">
@@ -680,8 +680,8 @@ export default function ServiceDetail() {
                 </div>
 
                 <div className="bg-card border border-border/50 rounded-md p-6 space-y-3" data-testid="card-testing-certiport">
-                  <div className="w-12 h-12 rounded-md bg-[#1e3a6e]/10 dark:bg-[#4a72c4]/20 flex items-center justify-center">
-                    <Award className="w-6 h-6 text-[#1e3a6e] dark:text-[#6b9aed]" />
+                  <div className="w-12 h-12 rounded-md bg-[#0D1B3D]/10 dark:bg-[#0077FF]/20 flex items-center justify-center">
+                    <Award className="w-6 h-6 text-[#0D1B3D] dark:text-[#0077FF]" />
                   </div>
                   <h3 className="font-semibold text-lg">Certiport</h3>
                   <p className="text-sm text-muted-foreground">
@@ -700,8 +700,8 @@ export default function ServiceDetail() {
                 </div>
 
                 <div className="bg-card border border-border/50 rounded-md p-6 space-y-3" data-testid="card-testing-bootcamp">
-                  <div className="w-12 h-12 rounded-md bg-[#1e3a6e]/10 dark:bg-[#4a72c4]/20 flex items-center justify-center">
-                    <BookOpen className="w-6 h-6 text-[#1e3a6e] dark:text-[#6b9aed]" />
+                  <div className="w-12 h-12 rounded-md bg-[#0D1B3D]/10 dark:bg-[#0077FF]/20 flex items-center justify-center">
+                    <BookOpen className="w-6 h-6 text-[#0D1B3D] dark:text-[#0077FF]" />
                   </div>
                   <h3 className="font-semibold text-lg">Exam Cram Bootcamps</h3>
                   <p className="text-sm text-muted-foreground">
@@ -717,8 +717,8 @@ export default function ServiceDetail() {
                 </div>
 
                 <div className="bg-card border border-border/50 rounded-md p-6 space-y-3" data-testid="card-testing-myeasypass">
-                  <div className="w-12 h-12 rounded-md bg-[#1e3a6e]/10 dark:bg-[#4a72c4]/20 flex items-center justify-center">
-                    <GraduationCap className="w-6 h-6 text-[#1e3a6e] dark:text-[#6b9aed]" />
+                  <div className="w-12 h-12 rounded-md bg-[#0D1B3D]/10 dark:bg-[#0077FF]/20 flex items-center justify-center">
+                    <GraduationCap className="w-6 h-6 text-[#0D1B3D] dark:text-[#0077FF]" />
                   </div>
                   <h3 className="font-semibold text-lg">Prepare Online with MyEasyPass</h3>
                   <p className="text-sm text-muted-foreground">
@@ -740,8 +740,8 @@ export default function ServiceDetail() {
               </div>
 
               <div className="bg-card border border-border/50 rounded-md p-6 md:p-8 flex flex-col md:flex-row items-start gap-4">
-                <div className="w-12 h-12 rounded-md bg-[#1e3a6e]/10 dark:bg-[#4a72c4]/20 flex items-center justify-center shrink-0">
-                  <IdCard className="w-6 h-6 text-[#1e3a6e] dark:text-[#6b9aed]" />
+                <div className="w-12 h-12 rounded-md bg-[#0D1B3D]/10 dark:bg-[#0077FF]/20 flex items-center justify-center shrink-0">
+                  <IdCard className="w-6 h-6 text-[#0D1B3D] dark:text-[#0077FF]" />
                 </div>
                 <div>
                   <h3 className="font-semibold text-lg mb-2">Appointment Preparation</h3>
@@ -760,7 +760,7 @@ export default function ServiceDetail() {
           <section className="py-14 bg-background" data-testid="section-testing-faq">
             <div className="max-w-7xl mx-auto px-6">
               <div className="text-center max-w-2xl mx-auto mb-10 space-y-3">
-                <p className="text-xs font-bold uppercase tracking-widest text-[#c9a84c]">Common Questions</p>
+                <p className="text-xs font-bold uppercase tracking-widest text-[#FF6A00]">Common Questions</p>
                 <h2 className="text-3xl font-bold">Testing Center FAQ</h2>
               </div>
               <div className="max-w-2xl mx-auto divide-y divide-border/50 border border-border/50 rounded-xl overflow-hidden bg-card">
@@ -774,7 +774,7 @@ export default function ServiceDetail() {
                     >
                       <span>{faq.q}</span>
                       <ChevronDown
-                        className={`w-4 h-4 shrink-0 text-[#c9a84c] transition-transform duration-200 ${openFaq === i ? "rotate-180" : ""}`}
+                        className={`w-4 h-4 shrink-0 text-[#FF6A00] transition-transform duration-200 ${openFaq === i ? "rotate-180" : ""}`}
                       />
                     </button>
                     {openFaq === i && (

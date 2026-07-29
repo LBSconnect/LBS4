@@ -46,7 +46,7 @@ export default function ServiceCard({
             <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
           </>
         ) : (
-          <div className="w-full h-full bg-gradient-to-br from-[#1e3a6e] to-[#2a4f8e] flex items-center justify-center">
+          <div className="w-full h-full bg-gradient-to-br from-[#0D1B3D] to-[#1A237E] flex items-center justify-center">
             {icon ? (
               <div className="w-16 h-16 rounded-2xl bg-white/10 backdrop-blur-sm flex items-center justify-center text-white">
                 {icon}
@@ -55,13 +55,13 @@ export default function ServiceCard({
           </div>
         )}
         {badge && (
-          <div className="absolute top-3 right-3 bg-[#c9a84c] text-[#0d1b35] rounded-md px-2.5 py-1 text-xs font-bold shadow-sm">
+          <div className="absolute top-3 right-3 bg-[#FF6A00] text-[#0D1B3D] rounded-md px-2.5 py-1 text-xs font-bold shadow-sm">
             {badge}
           </div>
         )}
         {price && (
           <div className="absolute bottom-3 left-3 bg-white/95 dark:bg-card/95 backdrop-blur-sm rounded-md px-3 py-1.5 shadow-sm">
-            <span className="text-lg font-bold text-[#1e3a6e] dark:text-white">
+            <span className="text-lg font-bold text-[#0D1B3D] dark:text-white">
               {price}
             </span>
             {priceLabel && (
@@ -75,7 +75,7 @@ export default function ServiceCard({
       <CardContent className="p-5 space-y-3">
         <div className="flex items-start gap-3">
           {icon && (
-            <div className="shrink-0 w-10 h-10 rounded-md bg-[#1e3a6e]/10 dark:bg-[#4a72c4]/20 flex items-center justify-center text-[#1e3a6e] dark:text-[#6b9aed]">
+            <div className="shrink-0 w-10 h-10 rounded-md bg-[#0D1B3D]/10 dark:bg-[#0077FF]/20 flex items-center justify-center text-[#0D1B3D] dark:text-[#0077FF]">
               {icon}
             </div>
           )}
@@ -98,7 +98,7 @@ export default function ServiceCard({
           <a href={href} target="_blank" rel="noopener noreferrer" className="block">
             <Button
               size="sm"
-              className="w-full mt-2 group/btn bg-gradient-to-r from-[#e85d40] to-[#f07050] text-white border-0"
+              className="w-full mt-2 group/btn bg-gradient-to-r from-[#FF6A00] to-[#FF2D55] text-white border-0 rounded-full"
               data-testid={`button-learn-more-${slug}`}
             >
               {buttonLabel ?? "Register Online"}
@@ -109,7 +109,7 @@ export default function ServiceCard({
           <Link href={href ?? `/services/${slug}`}>
             <Button
               size="sm"
-              className="w-full mt-2 group/btn bg-gradient-to-r from-[#e85d40] to-[#f07050] text-white border-0"
+              className="w-full mt-2 group/btn bg-gradient-to-r from-[#FF6A00] to-[#FF2D55] text-white border-0 rounded-full"
               data-testid={`button-learn-more-${slug}`}
             >
               {buttonLabel ?? "Learn More & Book"}

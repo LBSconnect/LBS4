@@ -16,7 +16,7 @@ export default function Footer() {
   ];
 
   return (
-    <footer className="bg-[#1a2d52] text-white/90">
+    <footer className="bg-[#0D1B3D] text-white/90">
       <div className="max-w-7xl mx-auto px-6 py-16">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-10">
           <div className="space-y-4">
@@ -49,6 +49,7 @@ export default function Footer() {
                 { href: "/for-businesses", label: "For Businesses" },
                 { href: "/corporate", label: "Corporate Notary" },
                 { href: "/about", label: "About Us" },
+                { href: "/resources", label: "Resources" },
                 { href: "/contact", label: "Contact" },
               ].map((link) => (
                 <Link key={link.href} href={link.href}>
@@ -102,7 +103,7 @@ export default function Footer() {
                 className="flex items-start gap-2.5 text-sm text-white/70 transition-colors hover:text-white"
                 data-testid="link-footer-address"
               >
-                <MapPin className="w-4 h-4 mt-0.5 shrink-0 text-[#f07050]" />
+                <MapPin className="w-4 h-4 mt-0.5 shrink-0 text-[#FF2D55]" />
                 <span>
                   616 FM 1960 Rd W<br />
                   Ste 101<br />
@@ -114,22 +115,22 @@ export default function Footer() {
                 className="flex items-center gap-2.5 text-sm text-white/70 transition-colors hover:text-white"
                 data-testid="link-footer-phone"
               >
-                <Phone className="w-4 h-4 shrink-0 text-[#f07050]" />
+                <Phone className="w-4 h-4 shrink-0 text-[#FF2D55]" />
                 (281) 836-5357
               </a>
               <a
-                href="mailto:info@lbsconnect.net"
+                href="mailto:info@lbs4.com"
                 className="flex items-center gap-2.5 text-sm text-white/70 transition-colors hover:text-white"
                 data-testid="link-footer-email"
               >
-                <Mail className="w-4 h-4 shrink-0 text-[#f07050]" />
-                info@lbsconnect.net
+                <Mail className="w-4 h-4 shrink-0 text-[#FF2D55]" />
+                info@lbs4.com
               </a>
               <div className="flex items-start gap-2.5 text-sm text-white/70">
-                <Clock className="w-4 h-4 mt-0.5 shrink-0 text-[#f07050]" />
+                <Clock className="w-4 h-4 mt-0.5 shrink-0 text-[#FF2D55]" />
                 <span>
-                  Mon – Fri: 8:00 AM – 5:00 PM<br />
-                  Sat: 8:00 AM – 4:00 PM<br />
+                  Mon – Fri: 8:30 AM – 6:00 PM<br />
+                  Sat: 9:00 AM – 3:00 PM<br />
                   Closed Sun
                 </span>
               </div>

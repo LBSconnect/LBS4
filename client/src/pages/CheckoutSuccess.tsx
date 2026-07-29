@@ -34,7 +34,7 @@ export default function CheckoutSuccess() {
                 rel="noopener noreferrer"
               >
                 <Button
-                  className="w-full bg-gradient-to-r from-[#e85d40] to-[#f07050] text-white"
+                  className="w-full bg-gradient-to-r from-[#FF6A00] to-[#FF2D55] text-white rounded-full"
                 >
                   <Star className="w-4 h-4 mr-2" />
                   Leave Us a Google Review

@@ -54,13 +54,14 @@ function utcToCTHour(date: Date): number {
 }
 
 // Business hours validation — all comparisons done in Central Time
+// Store opens 8:30am weekdays / 9am Saturday; first bookable hourly slot is 9am both days.
 function isValidBusinessTime(date: Date): boolean {
   const dow = date.getUTCDay();
   const ctHour = utcToCTHour(date);
 
   if (dow === 0) return false;                          // Sunday: closed
-  if (dow === 6) return ctHour >= 8 && ctHour <= 15;   // Saturday: last slot 3pm (closes 4pm)
-  return ctHour >= 8 && ctHour <= 16;                  // Mon–Fri: last slot 4pm (closes 5pm)
+  if (dow === 6) return ctHour >= 9 && ctHour <= 14;   // Saturday: last slot 2pm (closes 3pm)
+  return ctHour >= 9 && ctHour <= 17;                  // Mon–Fri: last slot 5pm (closes 6pm)
 }
 
 // Build a UTC ISO string for a specific CT hour:minute on a given date
@@ -82,7 +83,7 @@ const BOOT_CAMP_SLOTS: Record<string, { ctHour: number; ctMinute: number }> = {
 
 // Generate available time slots for a given date (all in Central Time)
 // Last slot is 1hr before close so appointments end at closing time:
-// Mon–Fri: slots 8am–4pm (business closes 5pm) | Sat: slots 8am–3pm (closes 4pm) | Sun: closed
+// Mon–Fri: slots 9am–5pm (business open 8:30am, closes 6pm) | Sat: slots 9am–2pm (open 9am, closes 3pm) | Sun: closed
 function getAvailableTimeSlots(date: Date, serviceSlug?: string): string[] {
   const slots: string[] = [];
   const dow = date.getUTCDay();
@@ -99,8 +100,8 @@ function getAvailableTimeSlots(date: Date, serviceSlug?: string): string[] {
   let startHour: number;
   let endHour: number;
 
-  if (dow === 6) { startHour = 8; endHour = 15; } // Saturday: last slot 3pm (closes 4pm)
-  else           { startHour = 8; endHour = 16; } // Mon–Wed, Fri: last slot 4pm (closes 5pm)
+  if (dow === 6) { startHour = 9; endHour = 14; } // Saturday: last slot 2pm (closes 3pm)
+  else           { startHour = 9; endHour = 17; } // Mon–Fri: last slot 5pm (closes 6pm)
 
   const offset = ctUtcOffset(date); // hours CT is behind UTC
   const y = date.getUTCFullYear();
@@ -299,8 +300,8 @@ export async function registerRoutes(
         date: requestedDate.toISOString().split('T')[0],
         slots: availableSlots,
         businessHours: {
-          monWedFri: { open: '08:00', close: '17:00', lastSlot: '16:00' },
-          sat: { open: '08:00', close: '16:00', lastSlot: '15:00' },
+          monWedFri: { open: '08:30', close: '18:00', lastSlot: '17:00' },
+          sat: { open: '09:00', close: '15:00', lastSlot: '14:00' },
         },
         daysOpen: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'],
       });
@@ -347,7 +348,7 @@ export async function registerRoutes(
       // Validate business hours
       if (!isValidBusinessTime(appointmentDate)) {
         return res.status(400).json({
-          error: 'Invalid appointment time. Mon–Fri: last slot 4pm, Sat: last slot 3pm CT. Closed Sunday.',
+          error: 'Invalid appointment time. Mon–Fri: last slot 5pm, Sat: last slot 2pm CT. Closed Sunday.',
         });
       }
 

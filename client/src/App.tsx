@@ -8,6 +8,7 @@ import Home from "@/pages/Home";
 import Services from "@/pages/Services";
 import ServiceDetail from "@/pages/ServiceDetail";
 import ForBusinesses from "@/pages/ForBusinesses";
+import Resources from "@/pages/Resources";
 import About from "@/pages/About";
 import Contact from "@/pages/Contact";
 import CheckoutSuccess from "@/pages/CheckoutSuccess";
@@ -33,6 +34,7 @@ function Router() {
         <Route path="/services" component={Services} />
         <Route path="/services/:slug" component={ServiceDetail} />
         <Route path="/for-businesses" component={ForBusinesses} />
+        <Route path="/resources" component={Resources} />
         <Route path="/about" component={About} />
         <Route path="/contact" component={Contact} />
         <Route path="/checkout/success" component={CheckoutSuccess} />

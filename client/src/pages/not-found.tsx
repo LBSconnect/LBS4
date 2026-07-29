@@ -10,7 +10,7 @@ export default function NotFound() {
       <Header />
       <div className="flex-1 flex items-center justify-center py-20 px-6">
         <div className="text-center space-y-4 max-w-md">
-          <div className="text-7xl font-bold text-[#1e3a6e] dark:text-[#6b9aed]" data-testid="text-404">
+          <div className="text-7xl font-bold text-[#0D1B3D] dark:text-[#0077FF]" data-testid="text-404">
             404
           </div>
           <h1 className="text-2xl font-bold" data-testid="text-not-found-title">
@@ -20,7 +20,7 @@ export default function NotFound() {
             The page you're looking for doesn't exist or has been moved.
           </p>
           <Link href="/">
-            <Button className="bg-[#1e3a6e] text-white mt-4" data-testid="button-go-home">
+            <Button className="bg-[#0D1B3D] text-white mt-4" data-testid="button-go-home">
               <ArrowLeft className="w-4 h-4 mr-2" />
               Back to Home
             </Button>
