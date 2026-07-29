@@ -157,7 +157,7 @@ export const services: ServiceInfo[] = [
     title: "Printing & Copies",
     shortTitle: "Printing & Copies",
     description:
-      "Black-and-white and color printing, plus document copies — no appointment needed.",
+      "Black-and-white and color printing, plus document copies. No appointment needed.",
     longDescription:
       "Get black-and-white or color printing and document copies at LBS Business Services Center. Bring a digital file (USB, email, or cloud link) or an original document to copy, and we'll take care of the rest while you wait.",
     features: [
@@ -168,6 +168,7 @@ export const services: ServiceInfo[] = [
       "No appointment needed",
       "Payment collected in office",
     ],
+    image: "/images/service-printing-office.png",
     price: "",
     priceLabel: "",
     icon: Printer,
@@ -180,7 +181,7 @@ export const services: ServiceInfo[] = [
     title: "Document Scanning",
     shortTitle: "Scanning",
     description:
-      "Convert paper documents into clear digital files — no appointment needed.",
+      "Convert paper documents into clear digital files. No appointment needed.",
     longDescription:
       "Turn paper documents into clear, organized digital files at LBS Business Services Center. Bring the physical documents you'd like scanned along with a USB drive or an email address to receive the files.",
     features: [
@@ -191,6 +192,7 @@ export const services: ServiceInfo[] = [
       "No appointment needed",
       "Payment collected in office",
     ],
+    image: "/images/service-scanning-office.png",
     price: "",
     priceLabel: "",
     icon: ScanLine,
@@ -203,7 +205,7 @@ export const services: ServiceInfo[] = [
     title: "Fax Services",
     shortTitle: "Faxing",
     description:
-      "Send and receive faxes quickly and securely — no appointment needed.",
+      "Send and receive faxes quickly and securely. No appointment needed.",
     longDescription:
       "Send and receive important documents with convenient fax services at LBS Business Services Center. Bring the document you'd like to send along with the recipient's fax number, and we'll handle the rest.",
     features: [
@@ -214,6 +216,7 @@ export const services: ServiceInfo[] = [
       "No appointment needed",
       "Payment collected in office",
     ],
+    image: "/images/service-faxing-office.png",
     price: "",
     priceLabel: "",
     icon: Send,
@@ -237,6 +240,7 @@ export const services: ServiceInfo[] = [
       "No appointment needed",
       "Payment collected in office",
     ],
+    image: "/images/service-resume-office.png",
     price: "",
     priceLabel: "",
     icon: Briefcase,
