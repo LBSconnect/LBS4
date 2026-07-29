@@ -1,6 +1,6 @@
 import { sendEmail, createOutlookCalendarEvent } from './smtpClient';
 
-const NOTIFICATION_EMAIL = process.env.NOTIFICATION_EMAIL || 'info@lbsconnect.net';
+const NOTIFICATION_EMAIL = process.env.NOTIFICATION_EMAIL || 'info@lbs4.com';
 const BUSINESS_NAME = 'LBS Test & Exam Center';
 const BUSINESS_ADDRESS = '616 FM 1960 Rd W, Ste 101, Houston, TX 77090-3048';
 const LBS_PHONE = '(281) 836-5357';
@@ -45,7 +45,7 @@ function emailWrapper(content: string): string {
           <strong style="color:#0d1b35;">${BUSINESS_NAME}</strong><br />
           ${BUSINESS_ADDRESS}<br />
           ${LBS_PHONE} &nbsp;|&nbsp; <a href="mailto:${NOTIFICATION_EMAIL}" style="color:#1e3a6e;">${NOTIFICATION_EMAIL}</a><br />
-          Mon-Fri 8 AM-5 PM &nbsp;|&nbsp; Sat 8 AM-4 PM
+          Mon-Fri 8:30 AM-6 PM &nbsp;|&nbsp; Sat 9 AM-3 PM
         </p>
       </td></tr>
 
@@ -161,7 +161,7 @@ export async function sendContactAcknowledgement(data: {
         <p style="margin:0;color:#374151;font-size:14px;">
           Call us at <a href="tel:${LBS_PHONE}" style="color:#1e3a6e;font-weight:600;">${LBS_PHONE}</a> or
           email <a href="mailto:${NOTIFICATION_EMAIL}" style="color:#1e3a6e;">${NOTIFICATION_EMAIL}</a>.<br />
-          Mon–Fri 8 AM–5 PM &nbsp;|&nbsp; Sat 8 AM–4 PM CT
+          Mon–Fri 8:30 AM–6 PM &nbsp;|&nbsp; Sat 9 AM–3 PM CT
         </p>
       </div>
     `;

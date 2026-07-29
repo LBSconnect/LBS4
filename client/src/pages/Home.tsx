@@ -4,7 +4,6 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import {
   ArrowRight,
-  CheckCircle2,
   MapPin,
   Phone,
   Shield,
@@ -14,16 +13,42 @@ import {
   ChevronDown,
   Zap,
   Headset,
-  Building2,
+  Globe,
+  BadgeCheck,
+  Lock,
+  Smile,
 } from "lucide-react";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import SEO from "@/components/SEO";
-import ServiceCard from "@/components/ServiceCard";
 import { services } from "@/lib/services";
 import logoImg from "@assets/Linton_Business_Solutions.gif_1771618422350.jpg";
 
 const businessServices = services.filter((s) => s.category === "business");
+
+const coreServiceStrip = [
+  ...businessServices.map((s) => ({
+    icon: s.icon,
+    title: s.shortTitle,
+    tagline:
+      s.id === "printing-copies" ? "B&W & Color" :
+      s.id === "scanning" ? "Digitize Documents" :
+      s.id === "notary" ? "Certified & Confidential" :
+      s.id === "passport" ? "Fast & Compliant" :
+      s.id === "faxing" ? "Send & Receive" :
+      s.id === "resume-services" ? "Stand Out" :
+      "",
+    href: `/services/${s.slug}`,
+  })),
+  { icon: Globe, title: "Website Design", tagline: "Modern & Effective", href: "/for-businesses" },
+];
+
+const whyChooseItems = [
+  { icon: BadgeCheck, title: "Professional & Reliable", description: "Quality services you can count on, every time." },
+  { icon: Users, title: "Experienced Team", description: "Skilled professionals ready to help." },
+  { icon: Lock, title: "Secure & Confidential", description: "Your documents and information are safe." },
+  { icon: MapPin, title: "Convenient & Local", description: "Serving our community with pride." },
+];
 
 const faqs = [
   {
@@ -36,7 +61,7 @@ const faqs = [
   },
   {
     q: "Can I walk in for notary or passport photos?",
-    a: "Yes. Walk-ins are always welcome for notary services and passport photos during regular business hours (Mon–Fri 8 AM–5 PM, Sat 8 AM–4 PM). No appointment needed.",
+    a: "Yes. Walk-ins are always welcome for notary services and passport photos during regular business hours (Mon–Fri 8:30 AM–6 PM, Sat 9 AM–3 PM). No appointment needed.",
   },
   {
     q: "How far in advance do I need to schedule a testing appointment?",
@@ -88,101 +113,99 @@ export default function Home() {
       <Header />
 
       {/* ── HERO ── */}
-      <section className="relative min-h-[480px] md:min-h-[560px] flex items-center bg-gradient-to-br from-[#0f1f3d] via-[#1a2d52] to-[#2a4f8e]" data-testid="section-hero">
-        <div className="relative z-10 max-w-7xl mx-auto px-6 py-20 w-full">
-          <div className="max-w-2xl space-y-5">
-            <div className="inline-flex items-center gap-2 bg-white/10 backdrop-blur-sm border border-white/20 rounded-full px-4 py-1.5 text-sm text-white/90">
-              <Shield className="w-4 h-4 text-[#f07050]" />
-              One Stop. Many Solutions.
+      <section className="relative bg-gradient-to-br from-[#0f1f3d] via-[#1a2d52] to-[#2a4f8e]" data-testid="section-hero">
+        <div className="relative z-10 max-w-7xl mx-auto px-6 py-16 md:py-20">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 items-center">
+            <div className="space-y-5">
+              <div className="inline-flex items-center gap-2 bg-white/10 backdrop-blur-sm border border-white/20 rounded-full px-4 py-1.5 text-sm text-white/90">
+                <Shield className="w-4 h-4 text-[#f07050]" />
+                One Stop. Many Solutions.
+              </div>
+              <h1
+                className="text-4xl md:text-5xl lg:text-6xl font-bold text-white leading-tight"
+                data-testid="text-hero-title"
+              >
+                Your{" "}
+                <span className="bg-gradient-to-r from-[#e85d40] via-[#c9a84c] to-[#e8c86c] bg-clip-text text-transparent">
+                  Business.
+                </span>
+                <br className="hidden sm:block" /> Our Solutions.
+              </h1>
+              <p
+                className="text-lg md:text-xl text-white/80 leading-relaxed max-w-lg"
+                data-testid="text-hero-subtitle"
+              >
+                Professional services that help you save time, stay productive, and keep your business moving — right here in Houston, TX.
+              </p>
+              <div className="flex flex-col sm:flex-row gap-3 pt-2">
+                <Link href="/book">
+                  <Button
+                    size="lg"
+                    className="bg-gradient-to-r from-[#e85d40] to-[#f07050] text-white text-base px-8"
+                    data-testid="button-hero-book"
+                  >
+                    Book a Service
+                    <ArrowRight className="w-5 h-5 ml-2" />
+                  </Button>
+                </Link>
+                <Link href="/services">
+                  <Button
+                    size="lg"
+                    variant="outline"
+                    className="border-white/30 text-white bg-white/5 backdrop-blur-sm"
+                    data-testid="button-hero-browse"
+                  >
+                    Browse Services
+                  </Button>
+                </Link>
+              </div>
+              <div className="flex flex-wrap items-center gap-x-6 gap-y-2 pt-4">
+                {[
+                  { icon: Zap, label: "Fast & Reliable Service" },
+                  { icon: Headset, label: "Professional Support" },
+                  { icon: Users, label: "Trusted by Our Community" },
+                ].map((item) => (
+                  <div key={item.label} className="flex items-center gap-2 text-sm text-white/80">
+                    <item.icon className="w-4 h-4 text-[#e8c86c]" />
+                    {item.label}
+                  </div>
+                ))}
+              </div>
             </div>
-            <h1
-              className="text-4xl md:text-5xl lg:text-6xl font-bold text-white leading-tight"
-              data-testid="text-hero-title"
-            >
-              Your{" "}
-              <span className="bg-gradient-to-r from-[#e85d40] via-[#c9a84c] to-[#e8c86c] bg-clip-text text-transparent">
-                Business.
-              </span>
-              <br className="hidden sm:block" /> Our Solutions.
-            </h1>
-            <p
-              className="text-lg md:text-xl text-white/80 leading-relaxed max-w-lg"
-              data-testid="text-hero-subtitle"
-            >
-              Professional services that help you save time, stay productive, and keep your business moving — right here in Houston, TX.
-            </p>
-            <div className="flex flex-col sm:flex-row gap-3 pt-2">
-              <Link href="/book">
-                <Button
-                  size="lg"
-                  className="bg-gradient-to-r from-[#e85d40] to-[#f07050] text-white text-base px-8"
-                  data-testid="button-hero-book"
-                >
-                  Book a Service
-                  <ArrowRight className="w-5 h-5 ml-2" />
-                </Button>
-              </Link>
-              <Link href="/services">
-                <Button
-                  size="lg"
-                  variant="outline"
-                  className="border-white/30 text-white bg-white/5 backdrop-blur-sm"
-                  data-testid="button-hero-browse"
-                >
-                  Browse Services
-                </Button>
-              </Link>
-            </div>
-            <div className="flex flex-wrap items-center gap-x-6 gap-y-2 pt-4">
-              {[
-                { icon: Zap, label: "Fast & Reliable Service" },
-                { icon: Headset, label: "Professional Support" },
-                { icon: Users, label: "Trusted by Our Community" },
-              ].map((item) => (
-                <div key={item.label} className="flex items-center gap-2 text-sm text-white/80">
-                  <item.icon className="w-4 h-4 text-[#e8c86c]" />
-                  {item.label}
-                </div>
-              ))}
+            <div className="hidden lg:block">
+              <div className="rounded-2xl overflow-hidden shadow-2xl ring-1 ring-white/10">
+                <img
+                  src="/images/hero-office-reception.png"
+                  alt="Modern office interior"
+                  className="w-full h-[420px] object-cover"
+                  data-testid="img-hero"
+                />
+              </div>
             </div>
           </div>
         </div>
       </section>
 
       {/* ── CORE BUSINESS SERVICES ── */}
-      <section className="py-14 bg-muted/30" data-testid="section-core-services">
+      <section className="py-8 bg-background border-b border-border/50" data-testid="section-core-services">
         <div className="max-w-7xl mx-auto px-6">
-          <div className="text-center max-w-2xl mx-auto mb-10 space-y-3">
-            <p className="text-xs font-bold uppercase tracking-widest text-[#c9a84c]">What We Offer</p>
-            <h2 className="text-3xl md:text-4xl font-bold" data-testid="text-core-services-heading">
-              Explore Our Services
-            </h2>
-            <p className="text-muted-foreground text-lg">
-              Everyday business essentials, all under one roof in Houston, TX.
-            </p>
-          </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-            {businessServices.map((service) => (
-              <ServiceCard
-                key={service.id}
-                title={service.title}
-                description={service.description}
-                image={service.image}
-                price={service.price}
-                priceLabel={service.priceLabel}
-                slug={service.slug}
-                icon={<service.icon className="w-5 h-5" />}
-              />
+          <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-7 gap-x-4 gap-y-8">
+            {coreServiceStrip.map((item) => (
+              <Link key={item.title} href={item.href}>
+                <div
+                  className="flex flex-col items-center text-center gap-2 cursor-pointer group"
+                  data-testid={`link-core-service-${item.title.toLowerCase().replace(/\s/g, "-")}`}
+                >
+                  <div className="w-14 h-14 rounded-2xl border-2 border-[#1e3a6e]/15 dark:border-[#4a72c4]/30 flex items-center justify-center text-[#1e3a6e] dark:text-[#6b9aed] group-hover:border-[#1e3a6e]/40 group-hover:bg-[#1e3a6e]/5 transition-colors">
+                    <item.icon className="w-6 h-6" />
+                  </div>
+                  <div>
+                    <p className="text-sm font-semibold leading-tight">{item.title}</p>
+                    <p className="text-xs text-muted-foreground mt-0.5">{item.tagline}</p>
+                  </div>
+                </div>
+              </Link>
             ))}
-            {/* Website Design — quote-based, not a bookable calendar service */}
-            <ServiceCard
-              title="Website Design"
-              description="Practical website design for Houston small businesses and entrepreneurs. Request a free quote."
-              slug="website-design"
-              href="/for-businesses"
-              icon={<Building2 className="w-5 h-5" />}
-              buttonLabel="Request a Quote"
-            />
           </div>
           <div className="text-center mt-8">
             <Link href="/services?filter=business">
@@ -292,88 +315,75 @@ export default function Home() {
       {/* ── WHY CHOOSE LBS ── */}
       <section className="py-14 bg-background" data-testid="section-why-choose">
         <div className="max-w-7xl mx-auto px-6">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
-            <div className="space-y-6">
-              <h2 className="text-3xl md:text-4xl font-bold" data-testid="text-why-heading">
-                Why Choose LBS?
-              </h2>
-              <p className="text-muted-foreground text-lg leading-relaxed">
-                Quality services you can count on, from a team that knows what it takes to help your business succeed.
-              </p>
-              <div className="space-y-4">
-                {[
-                  "Professional and reliable — quality services you can count on, every time",
-                  "Experienced team of skilled professionals ready to help",
-                  "Secure and confidential handling of your documents and information",
-                  "Convenient and local — serving Houston, TX with pride",
-                  "Walk-in printing, notary, and passport photos — no appointment needed",
-                  "Multiple professional business services under one roof",
-                ].map((item) => (
-                  <div key={item} className="flex items-start gap-3">
-                    <CheckCircle2 className="w-5 h-5 text-[#e85d40] mt-0.5 shrink-0" />
-                    <span className="text-sm">{item}</span>
-                  </div>
-                ))}
+          <div className="flex items-center justify-center gap-4 mb-10">
+            <div className="h-px flex-1 max-w-16 bg-gradient-to-r from-transparent to-[#c9a84c]" />
+            <h2 className="text-2xl md:text-3xl font-bold text-center" data-testid="text-why-heading">
+              Why Choose LBS?
+            </h2>
+            <div className="h-px flex-1 max-w-16 bg-gradient-to-l from-transparent to-[#c9a84c]" />
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
+            {whyChooseItems.map((item) => (
+              <div key={item.title} className="text-center space-y-3" data-testid={`card-why-${item.title.toLowerCase().replace(/[^a-z]+/g, "-")}`}>
+                <div className="w-16 h-16 mx-auto rounded-2xl border-2 border-[#1e3a6e]/15 dark:border-[#4a72c4]/30 flex items-center justify-center text-[#1e3a6e] dark:text-[#6b9aed]">
+                  <item.icon className="w-7 h-7" />
+                </div>
+                <h3 className="font-semibold">{item.title}</h3>
+                <p className="text-sm text-muted-foreground">{item.description}</p>
               </div>
-              <Link href="/about">
-                <Button variant="outline" size="lg" className="mt-4" data-testid="button-learn-about">
-                  Learn More About Us
-                  <ArrowRight className="w-4 h-4 ml-2" />
-                </Button>
-              </Link>
-            </div>
-            <div className="relative">
-              <Card className="border-border/50">
-                <CardContent className="p-8 space-y-6">
-                  <div className="flex items-center gap-4 mb-4">
-                    <img src={logoImg} alt="LBS" className="w-16 h-16 object-contain rounded-md" />
+            ))}
+          </div>
+          <div className="max-w-md mx-auto">
+            <Card className="border-border/50">
+              <CardContent className="p-8 space-y-6">
+                <div className="flex items-center gap-4 mb-2">
+                  <img src={logoImg} alt="LBS" className="w-14 h-14 object-contain rounded-md" />
+                  <div>
+                    <h3 className="text-lg font-bold text-[#1e3a6e] dark:text-white">Visit Us Today</h3>
+                    <p className="text-sm text-muted-foreground">Walk-ins welcome for most services</p>
+                  </div>
+                </div>
+                <div className="space-y-4">
+                  <div className="flex items-start gap-3">
+                    <MapPin className="w-5 h-5 text-[#e85d40] mt-0.5 shrink-0" />
                     <div>
-                      <h3 className="text-xl font-bold text-[#1e3a6e] dark:text-white">Visit Us Today</h3>
-                      <p className="text-sm text-muted-foreground">Walk-ins welcome for most services</p>
+                      <p className="font-medium text-sm">Address</p>
+                      <p className="text-sm text-muted-foreground">
+                        616 FM 1960 Rd W, Ste 101<br />Houston, TX 77090-3048
+                      </p>
                     </div>
                   </div>
-                  <div className="space-y-4">
-                    <div className="flex items-start gap-3">
-                      <MapPin className="w-5 h-5 text-[#e85d40] mt-0.5 shrink-0" />
-                      <div>
-                        <p className="font-medium text-sm">Address</p>
-                        <p className="text-sm text-muted-foreground">
-                          616 FM 1960 Rd W, Ste 101<br />Houston, TX 77090-3048
-                        </p>
-                      </div>
-                    </div>
-                    <div className="flex items-start gap-3">
-                      <Phone className="w-5 h-5 text-[#e85d40] mt-0.5 shrink-0" />
-                      <div>
-                        <p className="font-medium text-sm">Phone</p>
-                        <a href="tel:2818365357" className="text-sm text-muted-foreground hover:text-foreground">
-                          (281) 836-5357
-                        </a>
-                      </div>
-                    </div>
-                    <div className="flex items-start gap-3">
-                      <Clock className="w-5 h-5 text-[#e85d40] mt-0.5 shrink-0" />
-                      <div>
-                        <p className="font-medium text-sm">Hours</p>
-                        <p className="text-sm text-muted-foreground">
-                          Mon – Fri: 8:00 AM – 5:00 PM<br />
-                          Sat: 8:00 AM – 4:00 PM<br />
-                          Closed Sun
-                        </p>
-                      </div>
+                  <div className="flex items-start gap-3">
+                    <Phone className="w-5 h-5 text-[#e85d40] mt-0.5 shrink-0" />
+                    <div>
+                      <p className="font-medium text-sm">Phone</p>
+                      <a href="tel:2818365357" className="text-sm text-muted-foreground hover:text-foreground">
+                        (281) 836-5357
+                      </a>
                     </div>
                   </div>
-                  <Link href="/contact">
-                    <Button
-                      className="w-full bg-gradient-to-r from-[#e85d40] to-[#f07050] text-white mt-4"
-                      data-testid="button-contact-cta"
-                    >
-                      Get Directions & Contact
-                    </Button>
-                  </Link>
-                </CardContent>
-              </Card>
-            </div>
+                  <div className="flex items-start gap-3">
+                    <Clock className="w-5 h-5 text-[#e85d40] mt-0.5 shrink-0" />
+                    <div>
+                      <p className="font-medium text-sm">Hours</p>
+                      <p className="text-sm text-muted-foreground">
+                        Mon – Fri: 8:30 AM – 6:00 PM<br />
+                        Sat: 9:00 AM – 3:00 PM<br />
+                        Closed Sun
+                      </p>
+                    </div>
+                  </div>
+                </div>
+                <Link href="/contact">
+                  <Button
+                    className="w-full bg-gradient-to-r from-[#e85d40] to-[#f07050] text-white mt-4"
+                    data-testid="button-contact-cta"
+                  >
+                    Get Directions & Contact
+                  </Button>
+                </Link>
+              </CardContent>
+            </Card>
           </div>
         </div>
       </section>
@@ -402,18 +412,13 @@ export default function Home() {
                 </Button>
               </Link>
             </div>
-            <div className="grid grid-cols-2 gap-4">
-              {[
-                { icon: Building2, label: "Corporate Notary Program" },
-                { icon: Award, label: "Website Design" },
-                { icon: Users, label: "Resume Services" },
-                { icon: Headset, label: "Ongoing Business Support" },
-              ].map((item) => (
-                <div key={item.label} className="bg-card border border-border/50 rounded-xl p-5 text-center space-y-2">
-                  <item.icon className="w-6 h-6 mx-auto text-[#1e3a6e] dark:text-[#6b9aed]" />
-                  <p className="text-sm font-medium">{item.label}</p>
-                </div>
-              ))}
+            <div className="rounded-2xl overflow-hidden shadow-lg">
+              <img
+                src="/images/business-collaboration.png"
+                alt="Business professionals collaborating"
+                className="w-full h-72 md:h-80 object-cover"
+                data-testid="img-business-solutions"
+              />
             </div>
           </div>
         </div>
@@ -459,37 +464,29 @@ export default function Home() {
         </div>
       </section>
 
-      {/* ── BOTTOM CTA ── */}
-      <section className="py-14 bg-gradient-to-r from-[#1e3a6e] to-[#2a4f8e]" data-testid="section-cta">
-        <div className="max-w-4xl mx-auto px-6 text-center space-y-6">
-          <p className="text-xs font-bold uppercase tracking-widest text-[#c9a84c]">Ready When You Are</p>
-          <h2 className="text-3xl md:text-4xl font-bold text-white">
-            Visit LBS Business Services Center
-          </h2>
-          <p className="text-lg text-white/80 max-w-2xl mx-auto">
-            Printing, notary, passport photos, faxing, resume help, website design, and exam testing — all at one Houston location.
-          </p>
-          <div className="flex flex-col sm:flex-row gap-3 justify-center pt-2">
-            <Link href="/book">
-              <Button
-                size="lg"
-                className="bg-gradient-to-r from-[#e85d40] to-[#f07050] text-white text-base px-8"
-                data-testid="button-cta-book"
-              >
-                Book a Service
-                <ArrowRight className="w-5 h-5 ml-2" />
-              </Button>
-            </Link>
-            <a href="tel:2818365357" data-testid="button-cta-call">
-              <Button
-                size="lg"
-                variant="outline"
-                className="border-white/30 text-white bg-white/5"
-              >
-                <Phone className="w-4 h-4 mr-2" />
-                Call (281) 836-5357
-              </Button>
+      {/* ── BOTTOM CONTACT BAR ── */}
+      <section className="py-8 bg-[#0d1b35]" data-testid="section-cta">
+        <div className="max-w-7xl mx-auto px-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
+            <a href="tel:2818365357" className="flex items-center gap-4" data-testid="button-cta-call">
+              <div className="w-14 h-14 rounded-full bg-gradient-to-br from-[#e85d40] to-[#f07050] flex items-center justify-center shrink-0">
+                <Phone className="w-6 h-6 text-white" />
+              </div>
+              <div>
+                <p className="text-xs font-bold uppercase tracking-widest text-[#e8c86c]">We're Here to Help</p>
+                <p className="text-2xl font-bold text-white">(281) 836-5357</p>
+                <p className="text-sm text-[#e8c86c] font-medium">Walk-ins Welcome &nbsp;|&nbsp; Open to the Public</p>
+              </div>
             </a>
+            <div className="flex items-center gap-4 md:justify-end">
+              <div className="w-14 h-14 rounded-full border-2 border-white/30 flex items-center justify-center shrink-0">
+                <Smile className="w-7 h-7 text-white" />
+              </div>
+              <div>
+                <p className="text-sm font-bold uppercase tracking-wider text-white">Friendly. Local. Professional.</p>
+                <p className="text-sm text-white/70">Our goal is simple: deliver exceptional service with a personal touch.</p>
+              </div>
+            </div>
           </div>
         </div>
       </section>

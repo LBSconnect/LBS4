@@ -49,6 +49,7 @@ export default function Footer() {
                 { href: "/for-businesses", label: "For Businesses" },
                 { href: "/corporate", label: "Corporate Notary" },
                 { href: "/about", label: "About Us" },
+                { href: "/resources", label: "Resources" },
                 { href: "/contact", label: "Contact" },
               ].map((link) => (
                 <Link key={link.href} href={link.href}>
@@ -118,18 +119,18 @@ export default function Footer() {
                 (281) 836-5357
               </a>
               <a
-                href="mailto:info@lbsconnect.net"
+                href="mailto:info@lbs4.com"
                 className="flex items-center gap-2.5 text-sm text-white/70 transition-colors hover:text-white"
                 data-testid="link-footer-email"
               >
                 <Mail className="w-4 h-4 shrink-0 text-[#f07050]" />
-                info@lbsconnect.net
+                info@lbs4.com
               </a>
               <div className="flex items-start gap-2.5 text-sm text-white/70">
                 <Clock className="w-4 h-4 mt-0.5 shrink-0 text-[#f07050]" />
                 <span>
-                  Mon – Fri: 8:00 AM – 5:00 PM<br />
-                  Sat: 8:00 AM – 4:00 PM<br />
+                  Mon – Fri: 8:30 AM – 6:00 PM<br />
+                  Sat: 9:00 AM – 3:00 PM<br />
                   Closed Sun
                 </span>
               </div>

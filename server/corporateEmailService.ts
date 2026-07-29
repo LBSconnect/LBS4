@@ -15,7 +15,7 @@ const PLAN_NAMES: Record<string, string> = {
 
 const LBS_ADDRESS = "616 FM 1960 Rd W, Ste 101, Houston, TX 77090";
 const LBS_PHONE = "(281) 836-5357";
-const LBS_EMAIL = process.env.MAIL_FROM_ADDRESS || "info@lbsconnect.net";
+const LBS_EMAIL = process.env.MAIL_FROM_ADDRESS || "info@lbs4.com";
 const SITE_URL = "https://www.lbs4.com";
 
 function emailWrapper(content: string): string {
@@ -59,7 +59,7 @@ function emailWrapper(content: string): string {
           <strong style="color:#0d1b35;">LBS Test &amp; Exam Center</strong><br />
           ${LBS_ADDRESS}<br />
           ${LBS_PHONE} &nbsp;|&nbsp; <a href="mailto:${LBS_EMAIL}" style="color:#1e3a6e;">${LBS_EMAIL}</a><br />
-          Mon–Fri 8 AM–5 PM &nbsp;|&nbsp; Sat 8 AM–4 PM
+          Mon–Fri 8:30 AM–6 PM &nbsp;|&nbsp; Sat 9 AM–3 PM
         </p>
         <p style="margin:12px 0 0;color:#94a3b8;font-size:11px;">
           Official notarial fees are charged in accordance with Texas law. Monthly program fees cover administrative services, scheduling, account management, and reporting only.

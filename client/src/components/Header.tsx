@@ -13,6 +13,7 @@ const navLinks = [
   { href: "/for-businesses", label: "For Businesses" },
   { href: "/services/certification-exam-testing", label: "Testing Center" },
   { href: "/about", label: "About Us" },
+  { href: "/resources", label: "Resources" },
   { href: "/contact", label: "Contact" },
 ];
 
@@ -57,12 +58,12 @@ export default function Header() {
               <span>(281) 836-5357</span>
             </a>
             <a
-              href="mailto:info@lbsconnect.net"
+              href="mailto:info@lbs4.com"
               className="flex items-center gap-1.5 transition-colors"
               data-testid="link-email-top"
             >
               <Mail className="w-3.5 h-3.5" />
-              <span>info@lbsconnect.net</span>
+              <span>info@lbs4.com</span>
             </a>
           </div>
           <div className="flex items-center gap-1.5">
@@ -265,8 +266,8 @@ export default function Header() {
                   <a href="tel:2818365357" className="flex items-center gap-2">
                     <Phone className="w-4 h-4" /> (281) 836-5357
                   </a>
-                  <a href="mailto:info@lbsconnect.net" className="flex items-center gap-2">
-                    <Mail className="w-4 h-4" /> info@lbsconnect.net
+                  <a href="mailto:info@lbs4.com" className="flex items-center gap-2">
+                    <Mail className="w-4 h-4" /> info@lbs4.com
                   </a>
                 </div>
               </div>

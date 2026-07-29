@@ -58,7 +58,7 @@ const TESTING_CENTER_FAQS = [
   },
   {
     q: "What are the hours for the LBS Testing Center?",
-    a: "The LBS Testing Center is open Monday through Friday from 8:00 AM to 5:00 PM and Saturday from 8:00 AM to 4:00 PM. Closed Sunday.",
+    a: "The LBS Testing Center is open Monday through Friday from 8:30 AM to 6:00 PM and Saturday from 9:00 AM to 3:00 PM. Closed Sunday.",
   },
   {
     q: "Is there a testing center on FM 1960 in Houston?",
@@ -518,7 +518,7 @@ export default function ServiceDetail() {
                           )}
                           {!service?.saturdayOnly && (
                             <p className="text-xs text-muted-foreground mt-1">
-                              Mon–Fri: 8AM–4PM | Sat: 8AM–3PM
+                              Mon–Fri: 9AM–5PM | Sat: 9AM–2PM
                             </p>
                           )}
                         </div>
@@ -629,9 +629,9 @@ export default function ServiceDetail() {
                       <div className="flex items-start gap-2">
                         <Clock className="w-4 h-4 mt-0.5 shrink-0 text-[#e85d40]" />
                         <span>
-                          Mon – Fri: 8 AM – 5 PM
+                          Mon – Fri: 8:30 AM – 6 PM
                           <br />
-                          Sat: 8 AM – 4 PM
+                          Sat: 9 AM – 3 PM
                           <br />
                           Closed Sun
                         </span>

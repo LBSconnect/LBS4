@@ -156,7 +156,7 @@ export default function Contact() {
       <SEO
         title="Contact LBS Business Services Center Houston TX | (281) 836-5357"
         canonical="/contact"
-        description="Contact LBS Business Services Center at 616 FM 1960 Rd W, Ste 101, Houston, TX 77090. Call (281) 836-5357 or email info@lbsconnect.net. Open Mon–Fri 8 AM–5 PM, Sat 8 AM–4 PM."
+        description="Contact LBS Business Services Center at 616 FM 1960 Rd W, Ste 101, Houston, TX 77090. Call (281) 836-5357 or email info@lbs4.com. Open Mon–Fri 8:30 AM–6 PM, Sat 9 AM–3 PM."
       />
       <Header />
 
@@ -225,7 +225,7 @@ export default function Contact() {
                 </a>
 
                 <a
-                  href="mailto:info@lbsconnect.net"
+                  href="mailto:info@lbs4.com"
                   className="flex items-start gap-4 p-4 rounded-md bg-muted/30 transition-colors hover:bg-muted/50"
                   data-testid="link-contact-email"
                 >
@@ -235,7 +235,7 @@ export default function Contact() {
                   <div>
                     <h3 className="font-semibold text-sm">Email</h3>
                     <p className="text-sm text-muted-foreground mt-1">
-                      info@lbsconnect.net
+                      info@lbs4.com
                     </p>
                   </div>
                 </a>
@@ -247,8 +247,8 @@ export default function Contact() {
                   <div>
                     <h3 className="font-semibold text-sm">Business Hours</h3>
                     <div className="text-sm text-muted-foreground mt-1 space-y-1">
-                      <p>Monday – Friday: 8:00 AM – 5:00 PM</p>
-                      <p>Saturday: 8:00 AM – 4:00 PM</p>
+                      <p>Monday – Friday: 8:30 AM – 6:00 PM</p>
+                      <p>Saturday: 9:00 AM – 3:00 PM</p>
                       <p>Sunday: Closed</p>
                     </div>
                   </div>

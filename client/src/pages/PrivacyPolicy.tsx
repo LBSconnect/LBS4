@@ -216,7 +216,7 @@ export default function PrivacyPolicy() {
                 <p className="text-muted-foreground">616 FM 1960 Rd W, Ste 101</p>
                 <p className="text-muted-foreground">Houston, TX 77090-3048</p>
                 <p className="text-muted-foreground">Phone: (281) 836-5357</p>
-                <p className="text-muted-foreground">Email: info@lbsconnect.net</p>
+                <p className="text-muted-foreground">Email: info@lbs4.com</p>
               </div>
             </div>
 
