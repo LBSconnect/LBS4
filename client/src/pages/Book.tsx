@@ -10,9 +10,9 @@ export default function Book() {
   return (
     <div className="min-h-screen flex flex-col bg-background">
       <SEO
-        title="Book an Appointment | LBS Test & Exam Center Houston TX"
+        title="Book an Appointment | LBS Business Services Center Houston TX"
         canonical="/book"
-        description="Book a testing appointment, notary service, passport photos, or insurance exam boot camp at LBS Test & Exam Center in Houston, TX. Online scheduling available 24/7. Call (281) 836-5357."
+        description="Book notary service, passport photos, an exam testing appointment, or an insurance exam boot camp at LBS Business Services Center in Houston, TX. Online scheduling available 24/7. Call (281) 836-5357."
       />
       <Header />
 

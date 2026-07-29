@@ -6,7 +6,7 @@ import { ArrowRight, ExternalLink } from "lucide-react";
 interface ServiceCardProps {
   title: string;
   description: string;
-  image: string;
+  image?: string;
   price?: string;
   priceLabel?: string;
   slug: string;
@@ -36,12 +36,24 @@ export default function ServiceCard({
       data-testid={`card-service-${slug}`}
     >
       <div className="relative aspect-[4/3] overflow-hidden rounded-t-md">
-        <img
-          src={image}
-          alt={title}
-          className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-        />
-        <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
+        {image ? (
+          <>
+            <img
+              src={image}
+              alt={title}
+              className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+            />
+            <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
+          </>
+        ) : (
+          <div className="w-full h-full bg-gradient-to-br from-[#1e3a6e] to-[#2a4f8e] flex items-center justify-center">
+            {icon ? (
+              <div className="w-16 h-16 rounded-2xl bg-white/10 backdrop-blur-sm flex items-center justify-center text-white">
+                {icon}
+              </div>
+            ) : null}
+          </div>
+        )}
         {badge && (
           <div className="absolute top-3 right-3 bg-[#c9a84c] text-[#0d1b35] rounded-md px-2.5 py-1 text-xs font-bold shadow-sm">
             {badge}

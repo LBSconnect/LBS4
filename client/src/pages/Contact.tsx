@@ -47,7 +47,9 @@ export default function Contact() {
     name: "",
     email: "",
     phone: "",
-    service: "",
+    service: typeof window !== "undefined"
+      ? new URLSearchParams(window.location.search).get("service") ?? ""
+      : "",
     message: "",
   });
 
@@ -152,9 +154,9 @@ export default function Contact() {
   return (
     <div className="min-h-screen flex flex-col bg-background">
       <SEO
-        title="Contact LBS Test & Exam Center Houston TX | (281) 836-5357"
+        title="Contact LBS Business Services Center Houston TX | (281) 836-5357"
         canonical="/contact"
-        description="Contact LBS Test & Exam Center at 616 FM 1960 Rd W, Ste 101, Houston, TX 77090. Call (281) 836-5357 or email info@lbsconnect.net. Open Mon–Fri 8 AM–5 PM, Sat 8 AM–4 PM."
+        description="Contact LBS Business Services Center at 616 FM 1960 Rd W, Ste 101, Houston, TX 77090. Call (281) 836-5357 or email info@lbsconnect.net. Open Mon–Fri 8 AM–5 PM, Sat 8 AM–4 PM."
       />
       <Header />
 
@@ -364,11 +366,26 @@ export default function Contact() {
                             <SelectValue placeholder="Select a service" />
                           </SelectTrigger>
                           <SelectContent>
+                            <SelectItem value="printing-copies">
+                              Printing & Copies
+                            </SelectItem>
+                            <SelectItem value="scanning">
+                              Scanning
+                            </SelectItem>
                             <SelectItem value="notary">
                               Notary Service
                             </SelectItem>
                             <SelectItem value="passport">
                               Passport Photos
+                            </SelectItem>
+                            <SelectItem value="faxing">
+                              Faxing
+                            </SelectItem>
+                            <SelectItem value="resume-services">
+                              Resume Services
+                            </SelectItem>
+                            <SelectItem value="website-design">
+                              Website Design
                             </SelectItem>
                             <SelectItem value="certification">
                               Certiport Exam Testing

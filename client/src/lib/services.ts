@@ -3,6 +3,10 @@ import {
   Camera,
   Award,
   BookOpen,
+  Printer,
+  ScanLine,
+  Send,
+  Briefcase,
 } from "lucide-react";
 
 export interface ServiceInfo {
@@ -14,12 +18,14 @@ export interface ServiceInfo {
   description: string;
   longDescription: string;
   features: string[];
-  image: string;
+  image?: string;
   price: string;
   priceLabel: string;
   icon: typeof Stamp;
   stripeProductName: string;
   saturdayOnly?: boolean;
+  /** "business" = walk-in / everyday office services; "testing" = Pearson VUE, Certiport, exam prep */
+  category: "business" | "testing";
 }
 
 export const services: ServiceInfo[] = [
@@ -45,6 +51,7 @@ export const services: ServiceInfo[] = [
     priceLabel: "/session",
     icon: Award,
     stripeProductName: "Certiport Exam Testing",
+    category: "testing",
   },
   {
     id: "life-insurance-bootcamp",
@@ -69,6 +76,7 @@ export const services: ServiceInfo[] = [
     icon: BookOpen,
     stripeProductName: "Texas Life Insurance Exam Boot Camp",
     saturdayOnly: true,
+    category: "testing",
   },
   {
     id: "property-casualty-bootcamp",
@@ -93,6 +101,7 @@ export const services: ServiceInfo[] = [
     icon: BookOpen,
     stripeProductName: "Texas Property & Casualty Exam Boot Camp",
     saturdayOnly: true,
+    category: "testing",
   },
   {
     id: "notary",
@@ -116,6 +125,7 @@ export const services: ServiceInfo[] = [
     priceLabel: "/document",
     icon: Stamp,
     stripeProductName: "Notary Service",
+    category: "business",
   },
   {
     id: "passport",
@@ -139,6 +149,99 @@ export const services: ServiceInfo[] = [
     priceLabel: "/set",
     icon: Camera,
     stripeProductName: "Passport Photos",
+    category: "business",
+  },
+  {
+    id: "printing-copies",
+    slug: "printing-copies",
+    title: "Printing & Copies",
+    shortTitle: "Printing & Copies",
+    description:
+      "Black-and-white and color printing, plus document copies — no appointment needed.",
+    longDescription:
+      "Get black-and-white or color printing and document copies at LBS Business Services Center. Bring a digital file (USB, email, or cloud link) or an original document to copy, and we'll take care of the rest while you wait.",
+    features: [
+      "Black & white and color printing",
+      "Single and multi-page copies",
+      "Print from USB or email",
+      "Walk-ins welcome",
+      "No appointment needed",
+      "Payment collected in office",
+    ],
+    price: "",
+    priceLabel: "",
+    icon: Printer,
+    stripeProductName: "Printing & Copies",
+    category: "business",
+  },
+  {
+    id: "scanning",
+    slug: "scanning",
+    title: "Document Scanning",
+    shortTitle: "Scanning",
+    description:
+      "Convert paper documents into clear digital files — no appointment needed.",
+    longDescription:
+      "Turn paper documents into clear, organized digital files at LBS Business Services Center. Bring the physical documents you'd like scanned along with a USB drive or an email address to receive the files.",
+    features: [
+      "Digitize documents and records",
+      "Multi-page document support",
+      "Receive files by USB or email",
+      "Walk-ins welcome",
+      "No appointment needed",
+      "Payment collected in office",
+    ],
+    price: "",
+    priceLabel: "",
+    icon: ScanLine,
+    stripeProductName: "Document Scanning",
+    category: "business",
+  },
+  {
+    id: "faxing",
+    slug: "faxing",
+    title: "Fax Services",
+    shortTitle: "Faxing",
+    description:
+      "Send and receive faxes quickly and securely — no appointment needed.",
+    longDescription:
+      "Send and receive important documents with convenient fax services at LBS Business Services Center. Bring the document you'd like to send along with the recipient's fax number, and we'll handle the rest.",
+    features: [
+      "Send documents by fax",
+      "Receive incoming faxes",
+      "Confirmation of transmission",
+      "Walk-ins welcome",
+      "No appointment needed",
+      "Payment collected in office",
+    ],
+    price: "",
+    priceLabel: "",
+    icon: Send,
+    stripeProductName: "Fax Services",
+    category: "business",
+  },
+  {
+    id: "resume-services",
+    slug: "resume-services",
+    title: "Resume Services",
+    shortTitle: "Resume Services",
+    description:
+      "Professional help preparing or improving your resume to stand out to employers.",
+    longDescription:
+      "Get help presenting your skills, experience, and qualifications clearly to employers. Bring your existing resume (if you have one), your work history, and your target job or industry, and our team will help you put together a clear, professional resume.",
+    features: [
+      "Resume writing and review",
+      "Guidance on formatting and content",
+      "Tailored to your target role",
+      "Walk-ins welcome",
+      "No appointment needed",
+      "Payment collected in office",
+    ],
+    price: "",
+    priceLabel: "",
+    icon: Briefcase,
+    stripeProductName: "Resume Services",
+    category: "business",
   },
 ];
 
