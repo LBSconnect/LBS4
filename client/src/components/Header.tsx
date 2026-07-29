@@ -10,6 +10,8 @@ const CORPORATE_ENABLED = import.meta.env.VITE_CORPORATE_ENABLED === "true";
 const navLinks = [
   { href: "/", label: "Home" },
   { href: "/services", label: "Services" },
+  { href: "/for-businesses", label: "For Businesses" },
+  { href: "/services/certification-exam-testing", label: "Testing Center" },
   { href: "/about", label: "About Us" },
   { href: "/contact", label: "Contact" },
 ];
@@ -84,7 +86,7 @@ export default function Header() {
                   LBS
                 </span>
                 <span className="text-[11px] text-muted-foreground leading-tight">
-                  Test & Exam Center
+                  Business Services Center
                 </span>
               </div>
             </div>
@@ -165,7 +167,7 @@ export default function Header() {
                 className="ml-2 bg-gradient-to-r from-[#e85d40] to-[#f07050] text-white"
                 data-testid="button-book-now"
               >
-                Book Now
+                Book a Service
               </Button>
             </Link>
           </nav>
@@ -187,7 +189,7 @@ export default function Header() {
                     />
                     <div>
                       <div className="font-bold text-[#1e3a6e] dark:text-white">LBS</div>
-                      <div className="text-xs text-muted-foreground">Test & Exam Center</div>
+                      <div className="text-xs text-muted-foreground">Business Services Center</div>
                     </div>
                   </div>
                 </div>
@@ -255,7 +257,7 @@ export default function Header() {
                       onClick={() => setMobileOpen(false)}
                       data-testid="button-mobile-book"
                     >
-                      Book Now
+                      Book a Service
                     </Button>
                   </Link>
                 </nav>

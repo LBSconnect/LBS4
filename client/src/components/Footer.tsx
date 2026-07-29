@@ -4,8 +4,12 @@ import logoImg from "@assets/Linton_Business_Solutions.gif_1771618422350.jpg";
 
 export default function Footer() {
   const serviceLinks = [
+    { href: "/services/printing-copies", label: "Printing & Copies" },
+    { href: "/services/scanning", label: "Scanning" },
     { href: "/services/notary-service", label: "Notary Service" },
     { href: "/services/passport-photos", label: "Passport Photos" },
+    { href: "/services/faxing", label: "Faxing" },
+    { href: "/services/resume-services", label: "Resume Services" },
     { href: "/services/certification-exam-testing", label: "Certiport Exams" },
     { href: "/services/life-insurance-boot-camp", label: "Life Insurance Boot Camp" },
     { href: "/services/property-casualty-boot-camp", label: "P&C Exam Boot Camp" },
@@ -24,12 +28,12 @@ export default function Footer() {
               />
               <div>
                 <h3 className="text-lg font-bold text-white">LBS</h3>
-                <p className="text-xs text-white/60">Test & Exam Center</p>
+                <p className="text-xs text-white/60">Business Services Center</p>
               </div>
             </div>
             <p className="text-sm text-white/70 leading-relaxed">
-              LBS is a skilling division of Linton Business Solutions LLC (LBS). Your trusted
-              partner for professional testing and business services in Houston,
+              LBS Business Services Center, a division of Linton Business Solutions LLC (LBS). Your
+              trusted partner for business services and professional testing in Houston,
               Texas.
             </p>
           </div>
@@ -42,6 +46,7 @@ export default function Footer() {
               {[
                 { href: "/", label: "Home" },
                 { href: "/services", label: "Our Services" },
+                { href: "/for-businesses", label: "For Businesses" },
                 { href: "/corporate", label: "Corporate Notary" },
                 { href: "/about", label: "About Us" },
                 { href: "/contact", label: "Contact" },

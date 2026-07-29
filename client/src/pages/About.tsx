@@ -18,9 +18,9 @@ export default function About() {
   return (
     <div className="min-h-screen flex flex-col bg-background">
       <SEO
-        title="About LBS Test & Exam Center | Linton Business Solutions Houston TX"
+        title="About LBS Business Services Center | Linton Business Solutions Houston TX"
         canonical="/about"
-        description="LBS Test & Exam Center is a division of Linton Business Solutions LLC, an authorized Pearson VUE & Certiport testing center serving Houston, TX. Professional testing environment, certified staff, and business services in one convenient location."
+        description="LBS Business Services Center is a division of Linton Business Solutions LLC, offering printing, notary, passport photos and more, plus authorized Pearson VUE & Certiport testing, in Houston, TX."
       />
       <Header />
 

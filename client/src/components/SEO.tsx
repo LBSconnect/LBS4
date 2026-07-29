@@ -11,12 +11,12 @@ interface SEOProps {
 
 const BASE_URL = 'https://www.lbs4.com';
 const DEFAULT_IMAGE = `${BASE_URL}/images/hero-testing-center.png`;
-const SITE_SUFFIX = 'LBS Test & Exam Center';
+const SITE_SUFFIX = 'LBS Business Services Center';
 
 export default function SEO({ title, description, canonical, ogImage, noIndex, schema }: SEOProps) {
   const fullTitle = title
     ? `${title} | ${SITE_SUFFIX}`
-    : `${SITE_SUFFIX} Houston TX | Pearson VUE | Real Estate & Insurance Exams`;
+    : `${SITE_SUFFIX} Houston TX | Printing, Notary, Testing & More`;
   const canonicalUrl = `${BASE_URL}${canonical ?? '/'}`;
   const image = ogImage ?? DEFAULT_IMAGE;
 

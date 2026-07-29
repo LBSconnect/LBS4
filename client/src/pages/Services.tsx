@@ -28,7 +28,9 @@ export default function Services() {
   const visibleServices = filter === "bootcamp"
     ? services.filter((s) => s.saturdayOnly)
     : filter === "business"
-    ? services.filter((s) => s.id === "notary" || s.id === "passport")
+    ? services.filter((s) => s.category === "business")
+    : filter === "testing"
+    ? services.filter((s) => s.category === "testing")
     : services;
 
   const showExamCram = !filter;
@@ -36,6 +38,7 @@ export default function Services() {
   const pageTitle =
     filter === "bootcamp" ? "Exam Prep Bootcamps" :
     filter === "business" ? "Business Services" :
+    filter === "testing" ? "Exam Testing Services" :
     "Our Services";
 
   return (
@@ -139,6 +142,7 @@ export default function Services() {
         </div>
       </section>
 
+      {filter !== "business" && (
       <section className="py-12 bg-muted/30" data-testid="section-exam-programs">
         <div className="max-w-7xl mx-auto px-6">
           <div className="text-center max-w-2xl mx-auto mb-8 space-y-3">
@@ -178,6 +182,7 @@ export default function Services() {
           </div>
         </div>
       </section>
+      )}
 
       <Footer />
     </div>
