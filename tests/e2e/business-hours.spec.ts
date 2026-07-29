@@ -298,8 +298,25 @@ test.describe("All services return correct slots", () => {
       const thu = nextDayOfWeek(4);
       const thuDay = thu.getUTCDate();
 
+      // The calendar opens on the current month; the target date can be
+      // months out (business-hours dates are deliberately offset to avoid
+      // colliding with other spec files' bookings), so navigate forward
+      // month-by-month first — otherwise a same-numbered day in whichever
+      // month happens to be showing gets matched instead.
+      const now = new Date();
+      const monthsAhead =
+        (thu.getUTCFullYear() - now.getUTCFullYear()) * 12 +
+        (thu.getUTCMonth() - now.getUTCMonth());
+      const nextMonthBtn = page.locator('button[name="next-month"]');
+      for (let i = 0; i < monthsAhead; i++) {
+        await nextMonthBtn.click();
+      }
+
+      // Exclude "outside day" cells (showOutsideDays renders adjacent months'
+      // trailing/leading days with the same day-of-month label, e.g. July 27
+      // shows up disabled alongside the real August 27 target).
       const thuBtn = page.locator(
-        `button[name="day"]`
+        `button[name="day"]:not(.day-outside)`
       ).filter({ hasText: String(thuDay) }).first();
 
       const visible = await thuBtn.isVisible().catch(() => false);

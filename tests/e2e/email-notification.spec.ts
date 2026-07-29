@@ -113,7 +113,7 @@ function buildFakeSession(appointmentId: string, email: string): object {
     amount_total: 1000,
     currency: "usd",
     customer_details: { email },
-    metadata: { appointment_id: appointmentId },
+    metadata: { appointment_id: appointmentId, app: 'lbs4' },
   };
 }
 
