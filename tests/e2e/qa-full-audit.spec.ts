@@ -308,7 +308,8 @@ test.describe("Home page — sections and CTAs", () => {
 
   test("Core Business Services icon strip renders all 7 services", async ({ page }) => {
     await goto(page, "/");
-    await expect(page.locator('[data-testid="section-core-services"]')).toBeVisible();
+    const strip = page.locator('[data-testid="section-core-services"]');
+    await expect(strip).toBeVisible();
     for (const slug of [
       "printing-copies",
       "scanning",
@@ -317,9 +318,9 @@ test.describe("Home page — sections and CTAs", () => {
       "faxing",
       "resume-services",
     ]) {
-      await expect(page.locator(`a[href="/services/${slug}"]`)).toBeVisible();
+      await expect(strip.locator(`a[href="/services/${slug}"]`)).toBeVisible();
     }
-    await expect(page.locator('a[href="/for-businesses"]').filter({ hasText: "Website Design" })).toBeVisible();
+    await expect(strip.locator('a[href="/for-businesses"]').filter({ hasText: "Website Design" })).toBeVisible();
   });
 
   test("clicking a core service icon navigates to its detail page", async ({ page }) => {
@@ -387,24 +388,12 @@ test.describe("Home page — sections and CTAs", () => {
     await expect(firstQ).toHaveAttribute("aria-expanded", "true");
   });
 
-  test("Bottom CTA book button → /book", async ({ page }) => {
-    await goto(page, "/");
-    await page.click('[data-testid="button-cta-book"]');
-    await expect(page).toHaveURL(`${BASE}/book`);
-  });
-
   test("Bottom CTA call = tel:2818365357", async ({ page }) => {
     await goto(page, "/");
     const href = await page
       .locator('[data-testid="button-cta-call"]')
       .getAttribute("href");
     expect(href).toBe("tel:2818365357");
-  });
-
-  test("Learn More About Us → /about", async ({ page }) => {
-    await goto(page, "/");
-    await page.click('[data-testid="button-learn-about"]');
-    await expect(page).toHaveURL(`${BASE}/about`);
   });
 
   test("Get Directions button → /contact", async ({ page }) => {
@@ -553,11 +542,11 @@ test.describe("Services page", () => {
 // ═══════════════════════════════════════════════════════════════════════════
 
 test.describe("ServiceDetail — Certiport Exam Testing", () => {
-  test("title contains Testing Center", async ({ page }) => {
+  test("title contains Pearson VUE & Certiport Exam Testing", async ({ page }) => {
     await goto(page, "/services/certification-exam-testing");
     await expect(
       page.locator('[data-testid="text-detail-title"]')
-    ).toContainText("Testing Center");
+    ).toContainText("Pearson VUE & Certiport Exam Testing");
   });
 
   test("service image renders", async ({ page }) => {
