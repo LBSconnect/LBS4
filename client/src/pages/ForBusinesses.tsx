@@ -13,6 +13,7 @@ import {
   Stamp,
   CheckCircle2,
 } from "lucide-react";
+import websiteDesignImg from "@assets/service-website-design.jpg";
 
 const notaryService = services.find((s) => s.id === "notary")!;
 const passportService = services.find((s) => s.id === "passport")!;
@@ -83,6 +84,7 @@ export default function ForBusinesses() {
             <ServiceCard
               title="Website Design"
               description="Practical website design for Houston small businesses and entrepreneurs. Request a free quote."
+              image={websiteDesignImg}
               slug="website-design"
               href="/contact?service=website-design"
               icon={<Globe className="w-5 h-5" />}

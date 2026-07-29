@@ -23,6 +23,7 @@ import Footer from "@/components/Footer";
 import SEO from "@/components/SEO";
 import { services } from "@/lib/services";
 import logoImg from "@assets/Linton_Business_Solutions.gif_1771618422350.jpg";
+import heroImg from "@assets/hero.png";
 
 const businessServices = services.filter((s) => s.category === "business");
 
@@ -188,8 +189,8 @@ export default function Home() {
             <div className="hidden lg:block">
               <div className="rounded-2xl overflow-hidden shadow-2xl ring-1 ring-white/10">
                 <img
-                  src="/images/hero-office-reception.png"
-                  alt="Modern office interior"
+                  src={heroImg}
+                  alt="LBS Business Services Center"
                   className="w-full h-[420px] object-cover"
                   data-testid="img-hero"
                 />
@@ -240,7 +241,7 @@ export default function Home() {
           <div className="rounded-2xl bg-gradient-to-br from-[#0D1B3D] to-[#1A237E] p-8 md:p-10">
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-center">
               <div className="lg:col-span-2 space-y-4">
-                <p className="text-xs font-bold uppercase tracking-widest text-[#FF2D55]">Secondary Operation</p>
+                <p className="text-xs font-bold uppercase tracking-widest text-[#FF2D55]">More Services</p>
                 <h2 className="text-2xl md:text-3xl font-bold text-white">Exam Testing Services</h2>
                 <p className="text-white/75 leading-relaxed max-w-2xl">
                   Professional exam testing and preparation services provided in a quiet, secure, and focused
