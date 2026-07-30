@@ -70,6 +70,8 @@ export default function About() {
                     src={logoImg}
                     alt="Linton Business Solutions Logo"
                     className="w-32 h-32 object-contain mx-auto"
+                    loading="lazy"
+                    decoding="async"
                     data-testid="img-about-logo"
                   />
                   <div>

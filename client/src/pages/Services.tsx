@@ -90,6 +90,7 @@ export default function Services() {
                 image={service.image}
                 price={service.price}
                 priceLabel={service.priceLabel}
+                priceNote={service.priceNote}
                 slug={service.slug}
                 href={service.link}
                 icon={<service.icon className="w-5 h-5" />}
@@ -113,15 +114,17 @@ export default function Services() {
             {testingAndExamRow.map(({ service, href }) => service && (
               <Link key={service.id} href={href}>
                 <div
-                  className="group border border-border/50 bg-card rounded-md overflow-hidden hover-elevate cursor-pointer h-full"
+                  className="group border border-border/50 bg-card rounded-xl overflow-hidden hover-elevate cursor-pointer h-full"
                   data-testid={`card-testing-row-${service.id}`}
                 >
-                  <div className="relative aspect-[4/3] overflow-hidden rounded-md">
+                  <div className="relative aspect-[4/3] overflow-hidden rounded-t-xl">
                     {service.image && (
                       <img
                         src={service.image}
                         alt={service.title}
                         className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                        loading="lazy"
+                        decoding="async"
                       />
                     )}
                     {service.price && (
@@ -130,8 +133,14 @@ export default function Services() {
                       </div>
                     )}
                   </div>
-                  <div className="p-3">
-                    <h3 className="text-sm font-semibold leading-tight">{service.shortTitle}</h3>
+                  <div className="p-3 space-y-1">
+                    <div className="flex items-start justify-between gap-1">
+                      <h3 className="text-sm font-semibold leading-tight">{service.shortTitle}</h3>
+                      <ArrowRight className="w-3.5 h-3.5 text-muted-foreground shrink-0 mt-0.5 transition-transform group-hover:translate-x-0.5" />
+                    </div>
+                    <p className="text-xs text-muted-foreground leading-snug line-clamp-2">
+                      {service.description}
+                    </p>
                   </div>
                 </div>
               </Link>
@@ -142,17 +151,22 @@ export default function Services() {
               rel="noopener noreferrer"
               data-testid="card-testing-row-myeasypass"
             >
-              <div className="group border border-border/50 bg-card rounded-md overflow-hidden hover-elevate cursor-pointer h-full">
-                <div className="relative aspect-[4/3] overflow-hidden rounded-md bg-white border-b border-border/50">
+              <div className="group border border-border/50 bg-card rounded-xl overflow-hidden hover-elevate cursor-pointer h-full">
+                <div className="relative aspect-[4/3] overflow-hidden rounded-t-xl bg-white border-b border-border/50">
                   <img
                     src="/images/myeasypass-logo.png"
                     alt="MyEasyPass.Net Exam Cram"
                     className="w-full h-full object-contain p-6"
+                    loading="lazy"
+                    decoding="async"
                   />
                   <ExternalLink className="absolute top-2 right-2 w-4 h-4 text-muted-foreground" />
                 </div>
-                <div className="p-3">
+                <div className="p-3 space-y-1">
                   <h3 className="text-sm font-semibold leading-tight">MyEasyPass.Net Exam Cram</h3>
+                  <p className="text-xs text-muted-foreground leading-snug line-clamp-2">
+                    Online practice tests for Texas licensing exams.
+                  </p>
                 </div>
               </div>
             </a>

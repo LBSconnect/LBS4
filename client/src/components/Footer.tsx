@@ -25,6 +25,8 @@ export default function Footer() {
                 src={logoImg}
                 alt="LBS Logo"
                 className="h-12 w-12 object-contain rounded-md bg-white/10 p-1"
+                loading="lazy"
+                decoding="async"
               />
               <div>
                 <h3 className="text-lg font-bold text-white">LBS</h3>

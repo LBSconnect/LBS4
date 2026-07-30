@@ -5,5 +5,9 @@ Allow: /
 Disallow: /checkout/success
 Disallow: /checkout/cancel
 
+# Disallow internal account areas
+Disallow: /admin/
+Disallow: /corporate/portal
+
 # Sitemap location
 Sitemap: https://www.lbs4.com/sitemap.xml

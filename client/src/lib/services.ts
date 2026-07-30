@@ -21,6 +21,8 @@ export interface ServiceInfo {
   image?: string;
   price: string;
   priceLabel: string;
+  /** Shown on the card in place of a price when the rate is variable/in-office (e.g. "Pay in office") */
+  priceNote?: string;
   icon: typeof Stamp;
   stripeProductName: string;
   saturdayOnly?: boolean;
@@ -123,6 +125,7 @@ export const services: ServiceInfo[] = [
     image: "/images/service-notary.png",
     price: "",
     priceLabel: "/document",
+    priceNote: "Per document rate",
     icon: Stamp,
     stripeProductName: "Notary Service",
     category: "business",
@@ -171,6 +174,7 @@ export const services: ServiceInfo[] = [
     image: "/images/service-printing-office.png",
     price: "",
     priceLabel: "",
+    priceNote: "Pay in office",
     icon: Printer,
     stripeProductName: "Printing & Copies",
     category: "business",
@@ -195,6 +199,7 @@ export const services: ServiceInfo[] = [
     image: "/images/service-scanning-office.png",
     price: "",
     priceLabel: "",
+    priceNote: "Pay in office",
     icon: ScanLine,
     stripeProductName: "Document Scanning",
     category: "business",
@@ -219,6 +224,7 @@ export const services: ServiceInfo[] = [
     image: "/images/service-faxing-office.png",
     price: "",
     priceLabel: "",
+    priceNote: "Pay in office",
     icon: Send,
     stripeProductName: "Fax Services",
     category: "business",
@@ -243,6 +249,7 @@ export const services: ServiceInfo[] = [
     image: "/images/service-resume-office.png",
     price: "",
     priceLabel: "",
+    priceNote: "Pay in office",
     icon: Briefcase,
     stripeProductName: "Resume Services",
     category: "business",

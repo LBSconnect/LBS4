@@ -1,10 +1,16 @@
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
+import SEO from "@/components/SEO";
 import { Shield } from "lucide-react";
 
 export default function PrivacyPolicy() {
   return (
     <div className="min-h-screen flex flex-col bg-background">
+      <SEO
+        title="Privacy Policy"
+        canonical="/privacy-policy"
+        description="Privacy Policy for LBS Business Services Center (Linton Business Solutions LLC), Houston, TX. How we collect, use, and protect your personal information."
+      />
       <Header />
 
       <section className="relative py-16 bg-gradient-to-br from-[#0D1B3D] to-[#1A237E]">
@@ -17,7 +23,7 @@ export default function PrivacyPolicy() {
             Privacy Policy
           </h1>
           <p className="text-white/80">
-            Last Updated: February 2025
+            Last Updated: July 2026
           </p>
         </div>
       </section>
