@@ -7,14 +7,20 @@ import logoImg from "@assets/Linton_Business_Solutions.gif_1771618422350.jpg";
 
 const CORPORATE_ENABLED = import.meta.env.VITE_CORPORATE_ENABLED === "true";
 
-const navLinks = [
+// Nav order: Home, Services, For Businesses, [Corporate], Testing Center, [Exam Cram], Contact, About Us
+const navLinksStart = [
   { href: "/", label: "Home" },
   { href: "/services", label: "Services" },
   { href: "/for-businesses", label: "For Businesses" },
+];
+
+const navLinksMid = [
   { href: "/services/certification-exam-testing", label: "Testing Center" },
-  { href: "/about", label: "About Us" },
-  { href: "/resources", label: "Resources" },
+];
+
+const navLinksEnd = [
   { href: "/contact", label: "Contact" },
+  { href: "/about", label: "About Us" },
 ];
 
 const corporateMainLinks = [
@@ -94,7 +100,7 @@ export default function Header() {
           </Link>
 
           <nav className="hidden md:flex items-center gap-1" data-testid="nav-desktop">
-            {navLinks.map((link) => (
+            {navLinksStart.map((link) => (
               <Link key={link.href} href={link.href}>
                 <Button
                   variant={location === link.href ? "default" : "ghost"}
@@ -153,6 +159,23 @@ export default function Header() {
               </div>
             )}
 
+            {navLinksMid.map((link) => (
+              <Link key={link.href} href={link.href}>
+                <Button
+                  variant={location === link.href ? "default" : "ghost"}
+                  size="sm"
+                  className={
+                    location === link.href
+                      ? "bg-[#0D1B3D] text-white"
+                      : "text-foreground"
+                  }
+                  data-testid={`link-nav-${link.label.toLowerCase().replace(/\s/g, "-")}`}
+                >
+                  {link.label}
+                </Button>
+              </Link>
+            ))}
+
             <a href="https://www.myeasypass.net" target="_blank" rel="noopener noreferrer" data-testid="link-nav-exam-cram">
               <Button
                 variant="ghost"
@@ -162,6 +185,24 @@ export default function Header() {
                 Exam Cram
               </Button>
             </a>
+
+            {navLinksEnd.map((link) => (
+              <Link key={link.href} href={link.href}>
+                <Button
+                  variant={location === link.href ? "default" : "ghost"}
+                  size="sm"
+                  className={
+                    location === link.href
+                      ? "bg-[#0D1B3D] text-white"
+                      : "text-foreground"
+                  }
+                  data-testid={`link-nav-${link.label.toLowerCase().replace(/\s/g, "-")}`}
+                >
+                  {link.label}
+                </Button>
+              </Link>
+            ))}
+
             <Link href="/book">
               <Button
                 size="sm"
@@ -195,7 +236,7 @@ export default function Header() {
                   </div>
                 </div>
                 <nav className="flex flex-col p-4 gap-1" data-testid="nav-mobile">
-                  {navLinks.map((link) => (
+                  {navLinksStart.map((link) => (
                     <Link key={link.href} href={link.href}>
                       <Button
                         variant={location === link.href ? "default" : "ghost"}
@@ -238,6 +279,18 @@ export default function Header() {
                       ))}
                     </>
                   )}
+                  {navLinksMid.map((link) => (
+                    <Link key={link.href} href={link.href}>
+                      <Button
+                        variant={location === link.href ? "default" : "ghost"}
+                        className={`w-full justify-start ${location === link.href ? "bg-[#0D1B3D] text-white" : ""}`}
+                        onClick={() => setMobileOpen(false)}
+                        data-testid={`link-mobile-${link.label.toLowerCase().replace(/\s/g, "-")}`}
+                      >
+                        {link.label}
+                      </Button>
+                    </Link>
+                  ))}
                   <a
                     href="https://www.myeasypass.net"
                     target="_blank"
@@ -252,6 +305,18 @@ export default function Header() {
                       Exam Cram
                     </Button>
                   </a>
+                  {navLinksEnd.map((link) => (
+                    <Link key={link.href} href={link.href}>
+                      <Button
+                        variant={location === link.href ? "default" : "ghost"}
+                        className={`w-full justify-start ${location === link.href ? "bg-[#0D1B3D] text-white" : ""}`}
+                        onClick={() => setMobileOpen(false)}
+                        data-testid={`link-mobile-${link.label.toLowerCase().replace(/\s/g, "-")}`}
+                      >
+                        {link.label}
+                      </Button>
+                    </Link>
+                  ))}
                   <Link href="/book">
                     <Button
                       className="w-full mt-3 bg-gradient-to-r from-[#FF6A00] to-[#FF2D55] text-white rounded-full"

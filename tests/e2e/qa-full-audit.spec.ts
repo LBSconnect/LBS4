@@ -338,7 +338,7 @@ test.describe("Home page — sections and CTAs", () => {
   test("Exam Testing Services secondary section renders", async ({ page }) => {
     await goto(page, "/");
     await expect(page.locator('[data-testid="section-testing-services"]')).toBeVisible();
-    await expect(page.locator('[data-testid="section-testing-services"]')).toContainText("Secondary Operation");
+    await expect(page.locator('[data-testid="section-testing-services"]')).toContainText("More Services");
   });
 
   test("View Testing Info → /services/certification-exam-testing", async ({

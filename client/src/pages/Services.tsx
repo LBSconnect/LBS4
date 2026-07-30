@@ -2,10 +2,9 @@ import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import SEO from "@/components/SEO";
 import ServiceCard from "@/components/ServiceCard";
-import { services } from "@/lib/services";
-import { Shield, GraduationCap, ArrowRight } from "lucide-react";
-import { Card, CardContent } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
+import { services, getServiceBySlug } from "@/lib/services";
+import { Shield, ArrowRight, ExternalLink } from "lucide-react";
+import { Link } from "wouter";
 
 function getNextSaturday(): string {
   const today = new Date();
@@ -21,32 +20,35 @@ function getUrlFilter(): string | null {
   return new URLSearchParams(window.location.search).get("filter");
 }
 
+const testingAndExamRow = [
+  { service: getServiceBySlug("certification-exam-testing"), href: "/services/certification-exam-testing" },
+  { service: getServiceBySlug("life-insurance-boot-camp"), href: "/services/life-insurance-boot-camp" },
+  { service: getServiceBySlug("property-casualty-boot-camp"), href: "/services/property-casualty-boot-camp" },
+];
+
 export default function Services() {
   const nextSat = getNextSaturday();
   const filter = getUrlFilter();
 
   const visibleServices = filter === "bootcamp"
     ? services.filter((s) => s.saturdayOnly)
-    : filter === "business"
-    ? services.filter((s) => s.category === "business")
     : filter === "testing"
     ? services.filter((s) => s.category === "testing")
-    : services;
+    : services.filter((s) => s.category === "business");
 
-  const showExamCram = !filter;
+  const showTestingBlock = !filter;
 
   const pageTitle =
     filter === "bootcamp" ? "Exam Prep Bootcamps" :
-    filter === "business" ? "Business Services" :
     filter === "testing" ? "Exam Testing Services" :
-    "Our Services";
+    "Business Services";
 
   return (
     <div className="min-h-screen flex flex-col bg-background">
       <SEO
-        title="Testing & Business Services in Houston TX"
+        title="Business Services in Houston TX"
         canonical="/services"
-        description="Exam testing, insurance license boot camps, notary services & passport photos in Houston, TX. Authorized Pearson VUE & Certiport center at 616 FM 1960 Rd W. Book online or call (281) 836-5357."
+        description="Printing, notary, passport photos, faxing, resume services and more at LBS Business Services Center. Authorized Pearson VUE & Certiport exam testing also available at 616 FM 1960 Rd W. Call (281) 836-5357."
       />
       <Header />
 
@@ -64,7 +66,7 @@ export default function Services() {
             {pageTitle}
           </h1>
           <p className="text-lg text-white/80 max-w-2xl mx-auto">
-            From certification exams to notary services, we provide everything
+            From printing and notary to exam testing, we provide everything
             you need in one convenient location.
           </p>
         </div>
@@ -80,50 +82,6 @@ export default function Services() {
             </div>
           )}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            {showExamCram && (
-              /* Exam Cram — external link to MyEasyPass, shown on unfiltered view only */
-              <Card
-                className="group border-border/50 bg-card transition-all duration-300 hover-elevate"
-                data-testid="card-service-exam-cram"
-              >
-                <div className="relative aspect-[4/3] overflow-hidden rounded-t-md bg-white border-2 border-[#0D1B3D]">
-                  <img
-                    src="/images/myeasypass-logo.png"
-                    alt="MyEasyPass - Exam Cram"
-                    className="w-full h-full object-contain p-6"
-                  />
-                  <div className="absolute bottom-3 left-3 bg-white/95 dark:bg-card/95 backdrop-blur-sm rounded-md px-3 py-1.5 shadow-sm">
-                    <span className="text-lg font-bold text-[#0D1B3D] dark:text-white">$19.99</span>
-                    <span className="text-xs text-muted-foreground ml-1">/month</span>
-                  </div>
-                </div>
-                <CardContent className="p-5 space-y-3">
-                  <div className="flex items-start gap-3">
-                    <div className="shrink-0 w-10 h-10 rounded-md bg-[#0D1B3D]/10 dark:bg-[#0077FF]/20 flex items-center justify-center text-[#0D1B3D] dark:text-[#0077FF]">
-                      <GraduationCap className="w-5 h-5" />
-                    </div>
-                    <div className="space-y-1.5 min-w-0">
-                      <h3 className="font-semibold text-lg leading-tight" data-testid="text-service-title-exam-cram">
-                        Exam Cram
-                      </h3>
-                      <p className="text-sm text-muted-foreground leading-relaxed line-clamp-2" data-testid="text-service-desc-exam-cram">
-                        Practice tests for Texas Real Estate, Insurance, and Professional licensing exams.
-                      </p>
-                    </div>
-                  </div>
-                  <a href="https://www.myeasypass.net" target="_blank" rel="noopener noreferrer">
-                    <Button
-                      size="sm"
-                      className="w-full mt-2 group/btn bg-gradient-to-r from-[#FF6A00] to-[#FF2D55] text-white border-0 rounded-full"
-                      data-testid="button-learn-more-exam-cram"
-                    >
-                      Learn More
-                      <ArrowRight className="w-4 h-4 ml-1 transition-transform group-hover/btn:translate-x-0.5" />
-                    </Button>
-                  </a>
-                </CardContent>
-              </Card>
-            )}
             {visibleServices.map((service) => (
               <ServiceCard
                 key={service.id}
@@ -142,43 +100,62 @@ export default function Services() {
         </div>
       </section>
 
-      {filter !== "business" && (
-      <section className="py-12 bg-muted/30" data-testid="section-exam-programs">
+      {showTestingBlock && (
+      <section className="py-12 bg-muted/30" data-testid="section-testing-exam-programs">
         <div className="max-w-7xl mx-auto px-6">
           <div className="text-center max-w-2xl mx-auto mb-8 space-y-3">
-            <h2 className="text-3xl font-bold">Supported Exam Programs</h2>
+            <h2 className="text-3xl font-bold">Testing &amp; Exam Programs</h2>
             <p className="text-muted-foreground">
-              We are an authorized testing center for major certification
-              programs.
+              Authorized exam testing, insurance license Boot Camps, and independent exam prep.
             </p>
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {[
-              {
-                name: "Pearson VUE",
-                desc: "IT certifications, professional licenses, and academic admissions exams from hundreds of programs worldwide.",
-              },
-              {
-                name: "Certiport",
-                desc: "Microsoft Office Specialist (MOS), Adobe Certified Professional, and other industry certifications.",
-              },
-              {
-                name: "PMI",
-                desc: "Project Management Professional (PMP), CAPM, and other PMI certification exams.",
-              },
-            ].map((program) => (
-              <div
-                key={program.name}
-                className="bg-card border border-border/50 rounded-md p-6 space-y-3 text-center"
-                data-testid={`card-program-${program.name.toLowerCase().replace(/\s/g, "-")}`}
-              >
-                <div className="w-14 h-14 rounded-full bg-[#0D1B3D]/10 dark:bg-[#0077FF]/20 flex items-center justify-center mx-auto">
-                  <Shield className="w-7 h-7 text-[#0D1B3D] dark:text-[#0077FF]" />
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+            {testingAndExamRow.map(({ service, href }) => service && (
+              <Link key={service.id} href={href}>
+                <div
+                  className="group border border-border/50 bg-card rounded-md overflow-hidden hover-elevate cursor-pointer h-full"
+                  data-testid={`card-testing-row-${service.id}`}
+                >
+                  <div className="relative aspect-[4/3] overflow-hidden rounded-md">
+                    {service.image && (
+                      <img
+                        src={service.image}
+                        alt={service.title}
+                        className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                      />
+                    )}
+                    {service.price && (
+                      <div className="absolute bottom-2 left-2 bg-white/95 dark:bg-card/95 backdrop-blur-sm rounded-md px-2 py-1 shadow-sm">
+                        <span className="text-sm font-bold text-[#0D1B3D] dark:text-white">{service.price}</span>
+                      </div>
+                    )}
+                  </div>
+                  <div className="p-3">
+                    <h3 className="text-sm font-semibold leading-tight">{service.shortTitle}</h3>
+                  </div>
                 </div>
-                <h3 className="font-semibold text-lg">{program.name}</h3>
-                <p className="text-sm text-muted-foreground">{program.desc}</p>
-              </div>
+              </Link>
             ))}
+            <a
+              href="https://www.myeasypass.net"
+              target="_blank"
+              rel="noopener noreferrer"
+              data-testid="card-testing-row-myeasypass"
+            >
+              <div className="group border border-border/50 bg-card rounded-md overflow-hidden hover-elevate cursor-pointer h-full">
+                <div className="relative aspect-[4/3] overflow-hidden rounded-md bg-white border-b border-border/50">
+                  <img
+                    src="/images/myeasypass-logo.png"
+                    alt="MyEasyPass.Net Exam Cram"
+                    className="w-full h-full object-contain p-6"
+                  />
+                  <ExternalLink className="absolute top-2 right-2 w-4 h-4 text-muted-foreground" />
+                </div>
+                <div className="p-3">
+                  <h3 className="text-sm font-semibold leading-tight">MyEasyPass.Net Exam Cram</h3>
+                </div>
+              </div>
+            </a>
           </div>
         </div>
       </section>
