@@ -20,7 +20,7 @@ export default function About() {
       <SEO
         title="About LBS Business Services Center | Linton Business Solutions Houston TX"
         canonical="/about"
-        description="LBS Business Services Center is a division of Linton Business Solutions LLC, offering printing, notary, passport photos and more, plus authorized Pearson VUE & Certiport testing, in Houston, TX."
+        description="LBS Business Services Center is a division of Linton Business Solutions LLC, offering printing, notary, passport photos and more, plus authorized Pearson VUE & Certiport testing, in Houston, Texas."
       />
       <Header />
 

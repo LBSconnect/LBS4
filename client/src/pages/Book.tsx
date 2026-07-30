@@ -12,7 +12,7 @@ export default function Book() {
       <SEO
         title="Book an Appointment | LBS Business Services Center Houston TX"
         canonical="/book"
-        description="Book notary service, passport photos, an exam testing appointment, or an insurance exam boot camp at LBS Business Services Center in Houston, TX. Online scheduling available 24/7. Call (281) 836-5357."
+        description="Book notary service, passport photos, an exam testing appointment, or an insurance exam boot camp at LBS Business Services Center in Houston, Texas. Online scheduling available 24/7. Call 281-836-5357."
       />
       <Header />
 
@@ -84,7 +84,7 @@ export default function Book() {
           <a href="tel:2818365357">
             <Button variant="outline" className="gap-2">
               <Phone className="w-4 h-4" />
-              (281) 836-5357
+              281-836-5357
             </Button>
           </a>
         </div>

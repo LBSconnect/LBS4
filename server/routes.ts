@@ -475,7 +475,7 @@ export async function registerRoutes(
             // Mark the appointment as payment-failed and reject — bootcamps cannot proceed without payment
             await storage.updateAppointmentPayment(appointment.id, 'failed');
             return res.status(500).json({
-              error: 'Payment processing failed. Please try again or call (281) 836-5357 to book your Boot Camp session.',
+              error: 'Payment processing failed. Please try again or call 281-836-5357 to book your Boot Camp session.',
             });
           }
           // For non-bootcamp services, continue without payment if Stripe fails

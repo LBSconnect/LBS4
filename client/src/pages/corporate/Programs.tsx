@@ -94,7 +94,7 @@ export default function CorporatePrograms() {
     <>
       <SEO
         title="Corporate Notary Plans: Bronze, Silver, Gold | LBS Houston"
-        description="Compare LBS corporate notary subscription plans. Bronze $250/mo (15 acts), Silver $400/mo (25 acts), Gold $750/mo (100 acts). Serving Houston TX businesses."
+        description="Compare LBS corporate notary subscription plans. Bronze $250/mo (15 acts), Silver $400/mo (25 acts), Gold $750/mo (100 acts). Serving Houston, Texas businesses."
         canonical="/corporate/programs"
       />
       <Header />
@@ -209,7 +209,7 @@ export default function CorporatePrograms() {
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center text-sm">
             <a href="tel:2818365357" className="flex items-center justify-center gap-2 text-white/80 hover:text-white transition-colors">
-              <Phone className="w-4 h-4" /> (281) 836-5357
+              <Phone className="w-4 h-4" /> 281-836-5357
             </a>
             <a href="mailto:info@lbsconnect.net" className="flex items-center justify-center gap-2 text-white/80 hover:text-white transition-colors">
               <Mail className="w-4 h-4" /> info@lbsconnect.net

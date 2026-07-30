@@ -48,7 +48,7 @@ export default function Services() {
       <SEO
         title="Business Services in Houston TX"
         canonical="/services"
-        description="Printing, notary, passport photos, faxing, resume services and more at LBS Business Services Center. Authorized Pearson VUE & Certiport exam testing also available at 616 FM 1960 Rd W. Call (281) 836-5357."
+        description="Printing, notary, passport photos, faxing, resume services and more at LBS Business Services Center. Authorized Pearson VUE & Certiport exam testing also available at 616 FM 1960 Road West. Call 281-836-5357."
       />
       <Header />
 
@@ -155,7 +155,7 @@ export default function Services() {
                 <div className="relative aspect-[4/3] overflow-hidden rounded-t-xl bg-white border-b border-border/50">
                   <img
                     src="/images/myeasypass-logo.png"
-                    alt="MyEasyPass.Net Exam Cram"
+                    alt="MyEasyPass.net Exam Cram"
                     className="w-full h-full object-contain p-6"
                     loading="lazy"
                     decoding="async"
@@ -163,7 +163,7 @@ export default function Services() {
                   <ExternalLink className="absolute top-2 right-2 w-4 h-4 text-muted-foreground" />
                 </div>
                 <div className="p-3 space-y-1">
-                  <h3 className="text-sm font-semibold leading-tight">MyEasyPass.Net Exam Cram</h3>
+                  <h3 className="text-sm font-semibold leading-tight">MyEasyPass.net Exam Cram</h3>
                   <p className="text-xs text-muted-foreground leading-snug line-clamp-2">
                     Online practice tests for Texas licensing exams.
                   </p>

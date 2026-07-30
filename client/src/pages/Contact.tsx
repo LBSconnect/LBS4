@@ -154,9 +154,9 @@ export default function Contact() {
   return (
     <div className="min-h-screen flex flex-col bg-background">
       <SEO
-        title="Contact LBS Business Services Center Houston TX | (281) 836-5357"
+        title="Contact LBS Business Services Center Houston TX | 281-836-5357"
         canonical="/contact"
-        description="Contact LBS Business Services Center at 616 FM 1960 Rd W, Ste 101, Houston, TX 77090. Call (281) 836-5357 or email info@lbsconnect.net. Open Mon–Fri 8 AM–5 PM, Sat 8 AM–4 PM."
+        description="Contact LBS Business Services Center at 616 FM 1960 Road West, Suite 101, Houston, Texas 77090. Call 281-836-5357 or email info@lbsconnect.net. Open Mon–Fri 8 AM–5 PM, Sat 8 AM–4 PM."
       />
       <Header />
 
@@ -199,9 +199,9 @@ export default function Contact() {
                   <div>
                     <h3 className="font-semibold text-sm">Location</h3>
                     <p className="text-sm text-muted-foreground mt-1">
-                      616 FM 1960 Rd W
+                      616 FM 1960 Road West
                       <br />
-                      Ste 101
+                      Suite 101
                       <br />
                       Houston, Texas 77090-3048
                     </p>
@@ -219,7 +219,7 @@ export default function Contact() {
                   <div>
                     <h3 className="font-semibold text-sm">Phone</h3>
                     <p className="text-sm text-muted-foreground mt-1">
-                      (281) 836-5357
+                      281-836-5357
                     </p>
                   </div>
                 </a>

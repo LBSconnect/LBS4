@@ -237,7 +237,7 @@ export default function CorporateBook() {
               </div>
               <div>
                 <p className="text-xs text-muted-foreground">Location</p>
-                <p className="text-sm text-foreground">616 FM 1960 Rd W, Ste 101, Houston, TX 77090</p>
+                <p className="text-sm text-foreground">616 FM 1960 Road West, Suite 101, Houston, Texas 77090</p>
               </div>
             </div>
             <div className="bg-amber-50 border border-amber-200 rounded-xl p-4 text-sm text-amber-800 text-left">
@@ -347,7 +347,7 @@ export default function CorporateBook() {
                     {errors.employeeEmail && <p className="text-red-500 text-xs mt-1">{errors.employeeEmail}</p>}
                   </Field>
                   <Field label="Phone Number">
-                    <Input type="tel" value={form.employeePhone} onChange={(e) => set("employeePhone", e.target.value)} placeholder="(281) 555-1234" />
+                    <Input type="tel" value={form.employeePhone} onChange={(e) => set("employeePhone", e.target.value)} placeholder="281-555-1234" />
                   </Field>
                 </div>
 

@@ -83,7 +83,7 @@ const faqs = [
   },
   {
     q: "Where do I park?",
-    a: "Free parking is available directly in front of our suite at 616 FM 1960 Rd W, Ste 101, Houston TX 77090. We're in a strip center with plenty of spots.",
+    a: "Free parking is available directly in front of our suite at 616 FM 1960 Road West, Suite 101, Houston, Texas 77090. We're in a strip center with plenty of spots.",
   },
   {
     q: "What happens if I need to reschedule?",
@@ -149,7 +149,7 @@ export default function Home() {
                 className="text-lg md:text-xl text-white/80 leading-relaxed max-w-lg"
                 data-testid="text-hero-subtitle"
               >
-                Professional services that help you save time, stay productive, and keep your business moving — right here in Houston, TX.
+                Professional services that help you save time, stay productive, and keep your business moving — right here in Houston, Texas.
               </p>
               <div className="flex flex-col sm:flex-row gap-3 pt-2">
                 <Link href="/book">
@@ -368,7 +368,7 @@ export default function Home() {
                     <div>
                       <p className="font-medium text-sm">Address</p>
                       <p className="text-sm text-muted-foreground">
-                        616 FM 1960 Rd W, Ste 101<br />Houston, TX 77090-3048
+                        616 FM 1960 Road West, Suite 101<br />Houston, Texas 77090-3048
                       </p>
                     </div>
                   </div>
@@ -377,7 +377,7 @@ export default function Home() {
                     <div>
                       <p className="font-medium text-sm">Phone</p>
                       <a href="tel:2818365357" className="text-sm text-muted-foreground hover:text-foreground">
-                        (281) 836-5357
+                        281-836-5357
                       </a>
                     </div>
                   </div>
@@ -478,7 +478,7 @@ export default function Home() {
             <p className="text-sm text-muted-foreground">
               Still have questions?{" "}
               <a href="tel:2818365357" className="text-[#FF6A00] font-semibold hover:underline">
-                Call us at (281) 836-5357
+                Call us at 281-836-5357
               </a>
             </p>
           </div>
@@ -495,7 +495,7 @@ export default function Home() {
               </div>
               <div>
                 <p className="text-xs font-bold uppercase tracking-widest text-[#FF2D55]">We're Here to Help</p>
-                <p className="text-2xl font-bold text-white">(281) 836-5357</p>
+                <p className="text-2xl font-bold text-white">281-836-5357</p>
                 <p className="text-sm text-[#FF2D55] font-medium">Walk-ins Welcome &nbsp;|&nbsp; Open to the Public</p>
               </div>
             </a>

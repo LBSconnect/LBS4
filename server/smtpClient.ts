@@ -166,7 +166,7 @@ export async function createOutlookCalendarEvent(options: {
     body: { contentType: 'HTML', content: options.bodyHtml },
     start: { dateTime: toUTC(start), timeZone: 'UTC' },
     end:   { dateTime: toUTC(end),   timeZone: 'UTC' },
-    location: { displayName: '616 FM 1960 Rd W, Ste 101, Houston, TX 77090-3048' },
+    location: { displayName: '616 FM 1960 Road West, Suite 101, Houston, Texas 77090-3048' },
     isReminderOn: true,
     reminderMinutesBeforeStart: 30,
   };

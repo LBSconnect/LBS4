@@ -284,7 +284,7 @@ export default function TermsOfUse() {
             <p className="font-semibold text-[#0D1B3D] dark:text-white">Linton Business Solutions LLC</p>
             <p className="text-muted-foreground">616 FM 1960 Road West, Suite 101</p>
             <p className="text-muted-foreground">Houston, Texas 77090-3048</p>
-            <p className="text-muted-foreground">Phone: (281) 836-5357</p>
+            <p className="text-muted-foreground">Phone: 281-836-5357</p>
             <p className="text-muted-foreground">
               Email: <a href="mailto:info@lbsconnect.net" className="text-[#0D1B3D] dark:text-[#0077FF] hover:underline">info@lbsconnect.net</a>
             </p>

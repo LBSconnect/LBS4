@@ -107,9 +107,9 @@ export default function Footer() {
               >
                 <MapPin className="w-4 h-4 mt-0.5 shrink-0 text-[#FF2D55]" />
                 <span>
-                  616 FM 1960 Rd W<br />
-                  Ste 101<br />
-                  Houston, TX 77090-3048
+                  616 FM 1960 Road West<br />
+                  Suite 101<br />
+                  Houston, Texas 77090-3048
                 </span>
               </a>
               <a
@@ -118,7 +118,7 @@ export default function Footer() {
                 data-testid="link-footer-phone"
               >
                 <Phone className="w-4 h-4 shrink-0 text-[#FF2D55]" />
-                (281) 836-5357
+                281-836-5357
               </a>
               <a
                 href="mailto:info@lbsconnect.net"
