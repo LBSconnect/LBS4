@@ -64,12 +64,12 @@ export default function Header() {
               <span>(281) 836-5357</span>
             </a>
             <a
-              href="mailto:info@lbs4.com"
+              href="mailto:info@lbsconnect.net"
               className="flex items-center gap-1.5 transition-colors"
               data-testid="link-email-top"
             >
               <Mail className="w-3.5 h-3.5" />
-              <span>info@lbs4.com</span>
+              <span>info@lbsconnect.net</span>
             </a>
           </div>
           <div className="flex items-center gap-1.5">
@@ -333,8 +333,8 @@ export default function Header() {
                   <a href="tel:2818365357" className="flex items-center gap-2">
                     <Phone className="w-4 h-4" /> (281) 836-5357
                   </a>
-                  <a href="mailto:info@lbs4.com" className="flex items-center gap-2">
-                    <Mail className="w-4 h-4" /> info@lbs4.com
+                  <a href="mailto:info@lbsconnect.net" className="flex items-center gap-2">
+                    <Mail className="w-4 h-4" /> info@lbsconnect.net
                   </a>
                 </div>
               </div>

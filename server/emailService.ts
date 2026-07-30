@@ -1,6 +1,6 @@
 import { sendEmail, createOutlookCalendarEvent } from './smtpClient';
 
-const NOTIFICATION_EMAIL = process.env.NOTIFICATION_EMAIL || 'info@lbs4.com';
+const NOTIFICATION_EMAIL = process.env.NOTIFICATION_EMAIL || 'info@lbsconnect.net';
 const BUSINESS_NAME = 'LBS Test & Exam Center';
 const BUSINESS_ADDRESS = '616 FM 1960 Rd W, Ste 101, Houston, TX 77090-3048';
 const LBS_PHONE = '(281) 836-5357';

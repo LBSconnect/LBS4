@@ -152,12 +152,12 @@ test.describe("Header navigation", () => {
     expect(href).toBe("tel:2818365357");
   });
 
-  test("Top bar email = mailto:info@lbs4.com", async ({ page }) => {
+  test("Top bar email = mailto:info@lbsconnect.net", async ({ page }) => {
     await goto(page, "/");
     const href = await page
       .locator('[data-testid="link-email-top"]')
       .getAttribute("href");
-    expect(href).toBe("mailto:info@lbs4.com");
+    expect(href).toBe("mailto:info@lbsconnect.net");
   });
 });
 
@@ -261,12 +261,12 @@ test.describe("Footer navigation", () => {
     expect(href).toBe("tel:2818365357");
   });
 
-  test("Footer email = mailto:info@lbs4.com", async ({ page }) => {
+  test("Footer email = mailto:info@lbsconnect.net", async ({ page }) => {
     await goto(page, "/");
     const href = await page
       .locator('[data-testid="link-footer-email"]')
       .getAttribute("href");
-    expect(href).toBe("mailto:info@lbs4.com");
+    expect(href).toBe("mailto:info@lbsconnect.net");
   });
 
   test("Footer address links to Google Maps", async ({ page }) => {

@@ -121,12 +121,12 @@ export default function Footer() {
                 (281) 836-5357
               </a>
               <a
-                href="mailto:info@lbs4.com"
+                href="mailto:info@lbsconnect.net"
                 className="flex items-center gap-2.5 text-sm text-white/70 transition-colors hover:text-white"
                 data-testid="link-footer-email"
               >
                 <Mail className="w-4 h-4 shrink-0 text-[#FF2D55]" />
-                info@lbs4.com
+                info@lbsconnect.net
               </a>
               <div className="flex items-start gap-2.5 text-sm text-white/70">
                 <Clock className="w-4 h-4 mt-0.5 shrink-0 text-[#FF2D55]" />
