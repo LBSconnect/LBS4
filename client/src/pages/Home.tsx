@@ -75,7 +75,7 @@ const faqs = [
   },
   {
     q: "Can I walk in for notary or passport photos?",
-    a: "Yes. Walk-ins are always welcome for notary services and passport photos during regular business hours (Mon–Fri 8:30 AM–6 PM, Sat 9 AM–3 PM). No appointment needed.",
+    a: "Yes. Walk-ins are always welcome for notary services and passport photos during regular business hours (Mon–Fri 8 AM–5 PM, Sat 8 AM–4 PM). No appointment needed.",
   },
   {
     q: "How far in advance do I need to schedule a testing appointment?",
@@ -386,8 +386,8 @@ export default function Home() {
                     <div>
                       <p className="font-medium text-sm">Hours</p>
                       <p className="text-sm text-muted-foreground">
-                        Mon – Fri: 8:30 AM – 6:00 PM<br />
-                        Sat: 9:00 AM – 3:00 PM<br />
+                        Mon – Fri: 8:00 AM – 5:00 PM<br />
+                        Sat: 8:00 AM – 4:00 PM<br />
                         Closed Sun
                       </p>
                     </div>
