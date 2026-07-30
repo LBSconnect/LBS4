@@ -9,6 +9,11 @@ import {
   Briefcase,
 } from "lucide-react";
 
+export interface RateTableSection {
+  label: string;
+  rows: { name: string; price: string }[];
+}
+
 export interface ServiceInfo {
   id: string;
   slug: string;
@@ -23,6 +28,12 @@ export interface ServiceInfo {
   priceLabel: string;
   /** Shown on the card in place of a price when the rate is variable/in-office (e.g. "Pay in office") */
   priceNote?: string;
+  /** Headline rate shown in the booking sidebar for pay-at-office services (e.g. "From 20¢/side") */
+  startingRate?: string;
+  /** Full in-store rate breakdown shown under "About This Service" */
+  rateTable?: RateTableSection[];
+  /** Small disclaimer/footnote shown under the rate table (e.g. minimums, volume discounts) */
+  rateNote?: string;
   icon: typeof Stamp;
   stripeProductName: string;
   saturdayOnly?: boolean;
@@ -175,6 +186,26 @@ export const services: ServiceInfo[] = [
     price: "",
     priceLabel: "",
     priceNote: "Pay in office",
+    startingRate: "From 20¢/side (B&W)",
+    rateTable: [
+      {
+        label: "Black & White",
+        rows: [
+          { name: "Letter", price: "20¢/side" },
+          { name: "Legal", price: "30¢/side" },
+          { name: "11 × 17", price: "50¢/side" },
+        ],
+      },
+      {
+        label: "Full Color",
+        rows: [
+          { name: "Letter", price: "65¢/side" },
+          { name: "Legal", price: "85¢/side" },
+          { name: "11 × 17", price: "$1.25/side" },
+        ],
+      },
+    ],
+    rateNote: "Volume discounts available. $2 minimum printing transaction. Rates subject to change.",
     icon: Printer,
     stripeProductName: "Printing & Copies",
     category: "business",
@@ -200,6 +231,19 @@ export const services: ServiceInfo[] = [
     price: "",
     priceLabel: "",
     priceNote: "Pay in office",
+    startingRate: "From $3 (up to 10 pages)",
+    rateTable: [
+      {
+        label: "Document Scanning",
+        rows: [
+          { name: "Up to 10 pages", price: "$3" },
+          { name: "Additional pages", price: "15¢ each" },
+          { name: "Manual or flatbed scanning", price: "$1 per page" },
+          { name: "Photo scanning", price: "$2 each" },
+        ],
+      },
+    ],
+    rateNote: "Rates subject to change.",
     icon: ScanLine,
     stripeProductName: "Document Scanning",
     category: "business",
@@ -225,6 +269,24 @@ export const services: ServiceInfo[] = [
     price: "",
     priceLabel: "",
     priceNote: "Pay in office",
+    startingRate: "From $2 (first page)",
+    rateTable: [
+      {
+        label: "Sending",
+        rows: [
+          { name: "First page", price: "$2" },
+          { name: "Additional pages", price: "$1 each" },
+        ],
+      },
+      {
+        label: "Receiving",
+        rows: [
+          { name: "First page", price: "$1.50" },
+          { name: "Additional pages", price: "75¢ each" },
+        ],
+      },
+    ],
+    rateNote: "Free cover sheet and confirmation included. Rates subject to change.",
     icon: Send,
     stripeProductName: "Fax Services",
     category: "business",

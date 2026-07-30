@@ -15,7 +15,7 @@ const PLAN_NAMES: Record<string, string> = {
 
 const LBS_ADDRESS = "616 FM 1960 Rd W, Ste 101, Houston, TX 77090";
 const LBS_PHONE = "(281) 836-5357";
-const LBS_EMAIL = process.env.MAIL_FROM_ADDRESS || "info@lbs4.com";
+const LBS_EMAIL = process.env.MAIL_FROM_ADDRESS || "info@lbsconnect.net";
 const SITE_URL = "https://www.lbs4.com";
 
 function emailWrapper(content: string): string {
