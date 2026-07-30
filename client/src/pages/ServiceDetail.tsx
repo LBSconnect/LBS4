@@ -388,7 +388,7 @@ export default function ServiceDetail() {
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
             <div className="lg:col-span-2 space-y-8">
               {service.image ? (
-                <div className="rounded-md overflow-hidden">
+                <div className="rounded-xl overflow-hidden">
                   <img
                     src={service.image}
                     alt={service.title}

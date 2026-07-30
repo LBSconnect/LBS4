@@ -113,10 +113,10 @@ export default function Services() {
             {testingAndExamRow.map(({ service, href }) => service && (
               <Link key={service.id} href={href}>
                 <div
-                  className="group border border-border/50 bg-card rounded-md overflow-hidden hover-elevate cursor-pointer h-full"
+                  className="group border border-border/50 bg-card rounded-xl overflow-hidden hover-elevate cursor-pointer h-full"
                   data-testid={`card-testing-row-${service.id}`}
                 >
-                  <div className="relative aspect-[4/3] overflow-hidden rounded-md">
+                  <div className="relative aspect-[4/3] overflow-hidden rounded-t-xl">
                     {service.image && (
                       <img
                         src={service.image}
@@ -142,8 +142,8 @@ export default function Services() {
               rel="noopener noreferrer"
               data-testid="card-testing-row-myeasypass"
             >
-              <div className="group border border-border/50 bg-card rounded-md overflow-hidden hover-elevate cursor-pointer h-full">
-                <div className="relative aspect-[4/3] overflow-hidden rounded-md bg-white border-b border-border/50">
+              <div className="group border border-border/50 bg-card rounded-xl overflow-hidden hover-elevate cursor-pointer h-full">
+                <div className="relative aspect-[4/3] overflow-hidden rounded-t-xl bg-white border-b border-border/50">
                   <img
                     src="/images/myeasypass-logo.png"
                     alt="MyEasyPass.Net Exam Cram"

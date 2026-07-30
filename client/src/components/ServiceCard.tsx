@@ -35,7 +35,7 @@ export default function ServiceCard({
       className="group border-border/50 bg-card transition-all duration-300 hover-elevate"
       data-testid={`card-service-${slug}`}
     >
-      <div className="relative aspect-[4/3] overflow-hidden rounded-t-md">
+      <div className="relative aspect-[4/3] overflow-hidden rounded-t-xl">
         {image ? (
           <>
             <img
