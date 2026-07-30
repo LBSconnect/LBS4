@@ -15,6 +15,15 @@ import CheckoutSuccess from "@/pages/CheckoutSuccess";
 import CheckoutCancel from "@/pages/CheckoutCancel";
 import PrivacyPolicy from "@/pages/PrivacyPolicy";
 import TermsOfUse from "@/pages/TermsOfUse";
+import CookiePolicy from "@/pages/CookiePolicy";
+import NoticeAtCollection from "@/pages/NoticeAtCollection";
+import PrivacyRequest from "@/pages/PrivacyRequest";
+import AccessibilityStatement from "@/pages/AccessibilityStatement";
+import CopyrightDmcaPolicy from "@/pages/CopyrightDmcaPolicy";
+import ElectronicCommunicationsTerms from "@/pages/ElectronicCommunicationsTerms";
+import BookingCancellationPolicy from "@/pages/BookingCancellationPolicy";
+import CandidateRulesSurveillanceNotice from "@/pages/CandidateRulesSurveillanceNotice";
+import DocumentHandlingNotice from "@/pages/DocumentHandlingNotice";
 import Book from "@/pages/Book";
 import CorporateLanding from "@/pages/corporate/Landing";
 import CorporatePrograms from "@/pages/corporate/Programs";
@@ -41,6 +50,15 @@ function Router() {
         <Route path="/checkout/cancel" component={CheckoutCancel} />
         <Route path="/privacy-policy" component={PrivacyPolicy} />
         <Route path="/terms-of-use" component={TermsOfUse} />
+        <Route path="/cookie-policy" component={CookiePolicy} />
+        <Route path="/notice-at-collection" component={NoticeAtCollection} />
+        <Route path="/privacy-request" component={PrivacyRequest} />
+        <Route path="/accessibility-statement" component={AccessibilityStatement} />
+        <Route path="/copyright-dmca-policy" component={CopyrightDmcaPolicy} />
+        <Route path="/electronic-communications-terms" component={ElectronicCommunicationsTerms} />
+        <Route path="/booking-cancellation-policy" component={BookingCancellationPolicy} />
+        <Route path="/candidate-rules-surveillance-notice" component={CandidateRulesSurveillanceNotice} />
+        <Route path="/document-handling-notice" component={DocumentHandlingNotice} />
         <Route path="/book" component={Book} />
         <Route path="/corporate" component={CorporateLanding} />
         <Route path="/corporate/programs" component={CorporatePrograms} />

@@ -1,289 +1,296 @@
-import Header from "@/components/Header";
-import Footer from "@/components/Footer";
 import SEO from "@/components/SEO";
+import LegalPageLayout from "@/components/LegalPageLayout";
 import { FileText } from "lucide-react";
 
 export default function TermsOfUse() {
   return (
-    <div className="min-h-screen flex flex-col bg-background">
+    <>
       <SEO
-        title="Terms of Use"
+        title="Terms of Service"
         canonical="/terms-of-use"
-        description="Terms of Use for LBS Business Services Center (Linton Business Solutions LLC), Houston, TX. Terms governing use of our website and services."
+        description="LBS4 Test, Exam, and Business Center Terms of Service: testing-center appointments, sponsored examinations, boot camps, notary services, passport photos, and business-center services."
       />
-      <Header />
+      <LegalPageLayout
+        icon={FileText}
+        title="LBS4 Test, Exam, and Business Center Terms of Service"
+        meta="Version 1.0 · Effective Date: July 30, 2026 · Last Updated: July 30, 2026"
+      >
+        <div className="space-y-4">
+          <h2 className="text-2xl font-bold text-[#0D1B3D] dark:text-white">1. Scope</h2>
+          <p className="text-muted-foreground leading-relaxed">These Terms apply to lbs4.com and LBS Test &amp; Exam Center services, including:</p>
+          <ul className="list-disc pl-6 text-muted-foreground space-y-2">
+            <li>testing-center appointments;</li>
+            <li>Pearson VUE, Certiport, PMI, and other sponsored examinations;</li>
+            <li>exam-preparation bootcamps;</li>
+            <li>notary services;</li>
+            <li>passport and visa photographs;</li>
+            <li>printing, copying, scanning, faxing, resume, website, and business-center services.</li>
+          </ul>
+        </div>
 
-      <section className="relative py-16 bg-gradient-to-br from-[#0D1B3D] to-[#1A237E]">
-        <div className="relative z-10 max-w-4xl mx-auto px-6 text-center space-y-4">
-          <div className="inline-flex items-center gap-2 bg-white/10 backdrop-blur-sm border border-white/20 rounded-full px-4 py-1.5 text-sm text-white/90">
-            <FileText className="w-4 h-4 text-[#FF2D55]" />
-            Legal
-          </div>
-          <h1 className="text-3xl md:text-4xl font-bold text-white">
-            Terms of Use
-          </h1>
-          <p className="text-white/80">
-            Last Updated: July 2026
+        <div className="space-y-4">
+          <h2 className="text-2xl font-bold text-[#0D1B3D] dark:text-white">2. Independent Testing Sponsors</h2>
+          <p className="text-muted-foreground leading-relaxed">Exam sponsors control their own:</p>
+          <ul className="list-disc pl-6 text-muted-foreground space-y-2">
+            <li>candidate eligibility and registration;</li>
+            <li>exam purchase or voucher;</li>
+            <li>identification rules;</li>
+            <li>accommodations;</li>
+            <li>exam content and security;</li>
+            <li>rescheduling and cancellation rules;</li>
+            <li>scoring and results;</li>
+            <li>retesting and certification decisions;</li>
+            <li>candidate data and retention.</li>
+          </ul>
+          <p className="text-muted-foreground leading-relaxed">
+            You may need to create an account and purchase the examination directly from the sponsor before
+            reserving a seat at LBS.
+          </p>
+          <p className="text-muted-foreground leading-relaxed">
+            When sponsor rules conflict with these Terms, sponsor rules control for the examination.
           </p>
         </div>
-      </section>
 
-      <section className="py-12 bg-background">
-        <div className="max-w-4xl mx-auto px-6">
-          <div className="prose prose-slate dark:prose-invert max-w-none space-y-8">
+        <div className="space-y-4">
+          <h2 className="text-2xl font-bold text-[#0D1B3D] dark:text-white">3. LBS Fees</h2>
+          <p className="text-muted-foreground leading-relaxed">
+            LBS facility, seat, booking, bootcamp, or service fees may be separate from sponsor exam or voucher
+            fees. Prices and refund rules shown before payment control.
+          </p>
+          <p className="text-muted-foreground leading-relaxed">
+            A Certiport seat fee may be advertised separately from the exam voucher.
+          </p>
+        </div>
 
-            <div className="space-y-4">
-              <h2 className="text-2xl font-bold text-[#0D1B3D] dark:text-white">Agreement to Terms</h2>
-              <p className="text-muted-foreground leading-relaxed">
-                These Terms of Use ("Terms") constitute a legally binding agreement between you and Linton Business
-                Solutions LLC, doing business as LBS Test & Exam Center ("LBS," "we," "us," or "our"), governing
-                your access to and use of our website at www.lbs4.com and our services provided at our Houston, Texas location.
-              </p>
-              <p className="text-muted-foreground leading-relaxed">
-                By accessing our website or using our services, you acknowledge that you have read, understood, and
-                agree to be bound by these Terms. If you do not agree to these Terms, you must not access or use
-                our website or services.
-              </p>
-            </div>
+        <div className="space-y-4">
+          <h2 className="text-2xl font-bold text-[#0D1B3D] dark:text-white">4. Appointments</h2>
+          <p className="text-muted-foreground leading-relaxed">
+            Provide accurate information and arrive by the stated time. Bring all confirmations and required
+            original identification.
+          </p>
+          <p className="text-muted-foreground leading-relaxed">LBS may deny or delay service when:</p>
+          <ul className="list-disc pl-6 text-muted-foreground space-y-2">
+            <li>identification is insufficient;</li>
+            <li>eligibility is not confirmed;</li>
+            <li>the candidate is late;</li>
+            <li>payment is incomplete;</li>
+            <li>equipment or sponsor systems are unavailable;</li>
+            <li>safety, security, or conduct rules are violated.</li>
+          </ul>
+        </div>
 
-            <div className="space-y-4">
-              <h2 className="text-2xl font-bold text-[#0D1B3D] dark:text-white">Services Description</h2>
-              <p className="text-muted-foreground leading-relaxed">
-                LBS Test & Exam Center provides the following services:
-              </p>
-              <ul className="list-disc pl-6 text-muted-foreground space-y-2">
-                <li><strong>Certiport Exam Testing:</strong> Authorized testing center for Pearson VUE, Certiport, PMI, and other certification programs</li>
-                <li><strong>Notary Services:</strong> Certified notary public services for documents and legal papers</li>
-                <li><strong>Passport Photos:</strong> Professional photos meeting government standards for passports and visas</li>
-                <li><strong>Texas Life Insurance Exam Boot Camp:</strong> Saturday morning intensive prep sessions (8:00 AM – 10:00 AM) for the Texas Life Insurance license exam</li>
-                <li><strong>Texas Property & Casualty Exam Boot Camp:</strong> Saturday morning intensive prep sessions (10:30 AM – 12:30 PM) for the Texas P&C insurance license exam</li>
-              </ul>
-            </div>
+        <div className="space-y-4">
+          <h2 className="text-2xl font-bold text-[#0D1B3D] dark:text-white">5. Candidate Conduct and Exam Security</h2>
+          <p className="text-muted-foreground leading-relaxed">
+            Candidates must comply with sponsor and LBS rules. Prohibited conduct includes:
+          </p>
+          <ul className="list-disc pl-6 text-muted-foreground space-y-2">
+            <li>bringing unauthorized items;</li>
+            <li>copying, recording, discussing, reproducing, or removing exam content;</li>
+            <li>receiving or providing unauthorized assistance;</li>
+            <li>impersonation;</li>
+            <li>tampering with equipment;</li>
+            <li>disruptive, threatening, discriminatory, or abusive conduct.</li>
+          </ul>
+          <p className="text-muted-foreground leading-relaxed">
+            LBS may stop an exam, remove a person, preserve evidence, and report an incident to the sponsor or
+            authorities.
+          </p>
+        </div>
 
-            <div className="space-y-4">
-              <h2 className="text-2xl font-bold text-[#0D1B3D] dark:text-white">Appointment Scheduling and Cancellation</h2>
+        <div className="space-y-4">
+          <h2 className="text-2xl font-bold text-[#0D1B3D] dark:text-white">6. Surveillance and Proctoring</h2>
+          <p className="text-muted-foreground leading-relaxed">
+            Testing areas may be observed or recorded as required by exam sponsors or security procedures. Sponsor
+            systems may collect video, audio, screen, identity, incident, and test-session information.
+          </p>
+          <p className="text-muted-foreground leading-relaxed">
+            LBS does not control sponsor retention or scoring decisions. Review the Candidate Rules and Surveillance
+            Notice.
+          </p>
+        </div>
 
-              <h3 className="text-lg font-semibold">Scheduling</h3>
-              <p className="text-muted-foreground leading-relaxed">
-                Appointments can be scheduled through our website or by contacting us directly. By scheduling an
-                appointment, you agree to arrive at the scheduled time and comply with all applicable requirements
-                for your service.
-              </p>
+        <div className="space-y-4">
+          <h2 className="text-2xl font-bold text-[#0D1B3D] dark:text-white">7. Scores and Certifications</h2>
+          <p className="text-muted-foreground leading-relaxed">
+            LBS does not determine official scores, pass/fail standards, eligibility, license issuance,
+            certification, or score appeals. Direct disputes to the sponsor or regulator.
+          </p>
+        </div>
 
-              <h3 className="text-lg font-semibold mt-4">Cancellation Policy</h3>
-              <p className="text-muted-foreground leading-relaxed">
-                If you need to cancel or reschedule an appointment, please contact us as soon as possible. Cancellation
-                policies may vary depending on the service:
-              </p>
-              <ul className="list-disc pl-6 text-muted-foreground space-y-2">
-                <li><strong>Certification Exams:</strong> Subject to the policies of the respective testing organization (Pearson VUE, Certiport, etc.). Fees may apply for late cancellations.</li>
-                <li><strong>Other Services:</strong> We request at least 24 hours notice for cancellations. Prepaid services may be rescheduled or refunded at our discretion.</li>
-              </ul>
+        <div className="space-y-4">
+          <h2 className="text-2xl font-bold text-[#0D1B3D] dark:text-white">8. Bootcamps</h2>
+          <p className="text-muted-foreground leading-relaxed">
+            Bootcamps and tutoring are educational services only. Attendance does not guarantee passing.
+            Registration does not include an official exam appointment unless expressly stated.
+          </p>
+        </div>
 
-              <h3 className="text-lg font-semibold mt-4">No-Shows</h3>
-              <p className="text-muted-foreground leading-relaxed">
-                Failure to appear for a scheduled appointment without prior notice may result in forfeiture of prepaid
-                fees. For certification exams, no-shows are subject to the testing organization's policies.
-              </p>
-            </div>
+        <div className="space-y-4">
+          <h2 className="text-2xl font-bold text-[#0D1B3D] dark:text-white">9. Notary Services</h2>
+          <p className="text-muted-foreground leading-relaxed">
+            The commissioned notary — not LBS as a corporate entity — performs the official act.
+          </p>
+          <p className="text-muted-foreground leading-relaxed">
+            The signer must personally appear as required, present satisfactory identification, understand the
+            document, and act willingly. The notary may refuse an act when legal or ethical requirements are not
+            satisfied.
+          </p>
+          <p className="text-muted-foreground leading-relaxed">
+            LBS and the notary do not select forms, prepare legal documents, explain legal consequences, or provide
+            legal advice. A notarial act does not prove that a document is truthful, valid, enforceable, or legally
+            sufficient.
+          </p>
+          <p className="text-muted-foreground leading-relaxed">
+            Required notary records may be public information.
+          </p>
+        </div>
 
-            <div className="space-y-4">
-              <h2 className="text-2xl font-bold text-[#0D1B3D] dark:text-white">Certification Exam Requirements</h2>
-              <p className="text-muted-foreground leading-relaxed">
-                For certification exam testing, you must:
-              </p>
-              <ul className="list-disc pl-6 text-muted-foreground space-y-2">
-                <li>Present valid, unexpired government-issued photo identification</li>
-                <li>Arrive at least 15-30 minutes before your scheduled exam time</li>
-                <li>Comply with the testing organization's rules and policies</li>
-                <li>Refrain from bringing prohibited items into the testing area (cell phones, smart watches, notes, etc.)</li>
-                <li>Follow all instructions provided by testing center staff</li>
-              </ul>
-              <p className="text-muted-foreground leading-relaxed">
-                Failure to comply with exam requirements may result in denial of testing, exam invalidation, or
-                reporting to the testing organization.
-              </p>
-            </div>
+        <div className="space-y-4">
+          <h2 className="text-2xl font-bold text-[#0D1B3D] dark:text-white">10. Passport and Visa Photos</h2>
+          <p className="text-muted-foreground leading-relaxed">
+            LBS will use reasonable efforts to produce photographs consistent with the customer's stated application
+            type. The receiving government or organization makes the final acceptance decision.
+          </p>
+          <p className="text-muted-foreground leading-relaxed">
+            The customer is responsible for confirming current size, age, background, clothing, digital, printing,
+            and submission requirements. Acceptance is not guaranteed.
+          </p>
+        </div>
 
-            <div className="space-y-4">
-              <h2 className="text-2xl font-bold text-[#0D1B3D] dark:text-white">Proctoring Services</h2>
-              <p className="text-muted-foreground leading-relaxed">
-                When using our remote proctoring services, you agree to:
-              </p>
-              <ul className="list-disc pl-6 text-muted-foreground space-y-2">
-                <li>Follow all rules established by your exam provider</li>
-                <li>Consent to video and audio monitoring during your exam session</li>
-                <li>Not engage in any form of cheating or exam misconduct</li>
-                <li>Use only authorized materials and resources</li>
-                <li>Maintain a quiet, distraction-free environment during your session</li>
-              </ul>
-              <p className="text-muted-foreground leading-relaxed">
-                We reserve the right to terminate a proctoring session if misconduct is observed or suspected.
-              </p>
-            </div>
+        <div className="space-y-4">
+          <h2 className="text-2xl font-bold text-[#0D1B3D] dark:text-white">11. Printing, Copying, Scanning, and Faxing</h2>
+          <p className="text-muted-foreground leading-relaxed">Customers are responsible for:</p>
+          <ul className="list-disc pl-6 text-muted-foreground space-y-2">
+            <li>having authority to reproduce or transmit documents;</li>
+            <li>providing correct files, page ranges, quantities, paper, destination email, and fax number;</li>
+            <li>reviewing proofs where offered;</li>
+            <li>retrieving originals and completed work;</li>
+            <li>avoiding illegal, infringing, fraudulent, threatening, or harmful content.</li>
+          </ul>
+          <p className="text-muted-foreground leading-relaxed">
+            Charges apply to work performed. Reprints caused by LBS error will be corrected; reprints caused by
+            customer files or instructions are chargeable.
+          </p>
+          <p className="text-muted-foreground leading-relaxed">
+            Fax delivery is not guaranteed merely because a machine reports transmission.
+          </p>
+        </div>
 
-            <div className="space-y-4">
-              <h2 className="text-2xl font-bold text-[#0D1B3D] dark:text-white">Notary Services</h2>
-              <p className="text-muted-foreground leading-relaxed">
-                Our notary services are provided in accordance with Texas law. By using our notary services, you:
-              </p>
-              <ul className="list-disc pl-6 text-muted-foreground space-y-2">
-                <li>Certify that you are signing documents voluntarily and of your own free will</li>
-                <li>Agree to present valid identification as required by law</li>
-                <li>Understand that the notary is prohibited from providing legal advice</li>
-                <li>Acknowledge that the notary may refuse to notarize documents if requirements are not met</li>
-              </ul>
-            </div>
+        <div className="space-y-4">
+          <h2 className="text-2xl font-bold text-[#0D1B3D] dark:text-white">12. Resume and Website Assistance</h2>
+          <p className="text-muted-foreground leading-relaxed">
+            Resume, application, website, and business-support services assist with preparation and presentation.
+            LBS does not guarantee interviews, employment, customers, revenue, search ranking, legal compliance,
+            accessibility compliance, or business outcomes.
+          </p>
+          <p className="text-muted-foreground leading-relaxed">
+            Customers are responsible for the truth and legality of submitted and published content.
+          </p>
+        </div>
 
-            <div className="space-y-4">
-              <h2 className="text-2xl font-bold text-[#0D1B3D] dark:text-white">Payment Terms</h2>
-              <p className="text-muted-foreground leading-relaxed">
-                Payment is required at the time of service or as specified during booking. We accept major credit
-                cards and process payments securely through Stripe. By making a payment, you agree to Stripe's
-                terms of service.
-              </p>
-              <p className="text-muted-foreground leading-relaxed">
-                Prices are subject to change without notice. The price displayed at the time of booking will be
-                honored for that transaction.
-              </p>
+        <div className="space-y-4">
+          <h2 className="text-2xl font-bold text-[#0D1B3D] dark:text-white">13. Temporary Documents and Privacy</h2>
+          <p className="text-muted-foreground leading-relaxed">
+            LBS will use customer files only to perform the requested service, troubleshoot, process payment, and
+            comply with law. Customers should avoid unnecessary sensitive information.
+          </p>
+          <p className="text-muted-foreground leading-relaxed">
+            See the Corporate Privacy Policy and Business-Center Document Handling Notice.
+          </p>
+        </div>
 
-              <h3 className="text-lg font-semibold mt-4">Refunds</h3>
-              <p className="text-muted-foreground leading-relaxed">
-                Refund eligibility varies by service:
-              </p>
-              <ul className="list-disc pl-6 text-muted-foreground space-y-2">
-                <li><strong>Certification Exams:</strong> Governed by the testing organization's refund policy</li>
-                <li><strong>Prepaid Services:</strong> May be refunded or applied to a future appointment at our discretion if cancelled with adequate notice</li>
-                <li><strong>Completed Services:</strong> Generally non-refundable once the service has been rendered</li>
-              </ul>
-            </div>
+        <div className="space-y-4">
+          <h2 className="text-2xl font-bold text-[#0D1B3D] dark:text-white">14. Payment</h2>
+          <p className="text-muted-foreground leading-relaxed">
+            Payment is due as shown at booking or service. Taxes and third-party fees may be additional.
+          </p>
+          <p className="text-muted-foreground leading-relaxed">
+            LBS may require deposits or full prepayment for custom, high-volume, or special-order work.
+          </p>
+        </div>
 
-            <div className="space-y-4">
-              <h2 className="text-2xl font-bold text-[#0D1B3D] dark:text-white">User Conduct</h2>
-              <p className="text-muted-foreground leading-relaxed">
-                When visiting our facility or using our website, you agree not to:
-              </p>
-              <ul className="list-disc pl-6 text-muted-foreground space-y-2">
-                <li>Engage in any disruptive, threatening, or harassing behavior</li>
-                <li>Damage, tamper with, or misuse our equipment or facilities</li>
-                <li>Access areas of our facility without authorization</li>
-                <li>Use our services for any unlawful purpose</li>
-                <li>Interfere with other customers or their testing sessions</li>
-                <li>Attempt to circumvent security measures on our website or systems</li>
-              </ul>
-              <p className="text-muted-foreground leading-relaxed">
-                We reserve the right to refuse service to anyone who violates these terms or engages in inappropriate conduct.
-              </p>
-            </div>
+        <div className="space-y-4">
+          <h2 className="text-2xl font-bold text-[#0D1B3D] dark:text-white">15. Cancellations and Refunds</h2>
+          <p className="text-muted-foreground leading-relaxed">
+            The LBS4 Booking and Cancellation Policy is incorporated into these Terms. Sponsor fees may be
+            non-refundable or governed solely by the sponsor.
+          </p>
+        </div>
 
-            <div className="space-y-4">
-              <h2 className="text-2xl font-bold text-[#0D1B3D] dark:text-white">Intellectual Property</h2>
-              <p className="text-muted-foreground leading-relaxed">
-                All content on our website, including text, graphics, logos, images, and software, is the property
-                of Linton Business Solutions LLC or its content suppliers and is protected by copyright and trademark
-                laws. You may not reproduce, distribute, modify, or create derivative works from any content without
-                our express written permission.
-              </p>
-              <p className="text-muted-foreground leading-relaxed">
-                Pearson VUE, Certiport, PMI, and other certification program names and logos are trademarks of their
-                respective owners.
-              </p>
-            </div>
+        <div className="space-y-4">
+          <h2 className="text-2xl font-bold text-[#0D1B3D] dark:text-white">16. Personal Property</h2>
+          <p className="text-muted-foreground leading-relaxed">
+            LBS is not responsible for unattended property except to the extent caused by LBS's failure to use
+            reasonable care. Candidates must follow locker and prohibited-item rules.
+          </p>
+        </div>
 
-            <div className="space-y-4">
-              <h2 className="text-2xl font-bold text-[#0D1B3D] dark:text-white">Disclaimer of Warranties</h2>
-              <p className="text-muted-foreground leading-relaxed">
-                OUR WEBSITE AND SERVICES ARE PROVIDED "AS IS" AND "AS AVAILABLE" WITHOUT WARRANTIES OF ANY KIND,
-                EITHER EXPRESS OR IMPLIED. TO THE FULLEST EXTENT PERMITTED BY LAW, WE DISCLAIM ALL WARRANTIES,
-                INCLUDING BUT NOT LIMITED TO IMPLIED WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE,
-                AND NON-INFRINGEMENT.
-              </p>
-              <p className="text-muted-foreground leading-relaxed">
-                We do not warrant that our website will be uninterrupted, error-free, or free of viruses or other
-                harmful components.
-              </p>
-            </div>
+        <div className="space-y-4">
+          <h2 className="text-2xl font-bold text-[#0D1B3D] dark:text-white">17. Conduct and Safety</h2>
+          <p className="text-muted-foreground leading-relaxed">
+            LBS may refuse service or remove anyone who threatens safety, disrupts operations, harasses others,
+            damages property, violates law, or violates sponsor rules.
+          </p>
+        </div>
 
-            <div className="space-y-4">
-              <h2 className="text-2xl font-bold text-[#0D1B3D] dark:text-white">Limitation of Liability</h2>
-              <p className="text-muted-foreground leading-relaxed">
-                TO THE MAXIMUM EXTENT PERMITTED BY LAW, LINTON BUSINESS SOLUTIONS LLC AND ITS OFFICERS, DIRECTORS,
-                EMPLOYEES, AND AGENTS SHALL NOT BE LIABLE FOR ANY INDIRECT, INCIDENTAL, SPECIAL, CONSEQUENTIAL, OR
-                PUNITIVE DAMAGES, INCLUDING BUT NOT LIMITED TO LOSS OF PROFITS, DATA, OR GOODWILL, ARISING OUT OF
-                OR RELATED TO YOUR USE OF OUR WEBSITE OR SERVICES.
-              </p>
-              <p className="text-muted-foreground leading-relaxed">
-                Our total liability for any claim arising from these Terms or your use of our services shall not
-                exceed the amount you paid for the specific service giving rise to the claim.
-              </p>
-            </div>
+        <div className="space-y-4">
+          <h2 className="text-2xl font-bold text-[#0D1B3D] dark:text-white">18. Accessibility</h2>
+          <p className="text-muted-foreground leading-relaxed">
+            Contact LBS regarding physical-service accommodations. Examination accommodations generally require
+            advance sponsor approval.
+          </p>
+        </div>
 
-            <div className="space-y-4">
-              <h2 className="text-2xl font-bold text-[#0D1B3D] dark:text-white">Indemnification</h2>
-              <p className="text-muted-foreground leading-relaxed">
-                You agree to indemnify, defend, and hold harmless Linton Business Solutions LLC, its officers,
-                directors, employees, agents, and affiliates from and against any claims, liabilities, damages,
-                losses, costs, or expenses (including reasonable attorneys' fees) arising out of or related to
-                your violation of these Terms or your use of our services.
-              </p>
-            </div>
+        <div className="space-y-4">
+          <h2 className="text-2xl font-bold text-[#0D1B3D] dark:text-white">19. Disclaimers</h2>
+          <p className="text-muted-foreground leading-relaxed">
+            TO THE MAXIMUM EXTENT PERMITTED BY LAW, SERVICES ARE PROVIDED "AS IS." LBS DOES NOT WARRANT EXAM RESULTS,
+            GOVERNMENT ACCEPTANCE, FAX DELIVERY, LEGAL SUFFICIENCY, EMPLOYMENT, OR BUSINESS RESULTS.
+          </p>
+        </div>
 
-            <div className="space-y-4">
-              <h2 className="text-2xl font-bold text-[#0D1B3D] dark:text-white">Third-Party Services</h2>
-              <p className="text-muted-foreground leading-relaxed">
-                Our services may involve third-party providers, including testing organizations and payment processors.
-                Your use of third-party services is subject to their respective terms and conditions. We are not
-                responsible for the actions, content, or policies of third parties.
-              </p>
-            </div>
+        <div className="space-y-4">
+          <h2 className="text-2xl font-bold text-[#0D1B3D] dark:text-white">20. Limitation of Liability</h2>
+          <p className="text-muted-foreground leading-relaxed">
+            LBS is not liable for indirect, incidental, consequential, special, exemplary, or punitive damages,
+            missed opportunities, lost wages, travel expenses, licensing delays, or sponsor decisions.
+          </p>
+          <p className="text-muted-foreground leading-relaxed">
+            For a direct claim, LBS's aggregate liability will not exceed the amount paid to LBS for the specific
+            service giving rise to the claim, except where law prohibits this limitation.
+          </p>
+        </div>
 
-            <div className="space-y-4">
-              <h2 className="text-2xl font-bold text-[#0D1B3D] dark:text-white">Governing Law</h2>
-              <p className="text-muted-foreground leading-relaxed">
-                These Terms shall be governed by and construed in accordance with the laws of the State of Texas,
-                without regard to its conflict of law provisions. Any disputes arising under these Terms shall be
-                resolved exclusively in the state or federal courts located in Harris County, Texas.
-              </p>
-            </div>
+        <div className="space-y-4">
+          <h2 className="text-2xl font-bold text-[#0D1B3D] dark:text-white">21. Governing Law and Venue</h2>
+          <p className="text-muted-foreground leading-relaxed">
+            Texas law governs. Disputes must be brought in state or federal courts located in Harris County, Texas,
+            subject to non-waivable rights.
+          </p>
+        </div>
 
-            <div className="space-y-4">
-              <h2 className="text-2xl font-bold text-[#0D1B3D] dark:text-white">Changes to Terms</h2>
-              <p className="text-muted-foreground leading-relaxed">
-                We reserve the right to modify these Terms at any time. Changes will be effective immediately upon
-                posting to our website. Your continued use of our website or services after any changes constitutes
-                acceptance of the modified Terms.
-              </p>
-            </div>
+        <div className="space-y-4">
+          <h2 className="text-2xl font-bold text-[#0D1B3D] dark:text-white">22. Changes</h2>
+          <p className="text-muted-foreground leading-relaxed">
+            LBS may update these Terms prospectively. The terms displayed and accepted at booking apply to that
+            transaction.
+          </p>
+        </div>
 
-            <div className="space-y-4">
-              <h2 className="text-2xl font-bold text-[#0D1B3D] dark:text-white">Severability</h2>
-              <p className="text-muted-foreground leading-relaxed">
-                If any provision of these Terms is found to be unenforceable or invalid, that provision shall be
-                limited or eliminated to the minimum extent necessary, and the remaining provisions shall remain
-                in full force and effect.
-              </p>
-            </div>
-
-            <div className="space-y-4">
-              <h2 className="text-2xl font-bold text-[#0D1B3D] dark:text-white">Contact Us</h2>
-              <p className="text-muted-foreground leading-relaxed">
-                If you have questions about these Terms of Use, please contact us:
-              </p>
-              <div className="bg-muted/30 rounded-lg p-6 space-y-2">
-                <p className="font-semibold text-[#0D1B3D] dark:text-white">Linton Business Solutions LLC</p>
-                <p className="text-muted-foreground">DBA: LBS Test & Exam Center</p>
-                <p className="text-muted-foreground">616 FM 1960 Rd W, Ste 101</p>
-                <p className="text-muted-foreground">Houston, TX 77090-3048</p>
-                <p className="text-muted-foreground">Phone: (281) 836-5357</p>
-                <p className="text-muted-foreground">Email: info@lbsconnect.net</p>
-              </div>
-            </div>
-
+        <div className="space-y-4">
+          <h2 className="text-2xl font-bold text-[#0D1B3D] dark:text-white">23. Contact</h2>
+          <div className="bg-muted/30 rounded-lg p-6 space-y-2">
+            <p className="font-semibold text-[#0D1B3D] dark:text-white">Linton Business Solutions LLC</p>
+            <p className="text-muted-foreground">616 FM 1960 Road West, Suite 101</p>
+            <p className="text-muted-foreground">Houston, Texas 77090-3048</p>
+            <p className="text-muted-foreground">Phone: (281) 836-5357</p>
+            <p className="text-muted-foreground">
+              Email: <a href="mailto:info@lbsconnect.net" className="text-[#0D1B3D] dark:text-[#0077FF] hover:underline">info@lbsconnect.net</a>
+            </p>
           </div>
         </div>
-      </section>
-
-      <Footer />
-    </div>
+      </LegalPageLayout>
+    </>
   );
 }

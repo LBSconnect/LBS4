@@ -144,14 +144,32 @@ export default function Footer() {
       <div className="border-t border-white/10">
         <div className="max-w-7xl mx-auto px-6 py-5 flex flex-col md:flex-row items-center justify-between gap-3 text-sm text-white/50">
           <p>&copy; {new Date().getFullYear()} Linton Business Solutions LLC (LBS). All rights reserved.</p>
-          <div className="flex items-center gap-4">
-            <Link href="/privacy-policy">
-              <span className="cursor-pointer hover:text-white transition-colors">Privacy Policy</span>
-            </Link>
-            <span className="text-white/30">|</span>
-            <Link href="/terms-of-use">
-              <span className="cursor-pointer hover:text-white transition-colors">Terms of Use</span>
-            </Link>
+          <div className="flex flex-wrap items-center justify-center gap-x-3 gap-y-1.5">
+            {[
+              { href: "/privacy-policy", label: "Privacy Policy" },
+              { href: "/terms-of-use", label: "Terms of Use" },
+              { href: "/cookie-policy", label: "Cookie Policy" },
+              { href: "/notice-at-collection", label: "Notice at Collection" },
+              { href: "/privacy-request", label: "Privacy Request" },
+              { href: "/accessibility-statement", label: "Accessibility" },
+              { href: "/copyright-dmca-policy", label: "Copyright & DMCA" },
+              { href: "/electronic-communications-terms", label: "Electronic Communications" },
+              { href: "/booking-cancellation-policy", label: "Booking & Cancellation" },
+              { href: "/candidate-rules-surveillance-notice", label: "Candidate Rules" },
+              { href: "/document-handling-notice", label: "Document Handling" },
+            ].map((link, i, arr) => (
+              <span key={link.href} className="flex items-center gap-3">
+                <Link href={link.href}>
+                  <span
+                    className="cursor-pointer hover:text-white transition-colors"
+                    data-testid={`link-footer-legal-${link.label.toLowerCase().replace(/[^a-z0-9]+/g, "-")}`}
+                  >
+                    {link.label}
+                  </span>
+                </Link>
+                {i < arr.length - 1 && <span className="text-white/30">|</span>}
+              </span>
+            ))}
           </div>
         </div>
       </div>
