@@ -62,7 +62,7 @@ export default function Book() {
             <div className="group flex items-center justify-between gap-4 p-5 rounded-lg border border-border/50 bg-card hover:border-[#0D1B3D]/40 hover:shadow-md transition-all cursor-pointer">
               <div className="flex items-center gap-4">
                 <div className="shrink-0 w-11 h-11 rounded-md bg-[#0D1B3D]/10 dark:bg-[#0077FF]/20 flex items-center justify-center">
-                  <img src="/images/myeasypass-logo.png" alt="MyEasyPass" className="w-8 h-8 object-contain" />
+                  <img src="/images/myeasypass-logo.png" alt="MyEasyPass" className="w-8 h-8 object-contain" loading="lazy" decoding="async" />
                 </div>
                 <div>
                   <p className="font-semibold leading-tight">Exam Cram (MyEasyPass)</p>

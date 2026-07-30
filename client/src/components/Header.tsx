@@ -228,6 +228,8 @@ export default function Header() {
                       src={logoImg}
                       alt="LBS Logo"
                       className="h-10 w-10 object-contain rounded-md"
+                      loading="lazy"
+                      decoding="async"
                     />
                     <div>
                       <div className="font-bold text-[#0D1B3D] dark:text-white">LBS</div>

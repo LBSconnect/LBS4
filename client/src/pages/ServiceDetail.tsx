@@ -393,6 +393,8 @@ export default function ServiceDetail() {
                     src={service.image}
                     alt={service.title}
                     className="w-full h-64 md:h-80 object-cover"
+                    loading="lazy"
+                    decoding="async"
                     data-testid="img-service-detail"
                   />
                 </div>

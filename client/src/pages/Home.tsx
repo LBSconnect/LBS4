@@ -193,6 +193,8 @@ export default function Home() {
                   alt="LBS Business Services Center"
                   className="w-full h-[420px] object-cover"
                   data-testid="img-hero"
+                  fetchPriority="high"
+                  decoding="async"
                 />
               </div>
             </div>
@@ -299,7 +301,7 @@ export default function Home() {
               <Card key={t.name} className="border-border/50 bg-card flex flex-col">
                 <CardContent className="p-6 flex flex-col flex-1 space-y-4">
                   <div className="text-[#fbbf24] text-sm tracking-widest">★★★★★</div>
-                  <p className="text-sm text-foreground leading-relaxed italic flex-1">
+                  <p className="text-sm text-foreground leading-relaxed italic flex-1 line-clamp-5">
                     "{t.quote}"
                   </p>
                   <div className="flex items-center gap-3 border-t border-border/50 pt-4">
@@ -354,7 +356,7 @@ export default function Home() {
             <Card className="border-border/50">
               <CardContent className="p-8 space-y-6">
                 <div className="flex items-center gap-4 mb-2">
-                  <img src={logoImg} alt="LBS" className="w-14 h-14 object-contain rounded-md" />
+                  <img src={logoImg} alt="LBS" className="w-14 h-14 object-contain rounded-md" loading="lazy" decoding="async" />
                   <div>
                     <h3 className="text-lg font-bold text-[#0D1B3D] dark:text-white">Visit Us Today</h3>
                     <p className="text-sm text-muted-foreground">Walk-ins welcome for most services</p>
@@ -434,6 +436,8 @@ export default function Home() {
                 src="/images/business-collaboration.png"
                 alt="Business professionals collaborating"
                 className="w-full h-72 md:h-80 object-cover"
+                loading="lazy"
+                decoding="async"
                 data-testid="img-business-solutions"
               />
             </div>

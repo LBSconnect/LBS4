@@ -9,6 +9,7 @@ interface ServiceCardProps {
   image?: string;
   price?: string;
   priceLabel?: string;
+  priceNote?: string;
   slug: string;
   href?: string; // overrides the default /services/:slug link
   icon?: React.ReactNode;
@@ -22,6 +23,7 @@ export default function ServiceCard({
   image,
   price,
   priceLabel,
+  priceNote,
   slug,
   href,
   icon,
@@ -42,6 +44,8 @@ export default function ServiceCard({
               src={image}
               alt={title}
               className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+              loading="lazy"
+              decoding="async"
             />
             <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
           </>
@@ -59,7 +63,7 @@ export default function ServiceCard({
             {badge}
           </div>
         )}
-        {price && (
+        {price ? (
           <div className="absolute bottom-3 left-3 bg-white/95 dark:bg-card/95 backdrop-blur-sm rounded-md px-3 py-1.5 shadow-sm">
             <span className="text-lg font-bold text-[#0D1B3D] dark:text-white">
               {price}
@@ -70,7 +74,13 @@ export default function ServiceCard({
               </span>
             )}
           </div>
-        )}
+        ) : priceNote ? (
+          <div className="absolute bottom-3 left-3 bg-white/95 dark:bg-card/95 backdrop-blur-sm rounded-md px-3 py-1.5 shadow-sm">
+            <span className="text-xs font-semibold text-[#0D1B3D] dark:text-white">
+              {priceNote}
+            </span>
+          </div>
+        ) : null}
       </div>
       <CardContent className="p-5 space-y-3">
         <div className="flex items-start gap-3">

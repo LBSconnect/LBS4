@@ -23,7 +23,7 @@ export default function TermsOfUse() {
             Terms of Use
           </h1>
           <p className="text-white/80">
-            Last Updated: February 2025
+            Last Updated: July 2026
           </p>
         </div>
       </section>
