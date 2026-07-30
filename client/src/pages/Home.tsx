@@ -54,7 +54,7 @@ const coreServiceStrip = [
     href: `/services/${s.slug}`,
     color: SERVICE_ICON_COLORS[s.id],
   })),
-  { icon: Globe, title: "Website Design", tagline: "Modern & Effective", href: "/for-businesses", color: SERVICE_ICON_COLORS["website-design"] },
+  { icon: Globe, title: "Website Design", tagline: "Modern & Effective", href: "/contact?service=website-design", color: SERVICE_ICON_COLORS["website-design"] },
 ];
 
 const whyChooseItems = [
