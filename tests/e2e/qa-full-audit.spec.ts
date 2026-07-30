@@ -320,7 +320,7 @@ test.describe("Home page — sections and CTAs", () => {
     ]) {
       await expect(strip.locator(`a[href="/services/${slug}"]`)).toBeVisible();
     }
-    await expect(strip.locator('a[href="/for-businesses"]').filter({ hasText: "Website Design" })).toBeVisible();
+    await expect(strip.locator('a[href="/contact?service=website-design"]').filter({ hasText: "Website Design" })).toBeVisible();
   });
 
   test("clicking a core service icon navigates to its detail page", async ({ page }) => {
@@ -408,26 +408,30 @@ test.describe("Home page — sections and CTAs", () => {
 // ═══════════════════════════════════════════════════════════════════════════
 
 test.describe("Services page", () => {
-  test("default view: title = Our Services, all 5 + Exam Cram visible", async ({
+  test("default view: title = Business Services, business services + Testing & Exam Programs row visible", async ({
     page,
   }) => {
     await goto(page, "/services");
     await expect(
       page.locator('[data-testid="text-services-title"]')
-    ).toContainText("Our Services");
+    ).toContainText("Business Services");
     for (const slug of [
-      "certification-exam-testing",
       "notary-service",
       "passport-photos",
-      "life-insurance-boot-camp",
-      "property-casualty-boot-camp",
+      "printing-copies",
+      "scanning",
+      "faxing",
+      "resume-services",
     ]) {
       await expect(
         page.locator(`[data-testid="card-service-${slug}"]`)
       ).toBeVisible();
     }
     await expect(
-      page.locator('[data-testid="card-service-exam-cram"]')
+      page.locator('[data-testid="section-testing-exam-programs"]')
+    ).toBeVisible();
+    await expect(
+      page.locator('[data-testid="card-testing-row-certification"]')
     ).toBeVisible();
   });
 
@@ -490,7 +494,7 @@ test.describe("Services page", () => {
   });
 
   test("bootcamp cards show Next: Saturday badge", async ({ page }) => {
-    await goto(page, "/services");
+    await goto(page, "/services?filter=bootcamp");
     const badge = page
       .locator('[data-testid="card-service-life-insurance-boot-camp"]')
       .locator('text=/Next:/');
@@ -500,7 +504,7 @@ test.describe("Services page", () => {
   test("Certiport Learn More → /services/certification-exam-testing", async ({
     page,
   }) => {
-    await goto(page, "/services");
+    await goto(page, "/services?filter=testing");
     await page.click(
       '[data-testid="button-learn-more-certification-exam-testing"]'
     );
@@ -522,18 +526,23 @@ test.describe("Services page", () => {
     expect(href).toContain("myeasypass.net");
   });
 
-  test("Supported Exam Programs section shows 3 programs", async ({ page }) => {
+  test("Testing & Exam Programs row shows certification, boot camps, and MyEasyPass", async ({ page }) => {
     await goto(page, "/services");
     await expect(
-      page.locator('[data-testid="section-exam-programs"]')
+      page.locator('[data-testid="section-testing-exam-programs"]')
     ).toBeVisible();
     await expect(
-      page.locator('[data-testid="card-program-pearson-vue"]')
+      page.locator('[data-testid="card-testing-row-certification"]')
     ).toBeVisible();
     await expect(
-      page.locator('[data-testid="card-program-certiport"]')
+      page.locator('[data-testid="card-testing-row-life-insurance-bootcamp"]')
     ).toBeVisible();
-    await expect(page.locator('[data-testid="card-program-pmi"]')).toBeVisible();
+    await expect(
+      page.locator('[data-testid="card-testing-row-property-casualty-bootcamp"]')
+    ).toBeVisible();
+    await expect(
+      page.locator('[data-testid="card-testing-row-myeasypass"]')
+    ).toBeVisible();
   });
 });
 
