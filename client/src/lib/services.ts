@@ -14,6 +14,11 @@ export interface RateTableSection {
   rows: { name: string; price: string }[];
 }
 
+export interface PolicySection {
+  label: string;
+  items: string[];
+}
+
 export interface ServiceInfo {
   id: string;
   slug: string;
@@ -34,6 +39,10 @@ export interface ServiceInfo {
   rateTable?: RateTableSection[];
   /** Small disclaimer/footnote shown under the rate table (e.g. minimums, volume discounts) */
   rateNote?: string;
+  /** Service policy sections (minimum charge, payment, customer files, privacy) shown under Pricing */
+  policies?: PolicySection[];
+  /** Short promo callout shown above the rate table (e.g. "10% off print jobs over $25") */
+  promo?: string;
   icon: typeof Stamp;
   stripeProductName: string;
   saturdayOnly?: boolean;
@@ -206,6 +215,36 @@ export const services: ServiceInfo[] = [
       },
     ],
     rateNote: "Volume discounts available. $2 minimum printing transaction. Rates subject to change.",
+    promo: "10% off print jobs over $25",
+    policies: [
+      { label: "Minimum Charge", items: ["$2.00 minimum for printing and copying."] },
+      {
+        label: "Payment",
+        items: [
+          "Payment is due when the service is completed.",
+          "Large print jobs may require advance payment.",
+          "Custom jobs may require a deposit.",
+        ],
+      },
+      {
+        label: "Customer Files",
+        items: [
+          "Customers are responsible for confirming that their file is correct before printing.",
+          "LBS is not responsible for errors contained in customer-provided files.",
+          "Reprints caused by customer file errors are charged at the regular rate.",
+          "Reprints caused by LBS equipment or staff errors are provided at no charge.",
+        ],
+      },
+      {
+        label: "Privacy",
+        items: [
+          "Printed documents are handled confidentially.",
+          "Customer files are deleted from LBS computers after the transaction.",
+          "Sensitive documents are not left unattended.",
+          "Unclaimed documents are securely destroyed after a defined retention period.",
+        ],
+      },
+    ],
     icon: Printer,
     stripeProductName: "Printing & Copies",
     category: "business",
@@ -244,6 +283,35 @@ export const services: ServiceInfo[] = [
       },
     ],
     rateNote: "Rates subject to change.",
+    policies: [
+      { label: "Minimum Charge", items: ["$3.00 minimum for scanning."] },
+      {
+        label: "Payment",
+        items: [
+          "Payment is due when the service is completed.",
+          "Large scan jobs may require advance payment.",
+          "Custom jobs may require a deposit.",
+        ],
+      },
+      {
+        label: "Customer Files",
+        items: [
+          "Customers are responsible for confirming that their file is correct before scanning.",
+          "LBS is not responsible for errors contained in customer-provided files.",
+          "Re-scans caused by customer file errors are charged at the regular rate.",
+          "Re-scans caused by LBS equipment or staff errors are provided at no charge.",
+        ],
+      },
+      {
+        label: "Privacy",
+        items: [
+          "Scanned documents are handled confidentially.",
+          "Customer files are deleted from LBS computers after the transaction.",
+          "Sensitive documents are not left unattended.",
+          "Unclaimed documents are securely destroyed after a defined retention period.",
+        ],
+      },
+    ],
     icon: ScanLine,
     stripeProductName: "Document Scanning",
     category: "business",
@@ -287,6 +355,41 @@ export const services: ServiceInfo[] = [
       },
     ],
     rateNote: "Free cover sheet and confirmation included. Rates subject to change.",
+    policies: [
+      {
+        label: "Minimum Charge",
+        items: [
+          "$2.00 minimum for outgoing faxing.",
+          "$1.50 minimum for received faxing.",
+        ],
+      },
+      {
+        label: "Payment",
+        items: [
+          "Payment is due when the service is completed.",
+          "Large fax jobs may require advance payment.",
+          "Custom jobs may require a deposit.",
+        ],
+      },
+      {
+        label: "Customer Files",
+        items: [
+          "Customers are responsible for confirming that their file is correct before faxing.",
+          "LBS is not responsible for errors contained in customer-provided files.",
+          "Re-sends caused by customer file errors are charged at the regular rate.",
+          "Re-sends caused by LBS equipment or staff errors are provided at no charge.",
+        ],
+      },
+      {
+        label: "Privacy",
+        items: [
+          "Faxed documents are handled confidentially.",
+          "Customer files are deleted from LBS computers after the transaction.",
+          "Sensitive documents are not left unattended.",
+          "Unclaimed documents are securely destroyed after a defined retention period.",
+        ],
+      },
+    ],
     icon: Send,
     stripeProductName: "Fax Services",
     category: "business",

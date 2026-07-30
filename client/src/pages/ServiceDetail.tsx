@@ -421,6 +421,14 @@ export default function ServiceDetail() {
               {service.rateTable && (
                 <div className="space-y-4" data-testid="section-pricing">
                   <h2 className="text-2xl font-bold">Pricing</h2>
+                  {service.promo && (
+                    <div
+                      className="rounded-md bg-[#FF6A00]/10 border border-[#FF6A00]/30 px-4 py-2.5 text-sm font-semibold text-[#0D1B3D] dark:text-white"
+                      data-testid="text-promo"
+                    >
+                      {service.promo}
+                    </div>
+                  )}
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                     {service.rateTable.map((section) => (
                       <div key={section.label} className="space-y-2">
@@ -446,6 +454,26 @@ export default function ServiceDetail() {
                   {service.rateNote && (
                     <p className="text-xs text-muted-foreground">{service.rateNote}</p>
                   )}
+                </div>
+              )}
+
+              {service.policies && (
+                <div className="space-y-4" data-testid="section-policies">
+                  <h2 className="text-2xl font-bold">Service Policies</h2>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                    {service.policies.map((section) => (
+                      <div key={section.label} className="space-y-2">
+                        <h3 className="text-xs font-bold uppercase tracking-wide text-muted-foreground">
+                          {section.label}
+                        </h3>
+                        <ul className="list-disc pl-5 text-sm text-muted-foreground space-y-1.5 leading-relaxed">
+                          {section.items.map((item) => (
+                            <li key={item}>{item}</li>
+                          ))}
+                        </ul>
+                      </div>
+                    ))}
+                  </div>
                 </div>
               )}
 
