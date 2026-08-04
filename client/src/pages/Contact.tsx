@@ -366,23 +366,11 @@ export default function Contact() {
                             <SelectValue placeholder="Select a service" />
                           </SelectTrigger>
                           <SelectContent>
-                            <SelectItem value="printing-copies">
-                              Printing & Copies
-                            </SelectItem>
-                            <SelectItem value="scanning">
-                              Scanning
-                            </SelectItem>
                             <SelectItem value="notary">
                               Notary Service
                             </SelectItem>
                             <SelectItem value="passport">
                               Passport Photos
-                            </SelectItem>
-                            <SelectItem value="faxing">
-                              Faxing
-                            </SelectItem>
-                            <SelectItem value="resume-services">
-                              Resume Services
                             </SelectItem>
                             <SelectItem value="website-design">
                               Website Design

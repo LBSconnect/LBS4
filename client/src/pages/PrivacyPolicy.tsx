@@ -23,7 +23,7 @@ export default function PrivacyPolicy() {
             Privacy Policy
           </h1>
           <p className="text-white/80">
-            Version 1.0 &nbsp;·&nbsp; Effective Date: July 30, 2026 &nbsp;·&nbsp; Last Updated: July 30, 2026
+            Version 1.0 &nbsp;·&nbsp; Effective Date: July 30, 2026 &nbsp;·&nbsp; Last Updated: August 4, 2026
           </p>
         </div>
       </section>
@@ -93,7 +93,7 @@ export default function PrivacyPolicy() {
                 <li>government-issued identification information required for testing or notarial services</li>
                 <li>passport or visa photographs</li>
                 <li>information entered into notarial records as required by law</li>
-                <li>information contained in documents presented for printing, copying, scanning, faxing, resume assistance, or similar services</li>
+                <li>information contained in documents or files presented for passport photos, website design, or similar services</li>
               </ul>
 
               <h3 className="text-lg font-semibold mt-6">3.2 Information Collected Automatically</h3>

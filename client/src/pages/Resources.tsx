@@ -31,7 +31,7 @@ const resourceLinks = [
   {
     icon: Briefcase,
     title: "Business Services Overview",
-    description: "Printing, scanning, notary, passport photos, faxing, resume services and website design.",
+    description: "Notary services, passport photos, and website design.",
     href: "/services?filter=business",
     external: false,
   },
@@ -52,7 +52,7 @@ const resourceLinks = [
   {
     icon: Mail,
     title: "Contact Us",
-    description: "Reach out with questions, or to request a quote for Website Design or Resume Services.",
+    description: "Reach out with questions, or to request a quote for Website Design.",
     href: "/contact",
     external: false,
   },

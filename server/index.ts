@@ -74,6 +74,23 @@ app.get('/health', (_req, res) => {
   res.json({ status: 'ok', timestamp: new Date().toISOString() });
 });
 
+// 301 redirects for discontinued services (Printing & Copies, Scanning,
+// Faxing, Resume Services) — send visitors and search engines to the
+// current services listing instead of a dead page.
+const DISCONTINUED_SERVICE_REDIRECTS: Record<string, string> = {
+  '/services/printing-copies': '/services',
+  '/services/scanning': '/services',
+  '/services/faxing': '/services',
+  '/services/resume-services': '/services',
+};
+app.use((req, res, next) => {
+  const target = DISCONTINUED_SERVICE_REDIRECTS[req.path];
+  if (target) {
+    return res.redirect(301, target);
+  }
+  next();
+});
+
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 

@@ -8,12 +8,12 @@ export default function TermsOfUse() {
       <SEO
         title="Terms of Service"
         canonical="/terms-of-use"
-        description="LBS4 Test, Exam, and Business Center Terms of Service: testing-center appointments, sponsored examinations, boot camps, notary services, passport photos, and business-center services."
+        description="LBS4 Test, Exam, and Business Center Terms of Service: testing-center appointments, sponsored examinations, boot camps, notary services, passport photos, and website design services."
       />
       <LegalPageLayout
         icon={FileText}
         title="LBS4 Test, Exam, and Business Center Terms of Service"
-        meta="Version 1.0 · Effective Date: July 30, 2026 · Last Updated: July 30, 2026"
+        meta="Version 1.0 · Effective Date: July 30, 2026 · Last Updated: August 4, 2026"
       >
         <div className="space-y-4">
           <h2 className="text-2xl font-bold text-[#0D1B3D] dark:text-white">1. Scope</h2>
@@ -24,7 +24,7 @@ export default function TermsOfUse() {
             <li>exam-preparation bootcamps;</li>
             <li>notary services;</li>
             <li>passport and visa photographs;</li>
-            <li>printing, copying, scanning, faxing, resume, website, and business-center services.</li>
+            <li>website design and business-center services.</li>
           </ul>
         </div>
 
@@ -159,30 +159,10 @@ export default function TermsOfUse() {
         </div>
 
         <div className="space-y-4">
-          <h2 className="text-2xl font-bold text-[#0D1B3D] dark:text-white">11. Printing, Copying, Scanning, and Faxing</h2>
-          <p className="text-muted-foreground leading-relaxed">Customers are responsible for:</p>
-          <ul className="list-disc pl-6 text-muted-foreground space-y-2">
-            <li>having authority to reproduce or transmit documents;</li>
-            <li>providing correct files, page ranges, quantities, paper, destination email, and fax number;</li>
-            <li>reviewing proofs where offered;</li>
-            <li>retrieving originals and completed work;</li>
-            <li>avoiding illegal, infringing, fraudulent, threatening, or harmful content.</li>
-          </ul>
+          <h2 className="text-2xl font-bold text-[#0D1B3D] dark:text-white">11. Website Assistance</h2>
           <p className="text-muted-foreground leading-relaxed">
-            Charges apply to work performed. Reprints caused by LBS error will be corrected; reprints caused by
-            customer files or instructions are chargeable.
-          </p>
-          <p className="text-muted-foreground leading-relaxed">
-            Fax delivery is not guaranteed merely because a machine reports transmission.
-          </p>
-        </div>
-
-        <div className="space-y-4">
-          <h2 className="text-2xl font-bold text-[#0D1B3D] dark:text-white">12. Resume and Website Assistance</h2>
-          <p className="text-muted-foreground leading-relaxed">
-            Resume, application, website, and business-support services assist with preparation and presentation.
-            LBS does not guarantee interviews, employment, customers, revenue, search ranking, legal compliance,
-            accessibility compliance, or business outcomes.
+            Website and business-support services assist with preparation and presentation. LBS does not guarantee
+            customers, revenue, search ranking, legal compliance, accessibility compliance, or business outcomes.
           </p>
           <p className="text-muted-foreground leading-relaxed">
             Customers are responsible for the truth and legality of submitted and published content.
@@ -190,7 +170,7 @@ export default function TermsOfUse() {
         </div>
 
         <div className="space-y-4">
-          <h2 className="text-2xl font-bold text-[#0D1B3D] dark:text-white">13. Temporary Documents and Privacy</h2>
+          <h2 className="text-2xl font-bold text-[#0D1B3D] dark:text-white">12. Temporary Documents and Privacy</h2>
           <p className="text-muted-foreground leading-relaxed">
             LBS will use customer files only to perform the requested service, troubleshoot, process payment, and
             comply with law. Customers should avoid unnecessary sensitive information.
@@ -201,7 +181,7 @@ export default function TermsOfUse() {
         </div>
 
         <div className="space-y-4">
-          <h2 className="text-2xl font-bold text-[#0D1B3D] dark:text-white">14. Payment</h2>
+          <h2 className="text-2xl font-bold text-[#0D1B3D] dark:text-white">13. Payment</h2>
           <p className="text-muted-foreground leading-relaxed">
             Payment is due as shown at booking or service. Taxes and third-party fees may be additional.
           </p>
@@ -211,7 +191,7 @@ export default function TermsOfUse() {
         </div>
 
         <div className="space-y-4">
-          <h2 className="text-2xl font-bold text-[#0D1B3D] dark:text-white">15. Cancellations and Refunds</h2>
+          <h2 className="text-2xl font-bold text-[#0D1B3D] dark:text-white">14. Cancellations and Refunds</h2>
           <p className="text-muted-foreground leading-relaxed">
             The LBS4 Booking and Cancellation Policy is incorporated into these Terms. Sponsor fees may be
             non-refundable or governed solely by the sponsor.
@@ -219,7 +199,7 @@ export default function TermsOfUse() {
         </div>
 
         <div className="space-y-4">
-          <h2 className="text-2xl font-bold text-[#0D1B3D] dark:text-white">16. Personal Property</h2>
+          <h2 className="text-2xl font-bold text-[#0D1B3D] dark:text-white">15. Personal Property</h2>
           <p className="text-muted-foreground leading-relaxed">
             LBS is not responsible for unattended property except to the extent caused by LBS's failure to use
             reasonable care. Candidates must follow locker and prohibited-item rules.
@@ -227,7 +207,7 @@ export default function TermsOfUse() {
         </div>
 
         <div className="space-y-4">
-          <h2 className="text-2xl font-bold text-[#0D1B3D] dark:text-white">17. Conduct and Safety</h2>
+          <h2 className="text-2xl font-bold text-[#0D1B3D] dark:text-white">16. Conduct and Safety</h2>
           <p className="text-muted-foreground leading-relaxed">
             LBS may refuse service or remove anyone who threatens safety, disrupts operations, harasses others,
             damages property, violates law, or violates sponsor rules.
@@ -235,7 +215,7 @@ export default function TermsOfUse() {
         </div>
 
         <div className="space-y-4">
-          <h2 className="text-2xl font-bold text-[#0D1B3D] dark:text-white">18. Accessibility</h2>
+          <h2 className="text-2xl font-bold text-[#0D1B3D] dark:text-white">17. Accessibility</h2>
           <p className="text-muted-foreground leading-relaxed">
             Contact LBS regarding physical-service accommodations. Examination accommodations generally require
             advance sponsor approval.
@@ -243,15 +223,15 @@ export default function TermsOfUse() {
         </div>
 
         <div className="space-y-4">
-          <h2 className="text-2xl font-bold text-[#0D1B3D] dark:text-white">19. Disclaimers</h2>
+          <h2 className="text-2xl font-bold text-[#0D1B3D] dark:text-white">18. Disclaimers</h2>
           <p className="text-muted-foreground leading-relaxed">
             TO THE MAXIMUM EXTENT PERMITTED BY LAW, SERVICES ARE PROVIDED "AS IS." LBS DOES NOT WARRANT EXAM RESULTS,
-            GOVERNMENT ACCEPTANCE, FAX DELIVERY, LEGAL SUFFICIENCY, EMPLOYMENT, OR BUSINESS RESULTS.
+            GOVERNMENT ACCEPTANCE, LEGAL SUFFICIENCY, OR BUSINESS RESULTS.
           </p>
         </div>
 
         <div className="space-y-4">
-          <h2 className="text-2xl font-bold text-[#0D1B3D] dark:text-white">20. Limitation of Liability</h2>
+          <h2 className="text-2xl font-bold text-[#0D1B3D] dark:text-white">19. Limitation of Liability</h2>
           <p className="text-muted-foreground leading-relaxed">
             LBS is not liable for indirect, incidental, consequential, special, exemplary, or punitive damages,
             missed opportunities, lost wages, travel expenses, licensing delays, or sponsor decisions.
@@ -263,7 +243,7 @@ export default function TermsOfUse() {
         </div>
 
         <div className="space-y-4">
-          <h2 className="text-2xl font-bold text-[#0D1B3D] dark:text-white">21. Governing Law and Venue</h2>
+          <h2 className="text-2xl font-bold text-[#0D1B3D] dark:text-white">20. Governing Law and Venue</h2>
           <p className="text-muted-foreground leading-relaxed">
             Texas law governs. Disputes must be brought in state or federal courts located in Harris County, Texas,
             subject to non-waivable rights.
@@ -271,7 +251,7 @@ export default function TermsOfUse() {
         </div>
 
         <div className="space-y-4">
-          <h2 className="text-2xl font-bold text-[#0D1B3D] dark:text-white">22. Changes</h2>
+          <h2 className="text-2xl font-bold text-[#0D1B3D] dark:text-white">21. Changes</h2>
           <p className="text-muted-foreground leading-relaxed">
             LBS may update these Terms prospectively. The terms displayed and accepted at booking apply to that
             transaction.
@@ -279,7 +259,7 @@ export default function TermsOfUse() {
         </div>
 
         <div className="space-y-4">
-          <h2 className="text-2xl font-bold text-[#0D1B3D] dark:text-white">23. Contact</h2>
+          <h2 className="text-2xl font-bold text-[#0D1B3D] dark:text-white">22. Contact</h2>
           <div className="bg-muted/30 rounded-lg p-6 space-y-2">
             <p className="font-semibold text-[#0D1B3D] dark:text-white">Linton Business Solutions LLC</p>
             <p className="text-muted-foreground">616 FM 1960 Road West, Suite 101</p>

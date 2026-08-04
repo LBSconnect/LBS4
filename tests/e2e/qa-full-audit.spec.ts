@@ -306,18 +306,11 @@ test.describe("Home page — sections and CTAs", () => {
     await expect(page).toHaveURL(`${BASE}/services`);
   });
 
-  test("Core Business Services icon strip renders all 7 services", async ({ page }) => {
+  test("Core Business Services icon strip renders notary, passport, website design", async ({ page }) => {
     await goto(page, "/");
     const strip = page.locator('[data-testid="section-core-services"]');
     await expect(strip).toBeVisible();
-    for (const slug of [
-      "printing-copies",
-      "scanning",
-      "notary-service",
-      "passport-photos",
-      "faxing",
-      "resume-services",
-    ]) {
+    for (const slug of ["notary-service", "passport-photos"]) {
       await expect(strip.locator(`a[href="/services/${slug}"]`)).toBeVisible();
     }
     await expect(strip.locator('a[href="/contact?service=website-design"]').filter({ hasText: "Website Design" })).toBeVisible();
@@ -418,10 +411,6 @@ test.describe("Services page", () => {
     for (const slug of [
       "notary-service",
       "passport-photos",
-      "printing-copies",
-      "scanning",
-      "faxing",
-      "resume-services",
     ]) {
       await expect(
         page.locator(`[data-testid="card-service-${slug}"]`)

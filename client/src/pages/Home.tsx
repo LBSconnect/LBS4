@@ -28,28 +28,20 @@ import heroImg from "@assets/hero.png";
 const businessServices = services.filter((s) => s.category === "business");
 
 const SERVICE_ICON_COLORS: Record<string, string> = {
-  "printing-copies": "#FF6A00",
-  "scanning": "#FF6A00",
   "notary": "#8A2BE2",
   "passport": "#8A2BE2",
-  "faxing": "#0077FF",
-  "resume-services": "#FF2D55",
   "website-design": "#0077FF",
 };
 
-const CORE_SERVICE_ORDER = ["printing-copies", "scanning", "notary", "passport", "faxing", "resume-services"];
+const CORE_SERVICE_ORDER = ["notary", "passport"];
 
 const coreServiceStrip = [
   ...CORE_SERVICE_ORDER.map((id) => businessServices.find((s) => s.id === id)!).map((s) => ({
     icon: s.icon,
     title: s.shortTitle,
     tagline:
-      s.id === "printing-copies" ? "B&W & Color" :
-      s.id === "scanning" ? "Digitize Documents" :
       s.id === "notary" ? "Certified & Confidential" :
       s.id === "passport" ? "Fast & Compliant" :
-      s.id === "faxing" ? "Send & Receive" :
-      s.id === "resume-services" ? "Stand Out" :
       "",
     href: `/services/${s.slug}`,
     color: SERVICE_ICON_COLORS[s.id],
@@ -122,7 +114,7 @@ export default function Home() {
     <div className="min-h-screen flex flex-col bg-background pb-16 md:pb-0">
       <SEO
         canonical="/"
-        description="LBS Business Services Center provides printing, scanning, notary, passport photos, faxing, resume services and website design in Houston, Texas."
+        description="LBS Business Services Center provides notary services, passport photos, and website design in Houston, Texas, plus authorized Pearson VUE & Certiport exam testing."
       />
       <Header />
 
@@ -205,7 +197,7 @@ export default function Home() {
       {/* ── CORE BUSINESS SERVICES ── */}
       <section className="py-8 bg-background border-b border-border/50" data-testid="section-core-services">
         <div className="max-w-7xl mx-auto px-6">
-          <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-7 gap-x-4 gap-y-8">
+          <div className="grid grid-cols-3 max-w-xl mx-auto gap-x-4 gap-y-8">
             {coreServiceStrip.map((item) => (
               <Link key={item.title} href={item.href}>
                 <div

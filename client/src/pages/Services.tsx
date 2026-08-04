@@ -48,7 +48,7 @@ export default function Services() {
       <SEO
         title="Business Services in Houston TX"
         canonical="/services"
-        description="Printing, notary, passport photos, faxing, resume services and more at LBS Business Services Center. Authorized Pearson VUE & Certiport exam testing also available at 616 FM 1960 Road West. Call 281-836-5357."
+        description="Notary services, passport photos, and website design at LBS Business Services Center. Authorized Pearson VUE & Certiport exam testing also available at 616 FM 1960 Road West. Call 281-836-5357."
       />
       <Header />
 
@@ -66,8 +66,8 @@ export default function Services() {
             {pageTitle}
           </h1>
           <p className="text-lg text-white/80 max-w-2xl mx-auto">
-            From printing and notary to exam testing, we provide everything
-            you need in one convenient location.
+            From notary and passport photos to exam testing, we provide
+            everything you need in one convenient location.
           </p>
         </div>
       </section>

@@ -8,17 +8,16 @@ export default function DocumentHandlingNotice() {
       <SEO
         title="Business-Center Document Handling Notice"
         canonical="/document-handling-notice"
-        description="LBS4 Business-Center Document Handling Notice: how we handle files for printing, copying, scanning, faxing, resume assistance, passport photos, and website services."
+        description="LBS4 Business-Center Document Handling Notice: how we handle files for passport photos and website design services."
       />
       <LegalPageLayout
         icon={FolderLock}
         title="Business-Center Document Handling Notice"
-        meta="Version 1.0 · Effective Date: July 30, 2026 · Last Updated: July 30, 2026"
+        meta="Version 1.0 · Effective Date: July 30, 2026 · Last Updated: August 4, 2026"
       >
         <div className="space-y-4">
           <p className="text-muted-foreground leading-relaxed">
-            This Notice applies to printing, copying, scanning, faxing, resume assistance, passport photos, website
-            services, and other document-handling services.
+            This Notice applies to passport photos, website design services, and other document-handling services.
           </p>
         </div>
 
@@ -75,28 +74,11 @@ export default function DocumentHandlingNotice() {
         <div className="space-y-4">
           <h2 className="text-2xl font-bold text-[#0D1B3D] dark:text-white">Deletion Standards</h2>
           <ul className="list-disc pl-6 text-muted-foreground space-y-2">
-            <li>standard print/scan/fax working files: within 24 hours after completion;</li>
             <li>passport-photo working files: same day or within 24 hours;</li>
-            <li>resume or design project files: 30 days after delivery unless the customer requests earlier deletion or ongoing storage;</li>
+            <li>design project files: 30 days after delivery unless the customer requests earlier deletion or ongoing storage;</li>
             <li>failed or abandoned jobs: 7 days;</li>
             <li>transaction records: retained separately without unnecessary document content.</li>
           </ul>
-        </div>
-
-        <div className="space-y-4">
-          <h2 className="text-2xl font-bold text-[#0D1B3D] dark:text-white">Scanning</h2>
-          <p className="text-muted-foreground leading-relaxed">
-            Confirm the destination email or storage device. LBS is not responsible for access after successful
-            delivery to a customer-controlled destination.
-          </p>
-        </div>
-
-        <div className="space-y-4">
-          <h2 className="text-2xl font-bold text-[#0D1B3D] dark:text-white">Faxing</h2>
-          <p className="text-muted-foreground leading-relaxed">
-            Confirm the fax number. Transmission confirmations indicate system activity but do not guarantee that
-            the intended person received, read, or securely handled the document.
-          </p>
         </div>
 
         <div className="space-y-4">

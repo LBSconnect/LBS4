@@ -4,12 +4,8 @@ import logoImg from "@assets/Linton_Business_Solutions.gif_1771618422350.jpg";
 
 export default function Footer() {
   const serviceLinks = [
-    { href: "/services/printing-copies", label: "Printing & Copies" },
-    { href: "/services/scanning", label: "Scanning" },
     { href: "/services/notary-service", label: "Notary Service" },
     { href: "/services/passport-photos", label: "Passport Photos" },
-    { href: "/services/faxing", label: "Faxing" },
-    { href: "/services/resume-services", label: "Resume Services" },
     { href: "/services/certification-exam-testing", label: "Certiport Exams" },
     { href: "/services/life-insurance-boot-camp", label: "Life Insurance Boot Camp" },
     { href: "/services/property-casualty-boot-camp", label: "P&C Exam Boot Camp" },
