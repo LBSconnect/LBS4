@@ -306,14 +306,15 @@ test.describe("Home page — sections and CTAs", () => {
     await expect(page).toHaveURL(`${BASE}/services`);
   });
 
-  test("Core Business Services icon strip renders notary, passport, website design", async ({ page }) => {
+  test("Core Business Services icon strip renders notary, passport, website design, certifications, bootcamp", async ({ page }) => {
     await goto(page, "/");
     const strip = page.locator('[data-testid="section-core-services"]');
     await expect(strip).toBeVisible();
-    for (const slug of ["notary-service", "passport-photos"]) {
+    for (const slug of ["notary-service", "passport-photos", "certification-exam-testing"]) {
       await expect(strip.locator(`a[href="/services/${slug}"]`)).toBeVisible();
     }
     await expect(strip.locator('a[href="/contact?service=website-design"]').filter({ hasText: "Website Design" })).toBeVisible();
+    await expect(strip.locator('a[href="/services?filter=bootcamp"]').filter({ hasText: "Life Insurance Boot Camp" })).toBeVisible();
   });
 
   test("clicking a core service icon navigates to its detail page", async ({ page }) => {
