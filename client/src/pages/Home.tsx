@@ -31,9 +31,14 @@ const SERVICE_ICON_COLORS: Record<string, string> = {
   "notary": "#8A2BE2",
   "passport": "#8A2BE2",
   "website-design": "#0077FF",
+  "certification": "#FF6A00",
+  "life-insurance-bootcamp": "#FF2D55",
 };
 
 const CORE_SERVICE_ORDER = ["notary", "passport"];
+
+const certificationService = services.find((s) => s.id === "certification")!;
+const lifeInsuranceBootcampService = services.find((s) => s.id === "life-insurance-bootcamp")!;
 
 const coreServiceStrip = [
   ...CORE_SERVICE_ORDER.map((id) => businessServices.find((s) => s.id === id)!).map((s) => ({
@@ -47,6 +52,20 @@ const coreServiceStrip = [
     color: SERVICE_ICON_COLORS[s.id],
   })),
   { icon: Globe, title: "Website Design", tagline: "Modern & Effective", href: "/contact?service=website-design", color: SERVICE_ICON_COLORS["website-design"] },
+  {
+    icon: certificationService.icon,
+    title: certificationService.shortTitle,
+    tagline: "Pearson VUE & Certiport",
+    href: "/services/certification-exam-testing",
+    color: SERVICE_ICON_COLORS["certification"],
+  },
+  {
+    icon: lifeInsuranceBootcampService.icon,
+    title: lifeInsuranceBootcampService.shortTitle,
+    tagline: "Saturday Mornings",
+    href: "/services?filter=bootcamp",
+    color: SERVICE_ICON_COLORS["life-insurance-bootcamp"],
+  },
 ];
 
 const whyChooseItems = [
@@ -141,7 +160,7 @@ export default function Home() {
                 className="text-lg md:text-xl text-white/80 leading-relaxed max-w-lg"
                 data-testid="text-hero-subtitle"
               >
-                Professional services that help you save time, stay productive, and keep your business moving — right here in Houston, Texas.
+                Professional services that help you save time, stay productive, and keep your business moving, right here in Houston, Texas.
               </p>
               <div className="flex flex-col sm:flex-row gap-3 pt-2">
                 <Link href="/book">
@@ -197,7 +216,7 @@ export default function Home() {
       {/* ── CORE BUSINESS SERVICES ── */}
       <section className="py-8 bg-background border-b border-border/50" data-testid="section-core-services">
         <div className="max-w-7xl mx-auto px-6">
-          <div className="grid grid-cols-3 max-w-xl mx-auto gap-x-4 gap-y-8">
+          <div className="grid grid-cols-2 sm:grid-cols-5 max-w-3xl mx-auto gap-x-4 gap-y-8">
             {coreServiceStrip.map((item) => (
               <Link key={item.title} href={item.href}>
                 <div
