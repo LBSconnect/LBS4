@@ -61,7 +61,7 @@ export default function Header() {
               data-testid="link-phone-top"
             >
               <Phone className="w-3.5 h-3.5" />
-              <span>(281) 836-5357</span>
+              <span>281-836-5357</span>
             </a>
             <a
               href="mailto:info@lbsconnect.net"
@@ -74,7 +74,7 @@ export default function Header() {
           </div>
           <div className="flex items-center gap-1.5">
             <MapPin className="w-3.5 h-3.5" />
-            <span>616 FM 1960 Rd W, Ste 101, Houston, TX 77090-3048</span>
+            <span>616 FM 1960 Road West, Suite 101, Houston, Texas 77090-3048</span>
           </div>
         </div>
       </div>
@@ -331,7 +331,7 @@ export default function Header() {
                 </nav>
                 <div className="mt-auto p-4 border-t border-border/50 space-y-3 text-sm text-muted-foreground">
                   <a href="tel:2818365357" className="flex items-center gap-2">
-                    <Phone className="w-4 h-4" /> (281) 836-5357
+                    <Phone className="w-4 h-4" /> 281-836-5357
                   </a>
                   <a href="mailto:info@lbsconnect.net" className="flex items-center gap-2">
                     <Mail className="w-4 h-4" /> info@lbsconnect.net

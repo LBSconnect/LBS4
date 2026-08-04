@@ -28,28 +28,20 @@ import heroImg from "@assets/hero.png";
 const businessServices = services.filter((s) => s.category === "business");
 
 const SERVICE_ICON_COLORS: Record<string, string> = {
-  "printing-copies": "#FF6A00",
-  "scanning": "#FF6A00",
   "notary": "#8A2BE2",
   "passport": "#8A2BE2",
-  "faxing": "#0077FF",
-  "resume-services": "#FF2D55",
   "website-design": "#0077FF",
 };
 
-const CORE_SERVICE_ORDER = ["printing-copies", "scanning", "notary", "passport", "faxing", "resume-services"];
+const CORE_SERVICE_ORDER = ["notary", "passport"];
 
 const coreServiceStrip = [
   ...CORE_SERVICE_ORDER.map((id) => businessServices.find((s) => s.id === id)!).map((s) => ({
     icon: s.icon,
     title: s.shortTitle,
     tagline:
-      s.id === "printing-copies" ? "B&W & Color" :
-      s.id === "scanning" ? "Digitize Documents" :
       s.id === "notary" ? "Certified & Confidential" :
       s.id === "passport" ? "Fast & Compliant" :
-      s.id === "faxing" ? "Send & Receive" :
-      s.id === "resume-services" ? "Stand Out" :
       "",
     href: `/services/${s.slug}`,
     color: SERVICE_ICON_COLORS[s.id],
@@ -83,7 +75,7 @@ const faqs = [
   },
   {
     q: "Where do I park?",
-    a: "Free parking is available directly in front of our suite at 616 FM 1960 Rd W, Ste 101, Houston TX 77090. We're in a strip center with plenty of spots.",
+    a: "Free parking is available directly in front of our suite at 616 FM 1960 Road West, Suite 101, Houston, Texas 77090. We're in a strip center with plenty of spots.",
   },
   {
     q: "What happens if I need to reschedule?",
@@ -122,7 +114,7 @@ export default function Home() {
     <div className="min-h-screen flex flex-col bg-background pb-16 md:pb-0">
       <SEO
         canonical="/"
-        description="LBS Business Services Center provides printing, scanning, notary, passport photos, faxing, resume services and website design in Houston, Texas."
+        description="LBS Business Services Center provides notary services, passport photos, and website design in Houston, Texas, plus authorized Pearson VUE & Certiport exam testing."
       />
       <Header />
 
@@ -149,7 +141,7 @@ export default function Home() {
                 className="text-lg md:text-xl text-white/80 leading-relaxed max-w-lg"
                 data-testid="text-hero-subtitle"
               >
-                Professional services that help you save time, stay productive, and keep your business moving — right here in Houston, TX.
+                Professional services that help you save time, stay productive, and keep your business moving — right here in Houston, Texas.
               </p>
               <div className="flex flex-col sm:flex-row gap-3 pt-2">
                 <Link href="/book">
@@ -205,7 +197,7 @@ export default function Home() {
       {/* ── CORE BUSINESS SERVICES ── */}
       <section className="py-8 bg-background border-b border-border/50" data-testid="section-core-services">
         <div className="max-w-7xl mx-auto px-6">
-          <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-7 gap-x-4 gap-y-8">
+          <div className="grid grid-cols-3 max-w-xl mx-auto gap-x-4 gap-y-8">
             {coreServiceStrip.map((item) => (
               <Link key={item.title} href={item.href}>
                 <div
@@ -368,7 +360,7 @@ export default function Home() {
                     <div>
                       <p className="font-medium text-sm">Address</p>
                       <p className="text-sm text-muted-foreground">
-                        616 FM 1960 Rd W, Ste 101<br />Houston, TX 77090-3048
+                        616 FM 1960 Road West, Suite 101<br />Houston, Texas 77090-3048
                       </p>
                     </div>
                   </div>
@@ -377,7 +369,7 @@ export default function Home() {
                     <div>
                       <p className="font-medium text-sm">Phone</p>
                       <a href="tel:2818365357" className="text-sm text-muted-foreground hover:text-foreground">
-                        (281) 836-5357
+                        281-836-5357
                       </a>
                     </div>
                   </div>
@@ -478,7 +470,7 @@ export default function Home() {
             <p className="text-sm text-muted-foreground">
               Still have questions?{" "}
               <a href="tel:2818365357" className="text-[#FF6A00] font-semibold hover:underline">
-                Call us at (281) 836-5357
+                Call us at 281-836-5357
               </a>
             </p>
           </div>
@@ -495,7 +487,7 @@ export default function Home() {
               </div>
               <div>
                 <p className="text-xs font-bold uppercase tracking-widest text-[#FF2D55]">We're Here to Help</p>
-                <p className="text-2xl font-bold text-white">(281) 836-5357</p>
+                <p className="text-2xl font-bold text-white">281-836-5357</p>
                 <p className="text-sm text-[#FF2D55] font-medium">Walk-ins Welcome &nbsp;|&nbsp; Open to the Public</p>
               </div>
             </a>

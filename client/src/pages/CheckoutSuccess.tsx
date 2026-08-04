@@ -57,7 +57,7 @@ export default function CheckoutSuccess() {
                   data-testid="button-call-support"
                 >
                   <Phone className="w-4 h-4 mr-2" />
-                  Call (281) 836-5357
+                  Call 281-836-5357
                 </Button>
               </a>
             </div>

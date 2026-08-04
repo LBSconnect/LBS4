@@ -3,7 +3,7 @@ import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { getUncachableStripeClient, getStripePublishableKey } from "./stripeClient";
 import { insertContactSchema } from "@shared/schema";
-import { sendContactNotification, sendContactAcknowledgement, sendAppointmentConfirmation, sendAppointmentCalendarInvite } from "./emailService";
+import { sendContactNotification, sendContactAcknowledgement, sendAppointmentConfirmation, sendAppointmentCalendarInvite, sendPrivacyRequestNotification, sendPrivacyRequestAcknowledgement } from "./emailService";
 import { sendEmail } from "./smtpClient";
 import { registerCorporateRoutes } from "./corporateRoutes";
 import { z } from "zod";
@@ -257,6 +257,50 @@ export async function registerRoutes(
     }
   });
 
+  const privacyRequestSchema = z.object({
+    name: z.string().min(1).max(200),
+    email: z.string().email().max(200),
+    phone: z.string().max(40).optional().or(z.literal('')),
+    organization: z.string().max(200).optional().or(z.literal('')),
+    service: z.enum(['LBSconnect', 'MyEasyPass', 'Work-A-Beez', 'LBS4', 'Other']),
+    requestType: z.enum([
+      'Access or confirmation',
+      'Copy or portability',
+      'Correction',
+      'Deletion',
+      'Marketing opt-out',
+      'Targeted-advertising or sale opt-out',
+      'Profiling opt-out',
+      'Appeal of a previous decision',
+      'Authorized-agent request',
+      'Other privacy question',
+    ]),
+    identifier: z.string().max(200).optional().or(z.literal('')),
+    description: z.string().min(1).max(4000),
+    preferredResponseMethod: z.string().max(100).optional().or(z.literal('')),
+    onBehalfOfAnother: z.boolean(),
+  });
+
+  app.post('/api/privacy-requests', async (req, res) => {
+    try {
+      const parsed = privacyRequestSchema.safeParse(req.body);
+      if (!parsed.success) {
+        return res.status(400).json({ error: 'Invalid form data', details: parsed.error.flatten() });
+      }
+      const data = parsed.data;
+      await sendPrivacyRequestNotification(data);
+      await sendPrivacyRequestAcknowledgement({
+        name: data.name,
+        email: data.email,
+        requestType: data.requestType,
+      });
+      res.json({ success: true, message: 'Privacy request received' });
+    } catch (error: any) {
+      console.error('Privacy request error:', error.message);
+      res.status(500).json({ error: 'Failed to process privacy request' });
+    }
+  });
+
   // Get available time slots for a specific date
   app.get('/api/appointments/available-slots', async (req, res) => {
     try {
@@ -431,7 +475,7 @@ export async function registerRoutes(
             // Mark the appointment as payment-failed and reject — bootcamps cannot proceed without payment
             await storage.updateAppointmentPayment(appointment.id, 'failed');
             return res.status(500).json({
-              error: 'Payment processing failed. Please try again or call (281) 836-5357 to book your Boot Camp session.',
+              error: 'Payment processing failed. Please try again or call 281-836-5357 to book your Boot Camp session.',
             });
           }
           // For non-bootcamp services, continue without payment if Stripe fails

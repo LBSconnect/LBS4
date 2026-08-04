@@ -16,7 +16,7 @@ const SITE_SUFFIX = 'LBS Business Services Center';
 export default function SEO({ title, description, canonical, ogImage, noIndex, schema }: SEOProps) {
   const fullTitle = title
     ? `${title} | ${SITE_SUFFIX}`
-    : `${SITE_SUFFIX} Houston TX | Printing, Notary, Testing & More`;
+    : `${SITE_SUFFIX} Houston TX | Notary, Testing & More`;
   const canonicalUrl = `${BASE_URL}${canonical ?? '/'}`;
   const image = ogImage ?? DEFAULT_IMAGE;
 

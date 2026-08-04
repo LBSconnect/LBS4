@@ -9,7 +9,6 @@ import {
   Building2,
   ArrowRight,
   Globe,
-  FileText,
   Stamp,
   CheckCircle2,
 } from "lucide-react";
@@ -17,21 +16,10 @@ import websiteDesignImg from "@assets/service-website-design.jpg";
 
 const notaryService = services.find((s) => s.id === "notary")!;
 const passportService = services.find((s) => s.id === "passport")!;
-const printingCopiesService = services.find((s) => s.id === "printing-copies")!;
-const scanningService = services.find((s) => s.id === "scanning")!;
-const resumeService = services.find((s) => s.id === "resume-services")!;
 
 const gridServices = [
   notaryService,
   passportService,
-  {
-    ...printingCopiesService,
-    title: "Printing, Copies & Faxing",
-    shortTitle: "Printing, Copies & Faxing",
-    description: "Black-and-white and color printing, document copies, and fax services. No appointment needed.",
-  },
-  scanningService,
-  resumeService,
 ];
 
 export default function ForBusinesses() {
@@ -40,7 +28,7 @@ export default function ForBusinesses() {
       <SEO
         title="Business Services in Houston TX | For Businesses"
         canonical="/for-businesses"
-        description="LBS Business Services Center helps Houston small businesses with printing, notary, resume support, website design, and our Corporate Notary subscription program. Explore business solutions today."
+        description="LBS Business Services Center helps Houston small businesses with notary services, passport photos, website design, and our Corporate Notary subscription program. Explore business solutions today."
       />
       <Header />
 
@@ -146,7 +134,7 @@ export default function ForBusinesses() {
               Tell us about your project and we'll follow up to discuss scope and next steps.
             </p>
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-3xl mx-auto">
+          <div className="max-w-sm mx-auto">
             <div className="border border-border/50 rounded-md p-6 space-y-3 text-center">
               <div className="w-14 h-14 rounded-full bg-[#0D1B3D]/10 dark:bg-[#0077FF]/20 flex items-center justify-center mx-auto">
                 <Globe className="w-7 h-7 text-[#0D1B3D] dark:text-[#0077FF]" />
@@ -163,27 +151,6 @@ export default function ForBusinesses() {
                   data-testid="button-quote-website-design"
                 >
                   Request a Quote
-                  <ArrowRight className="w-4 h-4 ml-1" />
-                </Button>
-              </Link>
-            </div>
-            <div className="border border-border/50 rounded-md p-6 space-y-3 text-center">
-              <div className="w-14 h-14 rounded-full bg-[#0D1B3D]/10 dark:bg-[#0077FF]/20 flex items-center justify-center mx-auto">
-                <FileText className="w-7 h-7 text-[#0D1B3D] dark:text-[#0077FF]" />
-              </div>
-              <h3 className="font-semibold text-lg">Resume Services</h3>
-              <p className="text-sm text-muted-foreground">
-                Prefer to reach out ahead of time instead of walking in? Send
-                us your details and we'll follow up.
-              </p>
-              <Link href="/contact?service=resume-services">
-                <Button
-                  size="sm"
-                  variant="outline"
-                  className="w-full mt-2"
-                  data-testid="button-quote-resume-services"
-                >
-                  Contact Us
                   <ArrowRight className="w-4 h-4 ml-1" />
                 </Button>
               </Link>

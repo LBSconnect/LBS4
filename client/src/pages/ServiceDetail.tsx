@@ -42,15 +42,15 @@ import { useToast } from "@/hooks/use-toast";
 const TESTING_CENTER_FAQS = [
   {
     q: "Where can I take my Texas Real Estate license exam in Houston?",
-    a: "LBS is an authorized Pearson VUE testing center where you can take your Texas Real Estate license exam. Call (281) 836-5357 to schedule.",
+    a: "LBS is an authorized Pearson VUE testing center where you can take your Texas Real Estate license exam. Call 281-836-5357 to schedule.",
   },
   {
     q: "Where can I take my Texas Insurance license exam in Houston?",
-    a: "LBS is an authorized testing location for Texas Property & Casualty, Life Insurance, and General Lines Insurance license exams. Call (281) 836-5357.",
+    a: "LBS is an authorized testing location for Texas Property & Casualty, Life Insurance, and General Lines Insurance license exams. Call 281-836-5357.",
   },
   {
     q: "Is LBS an authorized Pearson VUE testing center?",
-    a: "Yes. LBS is an authorized Pearson VUE and Certiport testing center in Houston, TX, offering a professional, secure environment for certification exams.",
+    a: "Yes. LBS is an authorized Pearson VUE and Certiport testing center in Houston, Texas, offering a professional, secure environment for certification exams.",
   },
   {
     q: "Does LBS offer exam prep for Texas licensing exams?",
@@ -62,7 +62,7 @@ const TESTING_CENTER_FAQS = [
   },
   {
     q: "Is there a testing center on FM 1960 in Houston?",
-    a: "Yes. LBS is located at 616 FM 1960 Rd W, Suite 101, Houston, TX 77090-3048, near the FM 1960 and I-45 corridor. We offer Pearson VUE, Certiport, and PMI exam testing.",
+    a: "Yes. LBS is located at 616 FM 1960 Road West, Suite 101, Houston, Texas 77090-3048, near the FM 1960 and I-45 corridor. We offer Pearson VUE, Certiport, and PMI exam testing.",
   },
 ];
 
@@ -240,7 +240,7 @@ export default function ServiceDetail() {
     if (isBootcamp && !price) {
       toast({
         title: "Payment Required",
-        description: "Boot Camp bookings require online payment. Please call (281) 836-5357 to complete your registration.",
+        description: "Boot Camp bookings require online payment. Please call 281-836-5357 to complete your registration.",
         variant: "destructive",
       });
       return;
@@ -336,7 +336,7 @@ export default function ServiceDetail() {
         canonical={`/services/${service.slug}`}
         description={
           isCertiport
-            ? "The LBS Testing Center offers authorized Pearson VUE & Certiport exam testing, Texas insurance license Boot Camps, and MyEasyPass exam prep in Houston, TX."
+            ? "The LBS Testing Center offers authorized Pearson VUE & Certiport exam testing, Texas insurance license Boot Camps, and MyEasyPass exam prep in Houston, Texas."
             : `${service.longDescription.slice(0, 155)}…`
         }
         schema={serviceSchema}
@@ -560,7 +560,7 @@ export default function ServiceDetail() {
                             </div>
                           ) : slotsError ? (
                             <p className="text-sm text-destructive">
-                              Could not load available times. Please try again or call us at (281) 836-5357.
+                              Could not load available times. Please try again or call us at 281-836-5357.
                             </p>
                           ) : slotsData?.slots && slotsData.slots.length > 0 ? (
                             <div className="grid grid-cols-3 gap-2">
@@ -684,14 +684,14 @@ export default function ServiceDetail() {
                       <div className="flex items-start gap-2">
                         <MapPin className="w-4 h-4 mt-0.5 shrink-0 text-[#FF6A00]" />
                         <span>
-                          616 FM 1960 Rd W, Ste 101
+                          616 FM 1960 Road West, Suite 101
                           <br />
-                          Houston, TX 77090-3048
+                          Houston, Texas 77090-3048
                         </span>
                       </div>
                       <div className="flex items-center gap-2">
                         <Phone className="w-4 h-4 shrink-0 text-[#FF6A00]" />
-                        <a href="tel:2818365357">(281) 836-5357</a>
+                        <a href="tel:2818365357">281-836-5357</a>
                       </div>
                       <div className="flex items-start gap-2">
                         <Clock className="w-4 h-4 mt-0.5 shrink-0 text-[#FF6A00]" />
@@ -734,7 +734,7 @@ export default function ServiceDetail() {
                   </div>
                   <h3 className="font-semibold text-lg">Pearson VUE</h3>
                   <p className="text-sm text-muted-foreground">
-                    LBS is an authorized Pearson VUE testing center in Houston, TX, offering a
+                    LBS is an authorized Pearson VUE testing center in Houston, Texas, offering a
                     professional, secure environment for IT certifications, professional
                     licenses, and academic admissions exams.
                   </p>

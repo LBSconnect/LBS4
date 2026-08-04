@@ -461,7 +461,7 @@ export default function CorporateEnroll() {
                       type="tel"
                       value={form.primaryContactPhone}
                       onChange={(e) => set("primaryContactPhone", e.target.value)}
-                      placeholder="(281) 555-1234"
+                      placeholder="281-555-1234"
                     />
                   </Field>
                 </div>

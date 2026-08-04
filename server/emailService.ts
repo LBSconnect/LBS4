@@ -2,8 +2,8 @@ import { sendEmail, createOutlookCalendarEvent } from './smtpClient';
 
 const NOTIFICATION_EMAIL = process.env.NOTIFICATION_EMAIL || 'info@lbsconnect.net';
 const BUSINESS_NAME = 'LBS Test & Exam Center';
-const BUSINESS_ADDRESS = '616 FM 1960 Rd W, Ste 101, Houston, TX 77090-3048';
-const LBS_PHONE = '(281) 836-5357';
+const BUSINESS_ADDRESS = '616 FM 1960 Road West, Suite 101, Houston, Texas 77090-3048';
+const LBS_PHONE = '281-836-5357';
 
 function emailWrapper(content: string): string {
   return `<!DOCTYPE html>
@@ -28,7 +28,7 @@ function emailWrapper(content: string): string {
             </td>
             <td align="right">
               <div style="color:#94a3b8;font-size:11px;">Linton Business Solutions LLC</div>
-              <div style="color:#94a3b8;font-size:11px;">JPMorgan Chase Building, Houston TX</div>
+              <div style="color:#94a3b8;font-size:11px;">JPMorgan Chase Building, Houston, Texas</div>
             </td>
           </tr>
         </table>
@@ -220,6 +220,88 @@ export async function sendContactNotification(data: {
     console.log('Contact notification email sent to', NOTIFICATION_EMAIL);
   } catch (error: any) {
     console.error('Failed to send contact notification email:', error.message);
+  }
+}
+
+export async function sendPrivacyRequestNotification(data: {
+  name: string;
+  email: string;
+  phone?: string | null;
+  organization?: string | null;
+  service: string;
+  requestType: string;
+  identifier?: string | null;
+  description: string;
+  preferredResponseMethod?: string | null;
+  onBehalfOfAnother: boolean;
+}) {
+  try {
+    await sendEmail({
+      to: NOTIFICATION_EMAIL,
+      subject: `New Privacy Request from ${data.name} (${data.requestType})`,
+      html: `
+        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+          <div style="background-color: #1e3a6e; color: white; padding: 20px; text-align: center;">
+            <h1 style="margin: 0; font-size: 22px;">LBS - New Privacy Request</h1>
+          </div>
+          <div style="padding: 24px; background-color: #f9fafb; border: 1px solid #e5e7eb;">
+            <table style="width: 100%; border-collapse: collapse;">
+              <tr><td style="padding: 8px 12px; font-weight: bold; color: #1e3a6e; width: 160px;">Name:</td><td style="padding: 8px 12px;">${data.name}</td></tr>
+              <tr><td style="padding: 8px 12px; font-weight: bold; color: #1e3a6e;">Email:</td><td style="padding: 8px 12px;"><a href="mailto:${data.email}">${data.email}</a></td></tr>
+              ${data.phone ? `<tr><td style="padding: 8px 12px; font-weight: bold; color: #1e3a6e;">Phone:</td><td style="padding: 8px 12px;">${data.phone}</td></tr>` : ''}
+              ${data.organization ? `<tr><td style="padding: 8px 12px; font-weight: bold; color: #1e3a6e;">Organization:</td><td style="padding: 8px 12px;">${data.organization}</td></tr>` : ''}
+              <tr><td style="padding: 8px 12px; font-weight: bold; color: #1e3a6e;">Website/Service:</td><td style="padding: 8px 12px;">${data.service}</td></tr>
+              <tr><td style="padding: 8px 12px; font-weight: bold; color: #1e3a6e;">Request Type:</td><td style="padding: 8px 12px;">${data.requestType}</td></tr>
+              ${data.identifier ? `<tr><td style="padding: 8px 12px; font-weight: bold; color: #1e3a6e;">Account/Order ID:</td><td style="padding: 8px 12px;">${data.identifier}</td></tr>` : ''}
+              ${data.preferredResponseMethod ? `<tr><td style="padding: 8px 12px; font-weight: bold; color: #1e3a6e;">Preferred Response:</td><td style="padding: 8px 12px;">${data.preferredResponseMethod}</td></tr>` : ''}
+              <tr><td style="padding: 8px 12px; font-weight: bold; color: #1e3a6e;">On behalf of another person:</td><td style="padding: 8px 12px;">${data.onBehalfOfAnother ? 'Yes' : 'No'}</td></tr>
+            </table>
+            <div style="margin-top: 16px; padding: 16px; background-color: white; border: 1px solid #e5e7eb; border-radius: 6px;">
+              <p style="font-weight: bold; color: #1e3a6e; margin: 0 0 8px 0;">Description of Request:</p>
+              <p style="margin: 0; white-space: pre-wrap;">${data.description}</p>
+            </div>
+          </div>
+          <div style="padding: 12px; text-align: center; color: #6b7280; font-size: 12px;">
+            LBS Test &amp; Exam Center | ${BUSINESS_ADDRESS}
+          </div>
+        </div>
+      `,
+    });
+    console.log('Privacy request notification email sent to', NOTIFICATION_EMAIL);
+  } catch (error: any) {
+    console.error('Failed to send privacy request notification email:', error.message);
+  }
+}
+
+export async function sendPrivacyRequestAcknowledgement(data: {
+  name: string;
+  email: string;
+  requestType: string;
+}) {
+  try {
+    const content = `
+      <h2 style="margin:0 0 6px;color:#0d1b35;font-size:24px;font-weight:700;">We received your privacy request</h2>
+      <p style="margin:0 0 24px;color:#64748b;font-size:14px;">Hi ${data.name}, we received your ${data.requestType} request and have recorded the date received. We may contact you to verify your identity before acting on the request.</p>
+
+      <div style="background:#f8fafc;border-radius:8px;padding:18px 20px;margin-bottom:20px;border-left:4px solid #c9a84c;">
+        <p style="margin:0 0 4px;color:#0d1b35;font-size:14px;font-weight:600;">What happens next?</p>
+        <p style="margin:0;color:#374151;font-size:14px;">
+          Where the Texas Data Privacy and Security Act applies, we generally respond without undue delay and
+          within 45 days, subject to permitted extensions. Questions in the meantime? Call
+          <a href="tel:${LBS_PHONE}" style="color:#1e3a6e;font-weight:600;">${LBS_PHONE}</a> or
+          email <a href="mailto:${NOTIFICATION_EMAIL}" style="color:#1e3a6e;">${NOTIFICATION_EMAIL}</a>.
+        </p>
+      </div>
+    `;
+
+    await sendEmail({
+      to: data.email,
+      subject: `We received your privacy request: ${BUSINESS_NAME}`,
+      html: emailWrapper(content),
+    });
+    console.log('Privacy request acknowledgement email sent to', data.email);
+  } catch (error: any) {
+    console.error('Failed to send privacy request acknowledgement email:', error.message);
   }
 }
 

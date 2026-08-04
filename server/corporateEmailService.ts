@@ -13,8 +13,8 @@ const PLAN_NAMES: Record<string, string> = {
   gold: "Gold",
 };
 
-const LBS_ADDRESS = "616 FM 1960 Rd W, Ste 101, Houston, TX 77090";
-const LBS_PHONE = "(281) 836-5357";
+const LBS_ADDRESS = "616 FM 1960 Road West, Suite 101, Houston, Texas 77090";
+const LBS_PHONE = "281-836-5357";
 const LBS_EMAIL = process.env.MAIL_FROM_ADDRESS || "info@lbsconnect.net";
 const SITE_URL = "https://www.lbs4.com";
 
@@ -42,7 +42,7 @@ function emailWrapper(content: string): string {
             </td>
             <td align="right">
               <div style="color:#94a3b8;font-size:11px;">Linton Business Solutions LLC</div>
-              <div style="color:#94a3b8;font-size:11px;">JPMorgan Chase Building, Houston TX</div>
+              <div style="color:#94a3b8;font-size:11px;">JPMorgan Chase Building, Houston, Texas</div>
             </td>
           </tr>
         </table>
