@@ -8,7 +8,7 @@ test('Card 1 - Certiport booking workflow', async ({ page }) => {
   await page.goto('http://localhost:5000/');
   await page.waitForLoadState('networkidle');
 
-  const card1 = page.locator('[data-testid="link-core-service-certifications"]');
+  const card1 = page.locator('[data-testid="link-core-service-certiport-exam-testing"]');
   await expect(card1).toBeVisible();
   await card1.click();
   await page.waitForLoadState('networkidle');

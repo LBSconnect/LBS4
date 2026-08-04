@@ -505,19 +505,19 @@ test.describe("Services page", () => {
     await expect(badge).toBeVisible();
   });
 
-  test("Certiport Learn More → /certiport-testing-center-houston", async ({
+  test("Certiport card → /certiport-testing-center-houston", async ({
     page,
   }) => {
     await goto(page, "/services?filter=testing");
     await page.click(
-      '[data-testid="button-learn-more-certification-exam-testing"]'
+      '[data-testid="card-service-certification-exam-testing"]'
     );
     await expect(page).toHaveURL(/certiport-testing-center-houston/);
   });
 
-  test("Notary Learn More → /notary-houston-77090", async ({ page }) => {
+  test("Notary card → /notary-houston-77090", async ({ page }) => {
     await goto(page, "/services");
-    await page.click('[data-testid="button-learn-more-notary-service"]');
+    await page.click('[data-testid="card-service-notary-service"]');
     await expect(page).toHaveURL(/notary-houston-77090/);
   });
 

@@ -43,7 +43,7 @@ const FAQS = [
   },
   {
     q: "How much does website design cost?",
-    a: "Every project is quoted individually based on scope and features. Tell us about your business and what you need using the form below, and we'll follow up with a free custom quote — no obligation.",
+    a: "Every project is quoted individually based on scope and features. Tell us about your business and what you need using the form below, and we'll follow up with a free custom quote. No obligation.",
   },
   {
     q: "How long does a website project take?",
@@ -272,7 +272,7 @@ export default function WebsiteDesignLanding() {
                   We build practical, effective websites for Houston-area small businesses and
                   entrepreneurs who need an online presence that works. From a simple business
                   site to something more custom, we'll scope your project and provide a free
-                  quote before any work begins — no fixed packages, no surprises.
+                  quote before any work begins. No fixed packages, no surprises.
                 </p>
               </div>
 
@@ -280,7 +280,7 @@ export default function WebsiteDesignLanding() {
                 <h2 className="text-2xl font-bold">What's Included</h2>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   {[
-                    "Custom quote — no fixed packages",
+                    "Custom quote, no fixed packages",
                     "Mobile-friendly, responsive design",
                     "Built for Houston small businesses",
                     "Consultation to scope your project",
@@ -396,7 +396,7 @@ export default function WebsiteDesignLanding() {
                           <Label htmlFor="wd-details" className="text-sm">Website Needs *</Label>
                           <Textarea
                             id="wd-details"
-                            placeholder="Tell us about your business and what you need — new site, redesign, e-commerce, etc."
+                            placeholder="Tell us about your business and what you need: new site, redesign, e-commerce, etc."
                             rows={4}
                             value={formData.details}
                             onChange={(e) => setFormData({ ...formData, details: e.target.value })}

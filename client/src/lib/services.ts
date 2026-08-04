@@ -76,7 +76,7 @@ export const services: ServiceInfo[] = [
     stripeProductName: "Certiport Exam Testing",
     category: "testing",
     link: "/certiport-testing-center-houston",
-    visitNote: "Appointment recommended — book your exam time online or by phone",
+    visitNote: "Appointment recommended, book your exam time online or by phone",
     promo: "Same-week scheduling available for most Pearson VUE and Certiport exams",
   },
   {
@@ -103,7 +103,7 @@ export const services: ServiceInfo[] = [
     stripeProductName: "Texas Life Insurance Exam Boot Camp",
     saturdayOnly: true,
     category: "testing",
-    visitNote: "Registration required — Saturday sessions only, no walk-ins",
+    visitNote: "Registration required, Saturday sessions only, no walk-ins",
   },
   {
     id: "property-casualty-bootcamp",
@@ -129,7 +129,7 @@ export const services: ServiceInfo[] = [
     stripeProductName: "Texas Property & Casualty Exam Boot Camp",
     saturdayOnly: true,
     category: "testing",
-    visitNote: "Registration required — Saturday sessions only, no walk-ins",
+    visitNote: "Registration required, Saturday sessions only, no walk-ins",
   },
   {
     id: "notary",
@@ -156,8 +156,8 @@ export const services: ServiceInfo[] = [
     stripeProductName: "Notary Service",
     category: "business",
     link: "/notary-houston-77090",
-    visitNote: "Walk-ins welcome — no appointment needed",
-    promo: "Same-day notary service — walk in during business hours, no appointment required",
+    visitNote: "Walk-ins welcome, no appointment needed",
+    promo: "Same-day notary service. Walk in during business hours, no appointment required",
     faqs: [
       {
         q: "Where can I find a notary near me in Houston?",
@@ -169,7 +169,7 @@ export const services: ServiceInfo[] = [
       },
       {
         q: "What do I need to bring to get a document notarized?",
-        a: "Bring a valid, unexpired government-issued photo ID and your document. Do not sign the document before you arrive — you must sign it in front of the notary.",
+        a: "Bring a valid, unexpired government-issued photo ID and your document. Do not sign the document before you arrive. You must sign it in front of the notary.",
       },
       {
         q: "How much does notary service cost?",
@@ -205,8 +205,8 @@ export const services: ServiceInfo[] = [
     stripeProductName: "Passport Photos",
     category: "business",
     link: "/passport-photos-houston-77090",
-    visitNote: "Walk-ins welcome — no appointment needed",
-    promo: "No appointment needed — most passport photos are ready in minutes",
+    visitNote: "Walk-ins welcome, no appointment needed",
+    promo: "No appointment needed. Most passport photos are ready in minutes",
     faqs: [
       {
         q: "Where can I get passport photos near me in Houston?",

@@ -320,7 +320,7 @@ export default function PrivacyRequest() {
                         {formData.onBehalfOfAnother && (
                           <p className="text-xs text-muted-foreground">
                             Please describe your proof of authority (e.g. power of attorney, parent/guardian
-                            relationship) in the description above — we may follow up for verification.
+                            relationship) in the description above. We may follow up for verification.
                           </p>
                         )}
                       </div>

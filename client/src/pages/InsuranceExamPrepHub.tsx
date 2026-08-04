@@ -35,7 +35,7 @@ const FAQS = [
   },
   {
     q: "Do I need to register in advance?",
-    a: "Yes. Boot Camp seats are limited and fill quickly — registration and online payment are required to reserve your spot. Walk-ins cannot be accommodated for Boot Camp sessions.",
+    a: "Yes. Boot Camp seats are limited and fill quickly. Registration and online payment are required to reserve your spot. Walk-ins cannot be accommodated for Boot Camp sessions.",
   },
   {
     q: "Does attending a Boot Camp guarantee I'll pass my exam?",
@@ -110,7 +110,7 @@ export default function InsuranceExamPrepHub() {
               </p>
               <div className="flex flex-wrap items-center gap-3 pt-2">
                 <span className="inline-flex items-center gap-1.5 bg-white/10 backdrop-blur-sm border border-white/20 rounded-full px-3 py-1 text-sm text-white/90">
-                  Registration required — Saturday sessions only, no walk-ins
+                  Registration required, Saturday sessions only, no walk-ins
                 </span>
                 <a href="tel:2818365357">
                   <Button

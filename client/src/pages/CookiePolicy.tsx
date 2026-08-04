@@ -71,8 +71,8 @@ export default function CookiePolicy() {
         <div className="space-y-4">
           <h2 className="text-2xl font-bold text-[#0D1B3D] dark:text-white">5. Cookie List</h2>
           <p className="text-muted-foreground leading-relaxed">
-            A detailed cookie table — listing each cookie or technology, its provider, domain, purpose, category,
-            and duration — is maintained separately and is available on request.
+            A detailed cookie table (listing each cookie or technology, its provider, domain, purpose, category,
+            and duration) is maintained separately and is available on request.
           </p>
         </div>
 

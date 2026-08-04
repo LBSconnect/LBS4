@@ -817,7 +817,7 @@ function ReportsTab() {
             <h3 className="font-semibold text-[#0d1b35] text-sm">Scheduling Insight</h3>
           </div>
           <p className="text-sm text-muted-foreground">
-            Peak appointment hour: <strong className="text-[#0d1b35]">{peakLabel}</strong> — schedule staffing accordingly.
+            Peak appointment hour: <strong className="text-[#0d1b35]">{peakLabel}</strong>. Schedule staffing accordingly.
             {data.avgTurnaroundDays > 0 && ` Employees book an average of ${data.avgTurnaroundDays} days in advance.`}
           </p>
         </div>

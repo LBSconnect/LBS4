@@ -129,7 +129,7 @@ export default function TermsOfUse() {
         <div className="space-y-4">
           <h2 className="text-2xl font-bold text-[#0D1B3D] dark:text-white">9. Notary Services</h2>
           <p className="text-muted-foreground leading-relaxed">
-            The commissioned notary — not LBS as a corporate entity — performs the official act.
+            The commissioned notary, not LBS as a corporate entity, performs the official act.
           </p>
           <p className="text-muted-foreground leading-relaxed">
             The signer must personally appear as required, present satisfactory identification, understand the
