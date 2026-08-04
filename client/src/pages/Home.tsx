@@ -22,6 +22,7 @@ import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import SEO from "@/components/SEO";
 import { services } from "@/lib/services";
+import { testimonials } from "@/lib/testimonials";
 import logoImg from "@assets/Linton_Business_Solutions.gif_1771618422350.jpg";
 import heroImg from "@assets/hero.png";
 
@@ -48,15 +49,15 @@ const coreServiceStrip = [
       s.id === "notary" ? "Certified & Confidential" :
       s.id === "passport" ? "Fast & Compliant" :
       "",
-    href: `/services/${s.slug}`,
+    href: s.link ?? `/services/${s.slug}`,
     color: SERVICE_ICON_COLORS[s.id],
   })),
-  { icon: Globe, title: "Website Design", tagline: "Modern & Effective", href: "/contact?service=website-design", color: SERVICE_ICON_COLORS["website-design"] },
+  { icon: Globe, title: "Website Design", tagline: "Modern & Effective", href: "/website-design-houston-77090", color: SERVICE_ICON_COLORS["website-design"] },
   {
     icon: certificationService.icon,
     title: certificationService.shortTitle,
     tagline: "Pearson VUE & Certiport",
-    href: "/services/certification-exam-testing",
+    href: certificationService.link ?? "/services/certification-exam-testing",
     color: SERVICE_ICON_COLORS["certification"],
   },
   {
@@ -99,30 +100,6 @@ const faqs = [
   {
     q: "What happens if I need to reschedule?",
     a: "Contact us at least 24 hours before your appointment to reschedule at no charge. For Pearson VUE exams, their reschedule policy applies — check your confirmation email from them for details.",
-  },
-];
-
-const testimonials = [
-  {
-    initials: "KS",
-    name: "Kelly Somes",
-    service: "Google Review",
-    quote:
-      "I have no words to describe how great Linton Business Solutions was. The facility is clean, comfortable and very well managed. I was welcomed with a smile when I first walked in. Mr. Linton was so kind and welcoming — he definitely put me at ease. I had to take an exam and was very nervous. I've taken other tests at other testing centers and this was by far the best experience. Thank you Mr. Linton.",
-  },
-  {
-    initials: "CF",
-    name: "Cayla Fisch",
-    service: "Google Review",
-    quote:
-      "They are absolutely amazing!!! So helpful in every way and literally my own personal cheerleaders!! They didn't let me give up and made sure I was gonna pass!! God send people and so thankful for them!!",
-  },
-  {
-    initials: "KL",
-    name: "Kel Living",
-    service: "Google Review",
-    quote:
-      "I had a wonderful experience. Everyone was so nice. The process from setup all the way to pressing submit was great. They provide reassurance and speak positivity into you to help calm you before entering the testing area. And let's not forget the celebration they provide after you pass! Definitely will always be my site of choice!!! Thank you all for everything.",
   },
 ];
 
@@ -262,7 +239,7 @@ export default function Home() {
                 </p>
                 <div className="flex flex-wrap items-center gap-4 pt-2">
                   <Link
-                    href="/services/certification-exam-testing"
+                    href="/certiport-testing-center-houston"
                     aria-label="View Pearson VUE testing information"
                     className="bg-white rounded-lg px-4 py-2.5 flex items-center gap-2 hover-elevate"
                   >
@@ -270,7 +247,7 @@ export default function Home() {
                     <span className="text-sm font-semibold text-[#0D1B3D]">Pearson VUE</span>
                   </Link>
                   <Link
-                    href="/services/certification-exam-testing"
+                    href="/certiport-testing-center-houston"
                     aria-label="View Certiport testing information"
                     className="bg-white rounded-lg px-4 py-2.5 flex items-center gap-2 hover-elevate"
                   >
@@ -280,7 +257,7 @@ export default function Home() {
                 </div>
               </div>
               <div className="flex lg:justify-end">
-                <Link href="/services/certification-exam-testing">
+                <Link href="/certiport-testing-center-houston">
                   <Button
                     size="lg"
                     variant="outline"

@@ -15,7 +15,7 @@ const navLinksStart = [
 ];
 
 const navLinksMid = [
-  { href: "/services/certification-exam-testing", label: "Testing Center" },
+  { href: "/certiport-testing-center-houston", label: "Testing Center" },
 ];
 
 const navLinksEnd = [

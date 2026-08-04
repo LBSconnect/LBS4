@@ -21,7 +21,7 @@ function getUrlFilter(): string | null {
 }
 
 const testingAndExamRow = [
-  { service: getServiceBySlug("certification-exam-testing"), href: "/services/certification-exam-testing" },
+  { service: getServiceBySlug("certification-exam-testing"), href: "/certiport-testing-center-houston" },
   { service: getServiceBySlug("life-insurance-boot-camp"), href: "/services/life-insurance-boot-camp" },
   { service: getServiceBySlug("property-casualty-boot-camp"), href: "/services/property-casualty-boot-camp" },
 ];

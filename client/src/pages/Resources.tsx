@@ -39,7 +39,7 @@ const resourceLinks = [
     icon: ShieldCheck,
     title: "Testing Center Info",
     description: "Pearson VUE, Certiport, exam prep Boot Camps, and appointment preparation details.",
-    href: "/services/certification-exam-testing",
+    href: "/certiport-testing-center-houston",
     external: false,
   },
   {

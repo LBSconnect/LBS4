@@ -20,7 +20,7 @@ export default function About() {
       <SEO
         title="About LBS Business Services Center | Linton Business Solutions Houston TX"
         canonical="/about"
-        description="LBS Business Services Center is a division of Linton Business Solutions LLC, offering printing, notary, passport photos and more, plus authorized Pearson VUE & Certiport testing, in Houston, Texas."
+        description="LBS4 is the Skilling Services & Business Center for Linton Business Solutions LLC, offering notary services, passport photos, website design, and authorized Pearson VUE & Certiport testing in Houston, Texas."
       />
       <Header />
 
@@ -31,8 +31,8 @@ export default function About() {
             About LBS
           </h1>
           <p className="text-lg text-white/80 max-w-2xl mx-auto">
-            LBS is a skilling division of Linton Business Solutions LLC (LBS), providing professional
-            testing and business services in Houston, Texas.
+            LBS4 is the Skilling Services &amp; Business Center for Linton Business Solutions LLC,
+            providing professional testing and business services in Houston, Texas.
           </p>
         </div>
       </section>
@@ -43,24 +43,35 @@ export default function About() {
             <div className="space-y-6">
               <h2 className="text-3xl font-bold">Our Story</h2>
               <p className="text-muted-foreground leading-relaxed">
-                LBS is a skilling division of Linton Business
-                Solutions LLC (LBS). We were established to provide the Houston
-                community with a professional, reliable, and accessible testing
-                center that meets the highest industry standards.
+                LBS4 is the Skilling Services &amp; Business Center location and website for Linton
+                Business Solutions LLC, known as LBS. The website and location was established to
+                provide individuals, entrepreneurs, professionals, and local organizations with
+                convenient access to essential business, career, and testing services all in one
+                professional location.
               </p>
               <p className="text-muted-foreground leading-relaxed">
-                Our mission is to empower individuals and professionals by
-                providing a world-class testing environment and essential
-                business services. We understand that taking a certification
-                exam or completing important business tasks requires focus,
-                comfort, and professional support. That's exactly what we
-                deliver.
+                Today, LBS operates as a business support center offering professional notary
+                services, passport photos, website design, and practical solutions that help our
+                customers complete important personal and business tasks with confidence.
               </p>
               <p className="text-muted-foreground leading-relaxed">
-                Located conveniently in Houston, Texas, our facility is equipped
-                with modern technology and staffed by dedicated professionals
-                who are committed to making your experience seamless and
-                stress-free.
+                We also serve the Houston community as an authorized professional testing center,
+                providing a secure, quiet, and reliable environment for certification and licensing
+                examinations. Through our testing, exam-preparation, and career-support services, we
+                help individuals take meaningful steps toward new credentials, employment
+                opportunities, and professional growth.
+              </p>
+              <p className="text-muted-foreground leading-relaxed">
+                Our mission is simple: to make essential services more accessible, efficient, and
+                stress-free. Whether you are notarizing an important document, obtaining compliant
+                passport photos, building your online presence, preparing for a professional exam,
+                or completing a certification test, our team is committed to providing dependable
+                service and personalized support.
+              </p>
+              <p className="text-muted-foreground leading-relaxed">
+                Conveniently located in North Houston, our facility combines modern technology with
+                friendly, knowledgeable service to deliver a seamless experience for every customer
+                who walks through our doors.
               </p>
             </div>
             <div className="flex justify-center">

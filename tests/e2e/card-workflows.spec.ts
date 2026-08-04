@@ -1,23 +1,25 @@
-import { test, expect, chromium } from '@playwright/test';
+import { test, expect } from '@playwright/test';
 
-test.use({ 
-  launchOptions: { executablePath: '/opt/pw-browsers/chromium-1194/chrome-linux/chrome' }
+test.use({
+  launchOptions: { executablePath: '/opt/pw-browsers/chromium-1194/chrome-linux/chrome' },
 });
 
 test('Card 1 - Certiport booking workflow', async ({ page }) => {
   await page.goto('http://localhost:5000/');
   await page.waitForLoadState('networkidle');
 
-  const card1 = page.locator('text=Certiport Exam Testing').first();
+  const card1 = page.locator('[data-testid="link-core-service-certifications"]');
   await expect(card1).toBeVisible();
   await card1.click();
   await page.waitForLoadState('networkidle');
 
   console.log('Card 1 landed on:', page.url());
-  await expect(page).toHaveURL(/certification-exam-testing/);
+  await expect(page).toHaveURL(/certiport-testing-center-houston/);
 
-  // Verify booking button visible on the page
-  const bookBtn = page.locator('text=Book Appointment', { exact: false }).first();
+  // Verify the booking section is visible on the page (the submit button
+  // itself only renders after a date + time are picked in the calendar)
+  const bookingSection = page.locator('text=Book an Appointment', { exact: false }).first();
+  await expect(bookingSection).toBeVisible();
   console.log('Card 1: PASS —', page.url());
 });
 
@@ -25,7 +27,7 @@ test('Card 2 - Bootcamp filter workflow', async ({ page }) => {
   await page.goto('http://localhost:5000/');
   await page.waitForLoadState('networkidle');
 
-  const card2 = page.locator('text=Exam Prep Bootcamp').first();
+  const card2 = page.locator('[data-testid="link-core-service-life-insurance-boot-camp"]');
   await expect(card2).toBeVisible();
   await card2.click();
   await page.waitForLoadState('networkidle');
@@ -47,7 +49,7 @@ test('Card 3 - Business Services filter workflow', async ({ page }) => {
   await page.goto('http://localhost:5000/');
   await page.waitForLoadState('networkidle');
 
-  const card3 = page.locator('text=Business Services').first();
+  const card3 = page.locator('[data-testid="button-view-all-services"]');
   await expect(card3).toBeVisible();
   await card3.click();
   await page.waitForLoadState('networkidle');
