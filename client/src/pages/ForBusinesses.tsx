@@ -1,7 +1,7 @@
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import SEO from "@/components/SEO";
-import ServiceCard from "@/components/ServiceCard";
+import CompactServiceCard from "@/components/CompactServiceCard";
 import { Button } from "@/components/ui/button";
 import { Link } from "wouter";
 import { services } from "@/lib/services";
@@ -56,9 +56,9 @@ export default function ForBusinesses() {
               Walk in during business hours. No appointment needed for most services.
             </p>
           </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 max-w-3xl mx-auto">
             {gridServices.map((service) => (
-              <ServiceCard
+              <CompactServiceCard
                 key={service.id}
                 title={service.title}
                 description={service.description}
@@ -66,18 +66,17 @@ export default function ForBusinesses() {
                 price={service.price}
                 priceLabel={service.priceLabel}
                 slug={service.slug}
-                href={service.link}
+                href={service.link ?? `/services/${service.slug}`}
                 icon={<service.icon className="w-5 h-5" />}
               />
             ))}
-            <ServiceCard
-              title="Website Design"
-              description="Practical website design for Houston small businesses and entrepreneurs. Request a free quote."
-              image={websiteDesignImg}
+            <CompactServiceCard
               slug="website-design"
-              href="/contact?service=website-design"
+              title="Website Design"
+              description="Practical website design for Houston small businesses and entrepreneurs."
+              image={websiteDesignImg}
+              href="/website-design-houston-77090"
               icon={<Globe className="w-5 h-5" />}
-              buttonLabel="Request a Quote"
             />
           </div>
         </div>
@@ -88,7 +87,7 @@ export default function ForBusinesses() {
           <div className="bg-card border border-border/50 rounded-md p-8 md:p-10 grid grid-cols-1 lg:grid-cols-2 gap-8 items-center">
             <div className="space-y-4">
               <div className="inline-flex items-center gap-2 bg-[#0D1B3D]/10 dark:bg-[#0077FF]/20 text-[#0D1B3D] dark:text-[#0077FF] rounded-full px-3 py-1 text-xs font-semibold uppercase tracking-wide">
-                <Stamp className="w-3.5 h-3.5" /> Ongoing Support
+                <Stamp className="w-3.5 h-3.5" /> Need Ongoing Support?
               </div>
               <h2 className="text-2xl md:text-3xl font-bold">Corporate Notary Program</h2>
               <p className="text-muted-foreground">
@@ -150,7 +149,7 @@ export default function ForBusinesses() {
                 Practical website design for Houston small businesses and
                 entrepreneurs. Tell us about your business and what you need.
               </p>
-              <Link href="/contact?service=website-design">
+              <Link href="/website-design-houston-77090">
                 <Button
                   size="sm"
                   className="w-full mt-2 bg-gradient-to-r from-[#FF6A00] to-[#FF2D55] text-white rounded-full"

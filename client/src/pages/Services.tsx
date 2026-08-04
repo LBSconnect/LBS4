@@ -1,10 +1,11 @@
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import SEO from "@/components/SEO";
-import ServiceCard from "@/components/ServiceCard";
+import CompactServiceCard from "@/components/CompactServiceCard";
 import { services, getServiceBySlug } from "@/lib/services";
 import { Shield, ArrowRight, ExternalLink } from "lucide-react";
 import { Link } from "wouter";
+import websiteDesignImg from "@assets/service-website-design.jpg";
 
 function getNextSaturday(): string {
   const today = new Date();
@@ -37,6 +38,7 @@ export default function Services() {
     : services.filter((s) => s.category === "business");
 
   const showTestingBlock = !filter;
+  const showWebsiteDesignCard = filter !== "bootcamp" && filter !== "testing";
 
   const pageTitle =
     filter === "bootcamp" ? "Exam Prep Bootcamps" :
@@ -81,9 +83,9 @@ export default function Services() {
               </a>
             </div>
           )}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
             {visibleServices.map((service) => (
-              <ServiceCard
+              <CompactServiceCard
                 key={service.id}
                 title={service.title}
                 description={service.description}
@@ -92,11 +94,20 @@ export default function Services() {
                 priceLabel={service.priceLabel}
                 priceNote={service.priceNote}
                 slug={service.slug}
-                href={service.link}
+                href={service.link ?? `/services/${service.slug}`}
                 icon={<service.icon className="w-5 h-5" />}
                 badge={service.saturdayOnly ? `Next: ${nextSat}` : undefined}
               />
             ))}
+            {showWebsiteDesignCard && (
+              <CompactServiceCard
+                slug="website-design"
+                title="Website Design"
+                description="Practical website design for Houston small businesses and entrepreneurs."
+                image={websiteDesignImg}
+                href="/website-design-houston-77090"
+              />
+            )}
           </div>
         </div>
       </section>

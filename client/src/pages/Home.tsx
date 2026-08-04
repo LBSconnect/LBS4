@@ -55,7 +55,7 @@ const coreServiceStrip = [
   { icon: Globe, title: "Website Design", tagline: "Modern & Effective", href: "/website-design-houston-77090", color: SERVICE_ICON_COLORS["website-design"] },
   {
     icon: certificationService.icon,
-    title: certificationService.shortTitle,
+    title: "Certiport Exam Testing",
     tagline: "Pearson VUE & Certiport",
     href: certificationService.link ?? "/services/certification-exam-testing",
     color: SERVICE_ICON_COLORS["certification"],
@@ -79,11 +79,11 @@ const whyChooseItems = [
 const faqs = [
   {
     q: "Do I need to register with Pearson VUE or Certiport before booking here?",
-    a: "Yes — create your account and purchase your exam voucher directly at pearsonvue.com or certiport.com first. Then book your seat here at LBS. We serve as your authorized local testing location.",
+    a: "Yes. Create your account and purchase your exam voucher directly at pearsonvue.com or certiport.com first. Then book your seat here at LBS. We serve as your authorized local testing location.",
   },
   {
     q: "What ID do I need to bring?",
-    a: "A valid government-issued photo ID — driver's license, passport, or state ID. Your name must match your exam registration exactly. This is a strict Pearson VUE and Certiport requirement.",
+    a: "A valid government-issued photo ID: driver's license, passport, or state ID. Your name must match your exam registration exactly. This is a strict Pearson VUE and Certiport requirement.",
   },
   {
     q: "Can I walk in for notary or passport photos?",
@@ -91,7 +91,7 @@ const faqs = [
   },
   {
     q: "How far in advance do I need to schedule a testing appointment?",
-    a: "We recommend booking at least 48–72 hours in advance to secure your preferred time slot. Saturday bootcamp seats fill quickly — book at least a week ahead when possible.",
+    a: "We recommend booking at least 48–72 hours in advance to secure your preferred time slot. Saturday bootcamp seats fill quickly, so book at least a week ahead when possible.",
   },
   {
     q: "Where do I park?",
@@ -99,7 +99,7 @@ const faqs = [
   },
   {
     q: "What happens if I need to reschedule?",
-    a: "Contact us at least 24 hours before your appointment to reschedule at no charge. For Pearson VUE exams, their reschedule policy applies — check your confirmation email from them for details.",
+    a: "Contact us at least 24 hours before your appointment to reschedule at no charge. For Pearson VUE exams, their reschedule policy applies. Check your confirmation email from them for details.",
   },
 ];
 

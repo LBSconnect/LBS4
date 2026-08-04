@@ -386,7 +386,7 @@ export default function ServiceDetail({ slugOverride }: { slugOverride?: string 
               </h1>
               <p className="text-lg text-white/80 max-w-2xl">
                 {isCertiport
-                  ? "Access professional exam testing, focused preparation programs, and online study resources through LBS — including Certiport exam booking below."
+                  ? "Access professional exam testing, focused preparation programs, and online study resources through LBS, including Certiport exam booking below."
                   : service.description}
               </p>
               <div className="flex flex-wrap items-center gap-3 pt-2">
