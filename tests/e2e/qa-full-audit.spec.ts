@@ -70,9 +70,11 @@ test.describe("Page load — all routes render without crash", () => {
     "/checkout/cancel",
     "/privacy-policy",
     "/terms-of-use",
-    "/services/certification-exam-testing",
-    "/services/notary-service",
-    "/services/passport-photos",
+    "/notary-houston-77090",
+    "/passport-photos-houston-77090",
+    "/certiport-testing-center-houston",
+    "/texas-insurance-exam-prep-houston",
+    "/website-design-houston-77090",
     "/services/life-insurance-boot-camp",
     "/services/property-casualty-boot-camp",
   ];
@@ -93,6 +95,22 @@ test.describe("Page load — all routes render without crash", () => {
     await goto(page, "/this-does-not-exist-at-all");
     await expect(page.locator("body")).toContainText(/not found|404/i);
   });
+});
+
+test.describe("Legacy service URLs 301-redirect to their new SEO landing pages", () => {
+  const redirects: [string, string][] = [
+    ["/services/notary-service", "/notary-houston-77090"],
+    ["/services/passport-photos", "/passport-photos-houston-77090"],
+    ["/services/certification-exam-testing", "/certiport-testing-center-houston"],
+  ];
+
+  for (const [from, to] of redirects) {
+    test(`${from} → 301 → ${to}`, async ({ request }) => {
+      const res = await request.get(`${BASE}${from}`, { maxRedirects: 0 });
+      expect(res.status()).toBe(301);
+      expect(res.headers()["location"]).toBe(to);
+    });
+  }
 });
 
 // ═══════════════════════════════════════════════════════════════════════════
@@ -195,50 +213,46 @@ test.describe("Footer navigation", () => {
     await expect(page).toHaveURL(`${BASE}/contact`);
   });
 
-  test("Footer Notary Service → /services/notary-service", async ({ page }) => {
+  test("Footer Notary Service → /notary-houston-77090", async ({ page }) => {
     await goto(page, "/");
     await page
       .locator('[data-testid="link-footer-service-notary-service"]')
       .click();
-    await expect(page).toHaveURL(`${BASE}/services/notary-service`);
+    await expect(page).toHaveURL(`${BASE}/notary-houston-77090`);
   });
 
-  test("Footer Passport Photos → /services/passport-photos", async ({ page }) => {
+  test("Footer Passport Photos → /passport-photos-houston-77090", async ({ page }) => {
     await goto(page, "/");
     await page
       .locator('[data-testid="link-footer-service-passport-photos"]')
       .click();
-    await expect(page).toHaveURL(`${BASE}/services/passport-photos`);
+    await expect(page).toHaveURL(`${BASE}/passport-photos-houston-77090`);
   });
 
-  test("Footer Certiport Exams → /services/certification-exam-testing", async ({
+  test("Footer Website Design → /website-design-houston-77090", async ({ page }) => {
+    await goto(page, "/");
+    await page
+      .locator('[data-testid="link-footer-service-website-design"]')
+      .click();
+    await expect(page).toHaveURL(`${BASE}/website-design-houston-77090`);
+  });
+
+  test("Footer Certiport Exams → /certiport-testing-center-houston", async ({
     page,
   }) => {
     await goto(page, "/");
     await page
       .locator('[data-testid="link-footer-service-certiport-exams"]')
       .click();
-    await expect(page).toHaveURL(`${BASE}/services/certification-exam-testing`);
+    await expect(page).toHaveURL(`${BASE}/certiport-testing-center-houston`);
   });
 
-  test("Footer Life Insurance Boot Camp → correct slug", async ({ page }) => {
+  test("Footer Texas Insurance Exam Prep → /texas-insurance-exam-prep-houston", async ({ page }) => {
     await goto(page, "/");
     await page
-      .locator('[data-testid="link-footer-service-life-insurance-boot-camp"]')
+      .locator('[data-testid="link-footer-service-texas-insurance-exam-prep"]')
       .click();
-    await expect(page).toHaveURL(`${BASE}/services/life-insurance-boot-camp`);
-  });
-
-  test("Footer P&C Boot Camp → correct slug", async ({ page }) => {
-    await goto(page, "/");
-    await page
-      .locator(
-        '[data-testid="link-footer-service-p&c-exam-boot-camp"]'
-      )
-      .click();
-    await expect(page).toHaveURL(
-      `${BASE}/services/property-casualty-boot-camp`
-    );
+    await expect(page).toHaveURL(`${BASE}/texas-insurance-exam-prep-houston`);
   });
 
   test("Footer Privacy Policy → /privacy-policy", async ({ page }) => {
@@ -310,17 +324,17 @@ test.describe("Home page — sections and CTAs", () => {
     await goto(page, "/");
     const strip = page.locator('[data-testid="section-core-services"]');
     await expect(strip).toBeVisible();
-    for (const slug of ["notary-service", "passport-photos", "certification-exam-testing"]) {
-      await expect(strip.locator(`a[href="/services/${slug}"]`)).toBeVisible();
-    }
-    await expect(strip.locator('a[href="/contact?service=website-design"]').filter({ hasText: "Website Design" })).toBeVisible();
+    await expect(strip.locator('a[href="/notary-houston-77090"]')).toBeVisible();
+    await expect(strip.locator('a[href="/passport-photos-houston-77090"]')).toBeVisible();
+    await expect(strip.locator('a[href="/certiport-testing-center-houston"]')).toBeVisible();
+    await expect(strip.locator('a[href="/website-design-houston-77090"]').filter({ hasText: "Website Design" })).toBeVisible();
     await expect(strip.locator('a[href="/services?filter=bootcamp"]').filter({ hasText: "Life Insurance Boot Camp" })).toBeVisible();
   });
 
   test("clicking a core service icon navigates to its detail page", async ({ page }) => {
     await goto(page, "/");
     await page.click('[data-testid="link-core-service-notary"]');
-    await expect(page).toHaveURL(/notary-service/);
+    await expect(page).toHaveURL(/notary-houston-77090/);
   });
 
   test("View all business services → /services?filter=business", async ({ page }) => {
@@ -335,12 +349,12 @@ test.describe("Home page — sections and CTAs", () => {
     await expect(page.locator('[data-testid="section-testing-services"]')).toContainText("More Services");
   });
 
-  test("View Testing Info → /services/certification-exam-testing", async ({
+  test("View Testing Info → /certiport-testing-center-houston", async ({
     page,
   }) => {
     await goto(page, "/");
     await page.click('[data-testid="button-view-testing-info"]');
-    await expect(page).toHaveURL(/certification-exam-testing/);
+    await expect(page).toHaveURL(/certiport-testing-center-houston/);
   });
 
   test("Testimonials section shows 3 cards", async ({ page }) => {
@@ -491,20 +505,20 @@ test.describe("Services page", () => {
     await expect(badge).toBeVisible();
   });
 
-  test("Certiport Learn More → /services/certification-exam-testing", async ({
+  test("Certiport Learn More → /certiport-testing-center-houston", async ({
     page,
   }) => {
     await goto(page, "/services?filter=testing");
     await page.click(
       '[data-testid="button-learn-more-certification-exam-testing"]'
     );
-    await expect(page).toHaveURL(/certification-exam-testing/);
+    await expect(page).toHaveURL(/certiport-testing-center-houston/);
   });
 
-  test("Notary Learn More → /services/notary-service", async ({ page }) => {
+  test("Notary Learn More → /notary-houston-77090", async ({ page }) => {
     await goto(page, "/services");
     await page.click('[data-testid="button-learn-more-notary-service"]');
-    await expect(page).toHaveURL(/notary-service/);
+    await expect(page).toHaveURL(/notary-houston-77090/);
   });
 
   test("Exam Cram card links to myeasypass.net", async ({ page }) => {
@@ -736,12 +750,12 @@ test.describe("Book page (/book)", () => {
     ).toBeVisible();
   });
 
-  test("clicking Notary Service → /services/notary-service", async ({
+  test("clicking Notary Service → /notary-houston-77090", async ({
     page,
   }) => {
     await goto(page, "/book");
     await page.locator("text=Notary Service").first().click();
-    await expect(page).toHaveURL(/notary-service/);
+    await expect(page).toHaveURL(/notary-houston-77090/);
   });
 
   test("phone CTA = tel:2818365357", async ({ page }) => {

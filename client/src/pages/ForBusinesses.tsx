@@ -66,6 +66,7 @@ export default function ForBusinesses() {
                 price={service.price}
                 priceLabel={service.priceLabel}
                 slug={service.slug}
+                href={service.link}
                 icon={<service.icon className="w-5 h-5" />}
               />
             ))}
@@ -117,10 +118,15 @@ export default function ForBusinesses() {
                 </Button>
               </Link>
             </div>
-            <div className="h-56 md:h-64 rounded-md bg-gradient-to-br from-[#0D1B3D] to-[#1A237E] flex items-center justify-center">
-              <div className="w-20 h-20 rounded-2xl bg-white/10 backdrop-blur-sm flex items-center justify-center text-white">
-                <Stamp className="w-10 h-10" />
-              </div>
+            <div className="h-56 md:h-64 rounded-md overflow-hidden">
+              <img
+                src={notaryService.image}
+                alt="Corporate Notary Program"
+                className="w-full h-full object-cover"
+                loading="lazy"
+                decoding="async"
+                data-testid="img-corporate-notary"
+              />
             </div>
           </div>
         </div>

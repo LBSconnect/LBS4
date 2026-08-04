@@ -1,4 +1,5 @@
-import { Switch, Route } from "wouter";
+import { useEffect } from "react";
+import { Switch, Route, useLocation } from "wouter";
 import { queryClient } from "./lib/queryClient";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
@@ -25,6 +26,8 @@ import BookingCancellationPolicy from "@/pages/BookingCancellationPolicy";
 import CandidateRulesSurveillanceNotice from "@/pages/CandidateRulesSurveillanceNotice";
 import DocumentHandlingNotice from "@/pages/DocumentHandlingNotice";
 import Book from "@/pages/Book";
+import InsuranceExamPrepHub from "@/pages/InsuranceExamPrepHub";
+import WebsiteDesignLanding from "@/pages/WebsiteDesignLanding";
 import CorporateLanding from "@/pages/corporate/Landing";
 import CorporatePrograms from "@/pages/corporate/Programs";
 import CorporateEnroll from "@/pages/corporate/Enroll";
@@ -34,14 +37,38 @@ import CorporateAdmin from "@/pages/admin/CorporateAdmin";
 import CorporatePortal from "@/pages/corporate/Portal";
 import NotFound from "@/pages/not-found";
 
+function ScrollToTop() {
+  const [location] = useLocation();
+  useEffect(() => {
+    // Let same-page anchor links (e.g. /#section-faq) handle their own scroll.
+    if (window.location.hash) return;
+    window.scrollTo(0, 0);
+  }, [location]);
+  return null;
+}
+
 function Router() {
   return (
     <>
+      <ScrollToTop />
       <Analytics />
       <Switch>
         <Route path="/" component={Home} />
         <Route path="/services" component={Services} />
-        <Route path="/services/:slug" component={ServiceDetail} />
+        <Route path="/services/:slug">
+          {() => <ServiceDetail />}
+        </Route>
+        <Route path="/notary-houston-77090">
+          {() => <ServiceDetail slugOverride="notary-service" />}
+        </Route>
+        <Route path="/passport-photos-houston-77090">
+          {() => <ServiceDetail slugOverride="passport-photos" />}
+        </Route>
+        <Route path="/certiport-testing-center-houston">
+          {() => <ServiceDetail slugOverride="certification-exam-testing" />}
+        </Route>
+        <Route path="/texas-insurance-exam-prep-houston" component={InsuranceExamPrepHub} />
+        <Route path="/website-design-houston-77090" component={WebsiteDesignLanding} />
         <Route path="/for-businesses" component={ForBusinesses} />
         <Route path="/resources" component={Resources} />
         <Route path="/about" component={About} />

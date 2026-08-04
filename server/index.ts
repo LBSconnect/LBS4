@@ -76,12 +76,17 @@ app.get('/health', (_req, res) => {
 
 // 301 redirects for discontinued services (Printing & Copies, Scanning,
 // Faxing, Resume Services) — send visitors and search engines to the
-// current services listing instead of a dead page.
+// current services listing instead of a dead page. Also covers services
+// that moved from a generic /services/:slug URL to a dedicated,
+// keyword-focused SEO landing page.
 const DISCONTINUED_SERVICE_REDIRECTS: Record<string, string> = {
   '/services/printing-copies': '/services',
   '/services/scanning': '/services',
   '/services/faxing': '/services',
   '/services/resume-services': '/services',
+  '/services/notary-service': '/notary-houston-77090',
+  '/services/passport-photos': '/passport-photos-houston-77090',
+  '/services/certification-exam-testing': '/certiport-testing-center-houston',
 };
 app.use((req, res, next) => {
   const target = DISCONTINUED_SERVICE_REDIRECTS[req.path];

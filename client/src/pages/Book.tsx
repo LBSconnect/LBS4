@@ -35,7 +35,7 @@ export default function Book() {
       <section className="py-14 bg-background flex-1">
         <div className="max-w-3xl mx-auto px-6 space-y-4">
           {services.map((service) => (
-            <Link key={service.id} href={`/services/${service.slug}`}>
+            <Link key={service.id} href={service.link ?? `/services/${service.slug}`}>
               <div className="group flex items-center justify-between gap-4 p-5 rounded-lg border border-border/50 bg-card hover:border-[#0D1B3D]/40 hover:shadow-md transition-all cursor-pointer">
                 <div className="flex items-center gap-4">
                   <div className="shrink-0 w-11 h-11 rounded-md bg-[#0D1B3D]/10 dark:bg-[#0077FF]/20 flex items-center justify-center text-[#0D1B3D] dark:text-[#0077FF]">

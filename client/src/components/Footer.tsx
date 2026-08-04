@@ -4,11 +4,11 @@ import logoImg from "@assets/Linton_Business_Solutions.gif_1771618422350.jpg";
 
 export default function Footer() {
   const serviceLinks = [
-    { href: "/services/notary-service", label: "Notary Service" },
-    { href: "/services/passport-photos", label: "Passport Photos" },
-    { href: "/services/certification-exam-testing", label: "Certiport Exams" },
-    { href: "/services/life-insurance-boot-camp", label: "Life Insurance Boot Camp" },
-    { href: "/services/property-casualty-boot-camp", label: "P&C Exam Boot Camp" },
+    { href: "/notary-houston-77090", label: "Notary Service" },
+    { href: "/passport-photos-houston-77090", label: "Passport Photos" },
+    { href: "/website-design-houston-77090", label: "Website Design" },
+    { href: "/certiport-testing-center-houston", label: "Certiport Exams" },
+    { href: "/texas-insurance-exam-prep-houston", label: "Texas Insurance Exam Prep" },
   ];
 
   return (

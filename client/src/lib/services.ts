@@ -18,7 +18,8 @@ export interface PolicySection {
 export interface ServiceInfo {
   id: string;
   slug: string;
-  link?: string; // optional override for the card CTA link
+  /** Overrides the default /services/:slug card CTA and canonical page URL (e.g. a dedicated SEO landing page) */
+  link?: string;
   title: string;
   shortTitle: string;
   description: string;
@@ -44,6 +45,10 @@ export interface ServiceInfo {
   saturdayOnly?: boolean;
   /** "business" = walk-in / everyday office services; "testing" = Pearson VUE, Certiport, exam prep */
   category: "business" | "testing";
+  /** Short line shown near the price: "Walk-ins welcome" vs "Appointment recommended" */
+  visitNote?: string;
+  /** 3–5 service-specific FAQs shown in an accordion on the detail/landing page */
+  faqs?: { q: string; a: string }[];
 }
 
 export const services: ServiceInfo[] = [
@@ -70,6 +75,9 @@ export const services: ServiceInfo[] = [
     icon: Award,
     stripeProductName: "Certiport Exam Testing",
     category: "testing",
+    link: "/certiport-testing-center-houston",
+    visitNote: "Appointment recommended — book your exam time online or by phone",
+    promo: "Same-week scheduling available for most Pearson VUE and Certiport exams",
   },
   {
     id: "life-insurance-bootcamp",
@@ -95,6 +103,7 @@ export const services: ServiceInfo[] = [
     stripeProductName: "Texas Life Insurance Exam Boot Camp",
     saturdayOnly: true,
     category: "testing",
+    visitNote: "Registration required — Saturday sessions only, no walk-ins",
   },
   {
     id: "property-casualty-bootcamp",
@@ -120,6 +129,7 @@ export const services: ServiceInfo[] = [
     stripeProductName: "Texas Property & Casualty Exam Boot Camp",
     saturdayOnly: true,
     category: "testing",
+    visitNote: "Registration required — Saturday sessions only, no walk-ins",
   },
   {
     id: "notary",
@@ -145,6 +155,31 @@ export const services: ServiceInfo[] = [
     icon: Stamp,
     stripeProductName: "Notary Service",
     category: "business",
+    link: "/notary-houston-77090",
+    visitNote: "Walk-ins welcome — no appointment needed",
+    promo: "Same-day notary service — walk in during business hours, no appointment required",
+    faqs: [
+      {
+        q: "Where can I find a notary near me in Houston?",
+        a: "LBS Business Services Center is a walk-in notary location at 616 FM 1960 Road West, Suite 101, Houston, TX 77090, near the FM 1960 and I-45 corridor. We regularly serve customers from the 77060, 77066, 77067, 77068, and 77069 ZIP codes.",
+      },
+      {
+        q: "Do I need an appointment for notary service?",
+        a: "No. Walk-ins are welcome during business hours: Monday–Friday 8 AM–5 PM and Saturday 8 AM–4 PM.",
+      },
+      {
+        q: "What do I need to bring to get a document notarized?",
+        a: "Bring a valid, unexpired government-issued photo ID and your document. Do not sign the document before you arrive — you must sign it in front of the notary.",
+      },
+      {
+        q: "How much does notary service cost?",
+        a: "Notary service is billed per document at the time of service. Call 281-836-5357 for current per-document pricing.",
+      },
+      {
+        q: "What kinds of documents can LBS notarize?",
+        a: "We regularly notarize affidavits, powers of attorney, real estate documents, and other legal paperwork. The notary may decline an act when legal or ethical requirements aren't met.",
+      },
+    ],
   },
   {
     id: "passport",
@@ -169,6 +204,31 @@ export const services: ServiceInfo[] = [
     icon: Camera,
     stripeProductName: "Passport Photos",
     category: "business",
+    link: "/passport-photos-houston-77090",
+    visitNote: "Walk-ins welcome — no appointment needed",
+    promo: "No appointment needed — most passport photos are ready in minutes",
+    faqs: [
+      {
+        q: "Where can I get passport photos near me in Houston?",
+        a: "LBS Business Services Center takes passport and visa photos at 616 FM 1960 Road West, Suite 101, Houston, TX 77090, near the FM 1960 and I-45 corridor. We regularly serve customers from the 77060, 77066, 77067, 77068, and 77069 ZIP codes.",
+      },
+      {
+        q: "Do I need an appointment for passport photos?",
+        a: "No. Walk-ins are welcome during business hours: Monday–Friday 8 AM–5 PM and Saturday 8 AM–4 PM.",
+      },
+      {
+        q: "How much do passport photos cost?",
+        a: "Passport and visa photos are $25 per set, which includes 2 printed photos.",
+      },
+      {
+        q: "Are LBS passport photos guaranteed to be accepted?",
+        a: "We use professional equipment and lighting to meet U.S. Department of State and international standards, but the receiving government or organization makes the final acceptance decision.",
+      },
+      {
+        q: "What should I wear or bring for passport photos?",
+        a: "Wear normal street clothes without a hat or head covering (unless worn daily for religious reasons), and confirm any current size, background, or submission requirements for your specific application before you arrive.",
+      },
+    ],
   },
 ];
 

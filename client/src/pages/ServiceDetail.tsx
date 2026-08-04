@@ -36,8 +36,13 @@ import {
   Award,
 } from "lucide-react";
 import { getServiceBySlug } from "@/lib/services";
+import { testimonials } from "@/lib/testimonials";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
+
+const MAPS_URL = "https://maps.google.com/?q=616+FM+1960+Rd+W+Ste+101+Houston+TX+77090";
+
+const SERVICE_AREA_ZIPS = ["77090", "77060", "77066", "77067", "77068", "77069"];
 
 const TESTING_CENTER_FAQS = [
   {
@@ -66,8 +71,9 @@ const TESTING_CENTER_FAQS = [
   },
 ];
 
-export default function ServiceDetail() {
-  const { slug } = useParams<{ slug: string }>();
+export default function ServiceDetail({ slugOverride }: { slugOverride?: string }) {
+  const { slug: paramSlug } = useParams<{ slug: string }>();
+  const slug = slugOverride ?? paramSlug;
   const service = getServiceBySlug(slug || "");
   const { toast } = useToast();
 
@@ -297,12 +303,14 @@ export default function ServiceDetail() {
     );
   }
 
+  const canonicalPath = service.link ?? `/services/${service.slug}`;
+
   const serviceSchema = {
     "@context": "https://schema.org",
     "@type": "Service",
     "name": service.title,
     "description": service.longDescription,
-    "url": `https://www.lbs4.com/services/${service.slug}`,
+    "url": `https://www.lbs4.com${canonicalPath}`,
     "provider": {
       "@type": "LocalBusiness",
       "@id": "https://www.lbs4.com/#business",
@@ -317,14 +325,17 @@ export default function ServiceDetail() {
         "addressCountry": "US"
       }
     },
-    "areaServed": { "@type": "City", "name": "Houston", "addressRegion": "TX" },
+    "areaServed": [
+      { "@type": "City", "name": "Houston", "addressRegion": "TX" },
+      ...SERVICE_AREA_ZIPS.map((zip) => ({ "@type": "PostalAddress", "postalCode": zip, "addressCountry": "US" })),
+    ],
     ...(service.price ? {
       "offers": {
         "@type": "Offer",
         "price": service.price.replace("$", ""),
         "priceCurrency": "USD",
         "availability": "https://schema.org/InStock",
-        "url": `https://www.lbs4.com/services/${service.slug}`
+        "url": `https://www.lbs4.com${canonicalPath}`
       }
     } : {})
   };
@@ -333,7 +344,7 @@ export default function ServiceDetail() {
     <div className="min-h-screen flex flex-col bg-background">
       <SEO
         title={isCertiport ? "Testing Center | Pearson VUE & Certiport Exam Testing in Houston TX" : `${service.title} in Houston TX`}
-        canonical={`/services/${service.slug}`}
+        canonical={canonicalPath}
         description={
           isCertiport
             ? "The LBS Testing Center offers authorized Pearson VUE & Certiport exam testing, Texas insurance license Boot Camps, and MyEasyPass exam prep in Houston, Texas."
@@ -378,6 +389,27 @@ export default function ServiceDetail() {
                   ? "Access professional exam testing, focused preparation programs, and online study resources through LBS — including Certiport exam booking below."
                   : service.description}
               </p>
+              <div className="flex flex-wrap items-center gap-3 pt-2">
+                {service.visitNote && (
+                  <span
+                    className="inline-flex items-center gap-1.5 bg-white/10 backdrop-blur-sm border border-white/20 rounded-full px-3 py-1 text-sm text-white/90"
+                    data-testid="text-visit-note"
+                  >
+                    {service.visitNote}
+                  </span>
+                )}
+                <a href="tel:2818365357">
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    className="bg-white/10 border-white/30 text-white hover:bg-white/20 rounded-full"
+                    data-testid="button-click-to-call"
+                  >
+                    <Phone className="w-4 h-4 mr-1.5" />
+                    Call 281-836-5357
+                  </Button>
+                </a>
+              </div>
             </div>
           </div>
         </div>
@@ -421,14 +453,6 @@ export default function ServiceDetail() {
               {service.rateTable && (
                 <div className="space-y-4" data-testid="section-pricing">
                   <h2 className="text-2xl font-bold">Pricing</h2>
-                  {service.promo && (
-                    <div
-                      className="rounded-md bg-[#FF6A00]/10 border border-[#FF6A00]/30 px-4 py-2.5 text-sm font-semibold text-[#0D1B3D] dark:text-white"
-                      data-testid="text-promo"
-                    >
-                      {service.promo}
-                    </div>
-                  )}
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                     {service.rateTable.map((section) => (
                       <div key={section.label} className="space-y-2">
@@ -491,9 +515,28 @@ export default function ServiceDetail() {
                   ))}
                 </div>
               </div>
+
+              {service.link && (
+                <div className="space-y-4" data-testid="section-service-area">
+                  <h2 className="text-2xl font-bold">Proudly Serving the Houston Area</h2>
+                  <p className="text-muted-foreground leading-relaxed">
+                    Located at 616 FM 1960 Road West, Suite 101, near the FM 1960 &amp; I-45
+                    corridor, we serve customers within approximately 5–8 miles of our office,
+                    including the {SERVICE_AREA_ZIPS.join(", ")} ZIP codes.
+                  </p>
+                </div>
+              )}
             </div>
 
             <div className="space-y-6">
+              {service.promo && (
+                <div
+                  className="rounded-md bg-[#FF6A00]/10 border border-[#FF6A00]/30 px-4 py-3 text-sm font-semibold text-[#0D1B3D] dark:text-white"
+                  data-testid="text-service-offer"
+                >
+                  {service.promo}
+                </div>
+              )}
               <Card className="border-border/50">
                 <CardContent className="p-6 space-y-5">
                   {!isPayAtOffice && (
@@ -704,6 +747,20 @@ export default function ServiceDetail() {
                         </span>
                       </div>
                     </div>
+                    <a href={MAPS_URL} target="_blank" rel="noopener noreferrer" className="block">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="w-full gap-1.5"
+                        data-testid="button-map-directions"
+                      >
+                        <MapPin className="w-4 h-4" />
+                        Get Directions &amp; Parking Info
+                      </Button>
+                    </a>
+                    <p className="text-xs text-muted-foreground">
+                      Free customer parking is available directly in front of our suite.
+                    </p>
                   </div>
                 </CardContent>
               </Card>
@@ -752,7 +809,7 @@ export default function ServiceDetail() {
                   </div>
                   <h3 className="font-semibold text-lg">Certiport</h3>
                   <p className="text-sm text-muted-foreground">
-                    Book and pay for your Certiport exam right here — Microsoft Office
+                    Book and pay for your Certiport exam right here: Microsoft Office
                     Specialist (MOS), Adobe Certified Professional, and other industry
                     certifications. $35 per session.
                   </p>
@@ -813,8 +870,8 @@ export default function ServiceDetail() {
                 <div>
                   <h3 className="font-semibold text-lg mb-2">Appointment Preparation</h3>
                   <p className="text-sm text-muted-foreground">
-                    Bring a valid government-issued photo ID — driver's license, passport, or
-                    state ID — with a name that matches your exam registration exactly. This
+                    Bring a valid government-issued photo ID, driver's license, passport, or
+                    state ID, with a name that matches your exam registration exactly. This
                     is a strict Pearson VUE and Certiport requirement. Arrive a few minutes
                     early to check in, and contact us at least 24 hours in advance if you
                     need to reschedule.
@@ -855,6 +912,67 @@ export default function ServiceDetail() {
             </div>
           </section>
         </>
+      )}
+
+      {!isCertiport && service.faqs && (
+        <section className="py-14 bg-muted/30" data-testid="section-service-faq">
+          <div className="max-w-7xl mx-auto px-6">
+            <div className="text-center max-w-2xl mx-auto mb-10 space-y-3">
+              <p className="text-xs font-bold uppercase tracking-widest text-[#FF6A00]">Common Questions</p>
+              <h2 className="text-3xl font-bold">Frequently Asked Questions</h2>
+            </div>
+            <div className="max-w-2xl mx-auto divide-y divide-border/50 border border-border/50 rounded-xl overflow-hidden bg-card">
+              {service.faqs.map((faq, i) => (
+                <div key={i}>
+                  <button
+                    className="w-full flex items-center justify-between gap-4 px-6 py-5 text-left text-sm font-semibold hover:bg-muted/40 transition-colors"
+                    onClick={() => setOpenFaq(openFaq === i ? null : i)}
+                    aria-expanded={openFaq === i}
+                    data-testid={`button-service-faq-${i}`}
+                  >
+                    <span>{faq.q}</span>
+                    <ChevronDown
+                      className={`w-4 h-4 shrink-0 text-[#FF6A00] transition-transform duration-200 ${openFaq === i ? "rotate-180" : ""}`}
+                    />
+                  </button>
+                  {openFaq === i && (
+                    <div className="px-6 pb-5 text-sm text-muted-foreground leading-relaxed border-t border-border/30 pt-4">
+                      {faq.a}
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+      )}
+
+      {service.link && (
+        <section className="py-14 bg-background" data-testid="section-service-reviews">
+          <div className="max-w-7xl mx-auto px-6">
+            <div className="text-center max-w-2xl mx-auto mb-10 space-y-3">
+              <p className="text-xs font-bold uppercase tracking-widest text-[#FF6A00]">What Our Clients Say</p>
+              <h2 className="text-3xl font-bold">Customer Reviews</h2>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-5xl mx-auto">
+              {testimonials.map((t) => (
+                <div key={t.name} className="bg-card border border-border/50 rounded-md p-6 space-y-3">
+                  <div className="text-[#FF6A00] text-sm" aria-hidden="true">★★★★★</div>
+                  <p className="text-sm text-muted-foreground leading-relaxed line-clamp-6">{t.quote}</p>
+                  <div className="flex items-center gap-3 pt-2">
+                    <div className="w-9 h-9 rounded-full bg-[#0D1B3D]/10 dark:bg-[#0077FF]/20 flex items-center justify-center text-xs font-bold text-[#0D1B3D] dark:text-[#0077FF]">
+                      {t.initials}
+                    </div>
+                    <div>
+                      <p className="text-sm font-semibold">{t.name}</p>
+                      <p className="text-xs text-muted-foreground">{t.service}</p>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
       )}
 
       <Footer />
