@@ -1,6 +1,6 @@
 import { Link } from "wouter";
 import { Phone, Mail, MapPin, Clock } from "lucide-react";
-import logoImg from "@assets/Linton_Business_Solutions.gif_1771618422350.jpg";
+import logoImg from "@assets/lbs-logo-optimized.png";
 
 export default function Footer() {
   const serviceLinks = [
@@ -20,7 +20,7 @@ export default function Footer() {
             <div className="flex items-center gap-3">
               <img
                 src={logoImg}
-                alt="LBS Logo"
+                alt="Linton Business Solutions LLC logo"
                 className="h-12 w-12 object-contain rounded-md bg-white/10 p-1"
                 loading="lazy"
                 decoding="async"

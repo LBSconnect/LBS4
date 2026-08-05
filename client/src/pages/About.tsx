@@ -12,7 +12,7 @@ import {
   ArrowRight,
   CheckCircle2,
 } from "lucide-react";
-import logoImg from "@assets/Linton_Business_Solutions.gif_1771618422350.jpg";
+import logoImg from "@assets/lbs-logo-optimized.png";
 
 export default function About() {
   return (
@@ -79,7 +79,7 @@ export default function About() {
                 <CardContent className="p-8 text-center space-y-6">
                   <img
                     src={logoImg}
-                    alt="Linton Business Solutions Logo"
+                    alt="Linton Business Solutions LLC logo"
                     className="w-32 h-32 object-contain mx-auto"
                     loading="lazy"
                     decoding="async"
