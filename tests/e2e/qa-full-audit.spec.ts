@@ -335,10 +335,11 @@ test.describe("Home page — sections and CTAs", () => {
     await expect(page).toHaveURL(/notary-houston-77090/);
   });
 
-  test("View all business services → /services?filter=business", async ({ page }) => {
+  test("View all services → /services (same full list as top-nav Services)", async ({ page }) => {
     await goto(page, "/");
     await page.click('[data-testid="button-view-all-services"]');
-    await expect(page).toHaveURL(/\/services\?filter=business/);
+    await expect(page).toHaveURL(`${BASE}/services`);
+    await expect(page.locator('[data-testid="section-testing-exam-programs"]')).toBeVisible();
   });
 
   test("Exam Testing Services secondary section renders", async ({ page }) => {
@@ -414,13 +415,13 @@ test.describe("Home page — sections and CTAs", () => {
 // ═══════════════════════════════════════════════════════════════════════════
 
 test.describe("Services page", () => {
-  test("default view: title = Business Services, business services + Testing & Exam Programs row visible", async ({
+  test("default view: title = LBS Services, business services + Testing & Exam Programs row visible", async ({
     page,
   }) => {
     await goto(page, "/services");
     await expect(
       page.locator('[data-testid="text-services-title"]')
-    ).toContainText("Business Services");
+    ).toContainText("LBS Services");
     for (const slug of [
       "notary-service",
       "passport-photos",

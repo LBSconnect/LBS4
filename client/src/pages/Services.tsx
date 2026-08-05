@@ -43,7 +43,8 @@ export default function Services() {
   const pageTitle =
     filter === "bootcamp" ? "Exam Prep Bootcamps" :
     filter === "testing" ? "Exam Testing Services" :
-    "Business Services";
+    filter === "business" ? "Business Services" :
+    "LBS Services";
 
   const sectionHeading =
     filter === "bootcamp" ? "Exam Prep Bootcamps" :
