@@ -2,7 +2,7 @@ import { useState, useRef, useEffect } from "react";
 import { Link, useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
-import { Menu, Phone, Mail, MapPin, ChevronDown, Building2, ShieldCheck, Stamp, Globe, Briefcase } from "lucide-react";
+import { Menu, Phone, Mail, MapPin, ChevronDown, Building2, ShieldCheck, Stamp, Globe } from "lucide-react";
 import logoImg from "@assets/lbs-logo-optimized.png";
 
 const CORPORATE_ENABLED = import.meta.env.VITE_CORPORATE_ENABLED === "true";
@@ -14,14 +14,13 @@ const navLinksStart = [
 ];
 
 // Mirrors the section order on /for-businesses: Corporate Notary Program,
-// New-Hire Verification & Form I-9 Support, Website & Application Design
-// Services, then Everyday Business Services. Icons match the badge icon
-// each service already uses on that page, for a consistent look.
+// New-Hire Verification & Form I-9 Support, then Website & Application
+// Design Services. Icons match the badge icon each service already uses
+// on that page, for a consistent look.
 const businessDropdownLinks = [
   { href: "/corporate", label: "Corporate Notary Program", icon: Stamp },
   { href: "/employer-services/new-hire-verification", label: "New-Hire Verification & I-9 Support", icon: ShieldCheck },
   { href: "/website-design-houston-77090", label: "Website & Application Design", icon: Globe },
-  { href: "/for-businesses", label: "Everyday Business Services", icon: Briefcase },
 ];
 
 const navLinksMid = [
