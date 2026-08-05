@@ -187,6 +187,31 @@ export default function About() {
         </div>
       </section>
 
+      <section className="py-10 bg-muted/20" data-testid="section-naics-codes">
+        <div className="max-w-5xl mx-auto px-6">
+          <h2 className="text-sm font-semibold uppercase tracking-wider text-muted-foreground mb-4">
+            Industry Classifications (NAICS Codes)
+          </h2>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-x-6 gap-y-1.5 text-xs text-muted-foreground">
+            {[
+              { code: "541611", label: "Administrative Management and General Management Consulting" },
+              { code: "541512", label: "Computer Systems Design Services" },
+              { code: "541519", label: "Other Computer Related Services" },
+              { code: "561110", label: "Office Administrative Services" },
+              { code: "561410", label: "Document Preparation Services" },
+              { code: "561320", label: "Temporary Help Services" },
+              { code: "492110", label: "Couriers and Express Delivery Services" },
+              { code: "611430", label: "Professional and Management Development Training" },
+              { code: "561920", label: "Convention and Trade Show Organizers" },
+            ].map((item) => (
+              <p key={item.code}>
+                <span className="font-medium text-foreground/80">{item.code}:</span> {item.label}
+              </p>
+            ))}
+          </div>
+        </div>
+      </section>
+
       <section className="py-12 bg-gradient-to-r from-[#0D1B3D] to-[#1A237E]">
         <div className="max-w-4xl mx-auto px-6 text-center space-y-6">
           <h2 className="text-3xl font-bold text-white">
