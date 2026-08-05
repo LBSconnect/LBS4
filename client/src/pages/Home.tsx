@@ -274,6 +274,75 @@ export default function Home() {
         </div>
       </section>
 
+      {/* ── EMPLOYER SERVICES ── */}
+      <section className="py-14 bg-background border-y border-border/50" data-testid="section-employer-services">
+        <div className="max-w-7xl mx-auto px-6">
+          <div className="rounded-2xl bg-gradient-to-br from-[#0D1B3D] to-[#1A237E] p-8 md:p-10">
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-center">
+              <div className="lg:col-span-2 space-y-4">
+                <p className="text-xs font-bold uppercase tracking-widest text-[#FF2D55]">Employer Services</p>
+                <h2 className="text-2xl md:text-3xl font-bold text-white">New-Hire Verification &amp; Form I-9 Support</h2>
+                <p className="text-white/75 leading-relaxed max-w-2xl">
+                  LBS helps Houston employers manage Form I-9 administrative workflows and E-Verify cases:
+                  client enrollment, case creation, document examination, case monitoring, and monthly reporting.
+                </p>
+              </div>
+              <div className="flex lg:justify-end">
+                <Link href="/employer-services/new-hire-verification">
+                  <Button
+                    size="lg"
+                    variant="outline"
+                    className="border-white/30 text-white bg-white/5 backdrop-blur-sm rounded-full"
+                    data-testid="button-view-employer-services"
+                  >
+                    Explore Employer Services
+                    <ArrowRight className="w-4 h-4 ml-2" />
+                  </Button>
+                </Link>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* ── BUSINESS SOLUTIONS ── */}
+      <section className="py-14 bg-background" data-testid="section-business-solutions">
+        <div className="max-w-7xl mx-auto px-6">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 items-center bg-muted/30 rounded-2xl p-8 md:p-12">
+            <div className="space-y-5">
+              <p className="text-xs font-bold uppercase tracking-widest text-[#FF6A00]">Solutions for Your Business</p>
+              <h2 className="text-3xl md:text-4xl font-bold" data-testid="text-business-solutions-heading">
+                Services That Help Your Business Grow.
+              </h2>
+              <p className="text-muted-foreground text-lg leading-relaxed">
+                From everyday essentials to specialized business solutions, we help you save time and focus on what
+                matters most.
+              </p>
+              <Link href="/for-businesses">
+                <Button
+                  size="lg"
+                  className="bg-gradient-to-r from-[#FF6A00] to-[#FF2D55] text-white rounded-full"
+                  data-testid="button-explore-business-solutions"
+                >
+                  Explore Business Solutions
+                  <ArrowRight className="w-4 h-4 ml-2" />
+                </Button>
+              </Link>
+            </div>
+            <div className="rounded-2xl overflow-hidden shadow-lg">
+              <img
+                src="/images/business-collaboration.png"
+                alt="Business professionals collaborating"
+                className="w-full h-72 md:h-80 object-cover"
+                loading="lazy"
+                decoding="async"
+                data-testid="img-business-solutions"
+              />
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* ── TESTIMONIALS ── */}
       <section className="py-14 bg-muted/30" data-testid="section-testimonials">
         <div className="max-w-7xl mx-auto px-6">
@@ -391,75 +460,6 @@ export default function Home() {
                 </Link>
               </CardContent>
             </Card>
-          </div>
-        </div>
-      </section>
-
-      {/* ── BUSINESS SOLUTIONS ── */}
-      <section className="py-14 bg-background" data-testid="section-business-solutions">
-        <div className="max-w-7xl mx-auto px-6">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 items-center bg-muted/30 rounded-2xl p-8 md:p-12">
-            <div className="space-y-5">
-              <p className="text-xs font-bold uppercase tracking-widest text-[#FF6A00]">Solutions for Your Business</p>
-              <h2 className="text-3xl md:text-4xl font-bold" data-testid="text-business-solutions-heading">
-                Services That Help Your Business Grow.
-              </h2>
-              <p className="text-muted-foreground text-lg leading-relaxed">
-                From everyday essentials to specialized business solutions, we help you save time and focus on what
-                matters most.
-              </p>
-              <Link href="/for-businesses">
-                <Button
-                  size="lg"
-                  className="bg-gradient-to-r from-[#FF6A00] to-[#FF2D55] text-white rounded-full"
-                  data-testid="button-explore-business-solutions"
-                >
-                  Explore Business Solutions
-                  <ArrowRight className="w-4 h-4 ml-2" />
-                </Button>
-              </Link>
-            </div>
-            <div className="rounded-2xl overflow-hidden shadow-lg">
-              <img
-                src="/images/business-collaboration.png"
-                alt="Business professionals collaborating"
-                className="w-full h-72 md:h-80 object-cover"
-                loading="lazy"
-                decoding="async"
-                data-testid="img-business-solutions"
-              />
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* ── EMPLOYER SERVICES ── */}
-      <section className="py-14 bg-background border-y border-border/50" data-testid="section-employer-services">
-        <div className="max-w-7xl mx-auto px-6">
-          <div className="rounded-2xl bg-gradient-to-br from-[#0D1B3D] to-[#1A237E] p-8 md:p-10">
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-center">
-              <div className="lg:col-span-2 space-y-4">
-                <p className="text-xs font-bold uppercase tracking-widest text-[#FF2D55]">Employer Services</p>
-                <h2 className="text-2xl md:text-3xl font-bold text-white">New-Hire Verification &amp; Form I-9 Support</h2>
-                <p className="text-white/75 leading-relaxed max-w-2xl">
-                  LBS helps Houston employers manage Form I-9 administrative workflows and E-Verify cases:
-                  client enrollment, case creation, document examination, case monitoring, and monthly reporting.
-                </p>
-              </div>
-              <div className="flex lg:justify-end">
-                <Link href="/employer-services/new-hire-verification">
-                  <Button
-                    size="lg"
-                    variant="outline"
-                    className="border-white/30 text-white bg-white/5 backdrop-blur-sm rounded-full"
-                    data-testid="button-view-employer-services"
-                  >
-                    Explore Employer Services
-                    <ArrowRight className="w-4 h-4 ml-2" />
-                  </Button>
-                </Link>
-              </div>
-            </div>
           </div>
         </div>
       </section>

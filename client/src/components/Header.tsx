@@ -2,7 +2,7 @@ import { useState, useRef, useEffect } from "react";
 import { Link, useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
-import { Menu, Phone, Mail, MapPin, ChevronDown, Building2, ShieldCheck } from "lucide-react";
+import { Menu, Phone, Mail, MapPin, ChevronDown, Building2, ShieldCheck, Stamp, Globe, Briefcase } from "lucide-react";
 import logoImg from "@assets/lbs-logo-optimized.png";
 
 const CORPORATE_ENABLED = import.meta.env.VITE_CORPORATE_ENABLED === "true";
@@ -15,12 +15,13 @@ const navLinksStart = [
 
 // Mirrors the section order on /for-businesses: Corporate Notary Program,
 // New-Hire Verification & Form I-9 Support, Website & Application Design
-// Services, then Everyday Business Services.
+// Services, then Everyday Business Services. Icons match the badge icon
+// each service already uses on that page, for a consistent look.
 const businessDropdownLinks = [
-  { href: "/corporate", label: "Corporate Notary Program" },
-  { href: "/employer-services/new-hire-verification", label: "New-Hire Verification & I-9 Support" },
-  { href: "/website-design-houston-77090", label: "Website & Application Design" },
-  { href: "/for-businesses", label: "Everyday Business Services" },
+  { href: "/corporate", label: "Corporate Notary Program", icon: Stamp },
+  { href: "/employer-services/new-hire-verification", label: "New-Hire Verification & I-9 Support", icon: ShieldCheck },
+  { href: "/website-design-houston-77090", label: "Website & Application Design", icon: Globe },
+  { href: "/for-businesses", label: "Everyday Business Services", icon: Briefcase },
 ];
 
 const navLinksMid = [
@@ -148,14 +149,15 @@ export default function Header() {
                 <ChevronDown className={`w-3.5 h-3.5 transition-transform ${bizOpen ? "rotate-180" : ""}`} />
               </Button>
               {bizOpen && (
-                <div className="absolute top-full left-0 mt-1 w-64 bg-white border border-border/50 rounded-xl shadow-lg py-1 z-50">
+                <div className="absolute top-full left-0 mt-1 w-72 bg-white border border-border/50 rounded-xl shadow-lg py-1 z-50">
                   {businessDropdownLinks.map((link) => (
                     <Link key={link.href} href={link.href}>
                       <span
-                        className="block px-4 py-2.5 text-sm text-foreground hover:bg-[#f8f9fb] cursor-pointer transition-colors"
+                        className="flex items-center gap-2.5 px-4 py-2.5 text-sm text-foreground hover:bg-[#f8f9fb] cursor-pointer transition-colors"
                         onClick={() => setBizOpen(false)}
                         data-testid={`link-nav-dropdown-${link.label.toLowerCase().replace(/[^a-z0-9]+/g, "-")}`}
                       >
+                        <link.icon className="w-4 h-4 text-[#FF6A00] shrink-0" />
                         {link.label}
                       </span>
                     </Link>
@@ -296,10 +298,11 @@ export default function Header() {
                     <Link key={link.href} href={link.href}>
                       <Button
                         variant="ghost"
-                        className="w-full justify-start text-sm pl-4"
+                        className="w-full justify-start gap-2.5 text-sm pl-4"
                         onClick={() => setMobileOpen(false)}
                         data-testid={`link-mobile-dropdown-${link.label.toLowerCase().replace(/[^a-z0-9]+/g, "-")}`}
                       >
+                        <link.icon className="w-4 h-4 text-[#FF6A00] shrink-0" />
                         {link.label}
                       </Button>
                     </Link>
