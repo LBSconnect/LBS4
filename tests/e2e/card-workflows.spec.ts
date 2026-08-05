@@ -45,7 +45,7 @@ test('Card 2 - Bootcamp filter workflow', async ({ page }) => {
   console.log('Card 2: PASS');
 });
 
-test('Card 3 - Business Services filter workflow', async ({ page }) => {
+test('Card 3 - View all services workflow (full unfiltered list, matching top-nav Services)', async ({ page }) => {
   await page.goto('http://localhost:5000/');
   await page.waitForLoadState('networkidle');
 
@@ -55,14 +55,18 @@ test('Card 3 - Business Services filter workflow', async ({ page }) => {
   await page.waitForLoadState('networkidle');
 
   console.log('Card 3 landed on:', page.url());
-  await expect(page).toHaveURL(/filter=business/);
+  await expect(page).toHaveURL('http://localhost:5000/services');
 
   await expect(page.locator('[data-testid="card-service-notary-service"]')).toBeVisible();
   await expect(page.locator('[data-testid="card-service-passport-photos"]')).toBeVisible();
 
+  // Unlike the old filter=business link, the unfiltered page also shows the
+  // Testing & Exam Programs section — same content a visitor gets from the
+  // top-nav "Services" link.
+  await expect(page.locator('[data-testid="section-testing-exam-programs"]')).toBeVisible();
   const bootcamp = await page.locator('text=Texas Life Insurance Exam Boot Camp').count();
-  console.log('Bootcamp cards shown (should be 0):', bootcamp);
-  expect(bootcamp).toBe(0);
+  console.log('Bootcamp cards shown (should be 1, in the testing row):', bootcamp);
+  expect(bootcamp).toBeGreaterThan(0);
 
   console.log('Card 3: PASS');
 });

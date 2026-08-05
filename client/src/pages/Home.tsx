@@ -215,9 +215,9 @@ export default function Home() {
             ))}
           </div>
           <div className="text-center mt-8">
-            <Link href="/services?filter=business">
+            <Link href="/services">
               <Button variant="outline" size="sm" className="text-sm" data-testid="button-view-all-services">
-                View all business services
+                View all services
                 <ArrowRight className="w-4 h-4 ml-1.5" />
               </Button>
             </Link>
