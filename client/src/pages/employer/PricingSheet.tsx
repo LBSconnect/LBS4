@@ -6,7 +6,7 @@ import Footer from "@/components/Footer";
 import SEO from "@/components/SEO";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft, Printer, Phone, Mail, MapPin } from "lucide-react";
-import logoImg from "@assets/Linton_Business_Solutions.gif_1771618422350.jpg";
+import logoImg from "@assets/lbs-logo-optimized.png";
 import {
   EMPLOYER_BASE_ROUTE,
   monthlyPlans,

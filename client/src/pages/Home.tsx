@@ -23,7 +23,7 @@ import Footer from "@/components/Footer";
 import SEO from "@/components/SEO";
 import { services } from "@/lib/services";
 import { testimonials } from "@/lib/testimonials";
-import logoImg from "@assets/Linton_Business_Solutions.gif_1771618422350.jpg";
+import logoImg from "@assets/lbs-logo-optimized.png";
 import heroImg from "@assets/hero.png";
 
 const businessServices = services.filter((s) => s.category === "business");
@@ -344,7 +344,7 @@ export default function Home() {
             <Card className="border-border/50">
               <CardContent className="p-8 space-y-6">
                 <div className="flex items-center gap-4 mb-2">
-                  <img src={logoImg} alt="LBS" className="w-14 h-14 object-contain rounded-md" loading="lazy" decoding="async" />
+                  <img src={logoImg} alt="Linton Business Solutions LLC logo" className="w-14 h-14 object-contain rounded-md" loading="lazy" decoding="async" />
                   <div>
                     <h3 className="text-lg font-bold text-[#0D1B3D] dark:text-white">Visit Us Today</h3>
                     <p className="text-sm text-muted-foreground">Walk-ins welcome for most services</p>

@@ -3,7 +3,7 @@ import { Link, useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { Menu, Phone, Mail, MapPin, ChevronDown, Building2, ShieldCheck } from "lucide-react";
-import logoImg from "@assets/Linton_Business_Solutions.gif_1771618422350.jpg";
+import logoImg from "@assets/lbs-logo-optimized.png";
 
 const CORPORATE_ENABLED = import.meta.env.VITE_CORPORATE_ENABLED === "true";
 
@@ -95,7 +95,7 @@ export default function Header() {
             <div className="flex items-center gap-3 cursor-pointer">
               <img
                 src={logoImg}
-                alt="LBS Logo"
+                alt="Linton Business Solutions LLC logo"
                 className="h-12 w-12 object-contain rounded-md"
               />
               <div className="flex flex-col">
