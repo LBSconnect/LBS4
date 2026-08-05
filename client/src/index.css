@@ -173,6 +173,13 @@
   body {
     @apply font-sans antialiased bg-background text-foreground;
   }
+
+  /* Smooth in-page anchor scrolling (e.g. "View Plans" jump links), off for users who prefer reduced motion */
+  @media (prefers-reduced-motion: no-preference) {
+    html {
+      scroll-behavior: smooth;
+    }
+  }
 }
 
 /**
@@ -195,6 +202,17 @@
  * Even without handling focused or not, this is six possible combinations that
  * need to be distinguished from eachother visually.
  */
+/* Clean letter-size output for print-friendly pages (e.g. employer pricing sheet) */
+@media print {
+  @page {
+    size: letter;
+    margin: 0.5in;
+  }
+  body {
+    background: #fff !important;
+  }
+}
+
 @layer utilities {
 
   /* Hide ugly search cancel button in Chrome until we can style it properly */

@@ -11,6 +11,14 @@ declare global {
 const GA_ID = import.meta.env.VITE_GA_MEASUREMENT_ID as string | undefined;
 let gaReady = false;
 
+/** Fire a custom GA4 event through the site's single analytics implementation.
+ *  No-op when GA isn't configured (VITE_GA_MEASUREMENT_ID unset) or before the
+ *  gtag script has loaded, so it's always safe to call from any component. */
+export function trackEvent(action: string, params?: Record<string, unknown>) {
+  if (typeof window === "undefined" || !window.gtag) return;
+  window.gtag("event", action, params);
+}
+
 export default function Analytics() {
   const [location] = useLocation();
 

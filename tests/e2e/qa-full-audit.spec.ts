@@ -154,12 +154,10 @@ test.describe("Header navigation", () => {
     await expect(page).toHaveURL(`${BASE}/book`);
   });
 
-  test("Exam Cram nav links to myeasypass.net", async ({ page }) => {
+  test("Exam Cram removed from top navigation", async ({ page }) => {
     await goto(page, "/");
-    const href = await page
-      .locator('[data-testid="link-nav-exam-cram"]')
-      .getAttribute("href");
-    expect(href).toContain("myeasypass.net");
+    await expect(page.locator('[data-testid="link-nav-exam-cram"]')).toHaveCount(0);
+    await expect(page.locator('[data-testid="link-mobile-exam-cram"]')).toHaveCount(0);
   });
 
   test("Top bar phone = tel:2818365357", async ({ page }) => {

@@ -2,16 +2,21 @@ import { useState, useRef, useEffect } from "react";
 import { Link, useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
-import { Menu, Phone, Mail, MapPin, ChevronDown, Building2 } from "lucide-react";
+import { Menu, Phone, Mail, MapPin, ChevronDown, Building2, ShieldCheck } from "lucide-react";
 import logoImg from "@assets/Linton_Business_Solutions.gif_1771618422350.jpg";
 
 const CORPORATE_ENABLED = import.meta.env.VITE_CORPORATE_ENABLED === "true";
 
-// Nav order: Home, Services, For Businesses, [Corporate], Testing Center, [Exam Cram], Contact, About Us
+// Nav order: Home, Services, [For Businesses dropdown], [Notary Pro-Plans / Corporate], Testing Center, Contact, About Us
 const navLinksStart = [
   { href: "/", label: "Home" },
   { href: "/services", label: "Services" },
-  { href: "/for-businesses", label: "For Businesses" },
+];
+
+const businessDropdownLinks = [
+  { href: "/for-businesses", label: "Business Services Overview" },
+  { href: "/employer-services/new-hire-verification", label: "New-Hire Verification & I-9 Support" },
+  { href: "/website-design-houston-77090", label: "Website Design" },
 ];
 
 const navLinksMid = [
@@ -38,12 +43,17 @@ export default function Header() {
   const [location] = useLocation();
   const [mobileOpen, setMobileOpen] = useState(false);
   const [corpOpen, setCorpOpen] = useState(false);
+  const [bizOpen, setBizOpen] = useState(false);
   const corpRef = useRef<HTMLDivElement>(null);
+  const bizRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     function handleClick(e: MouseEvent) {
       if (corpRef.current && !corpRef.current.contains(e.target as Node)) {
         setCorpOpen(false);
+      }
+      if (bizRef.current && !bizRef.current.contains(e.target as Node)) {
+        setBizOpen(false);
       }
     }
     document.addEventListener("mousedown", handleClick);
@@ -117,6 +127,39 @@ export default function Header() {
               </Link>
             ))}
 
+            {/* For Businesses dropdown */}
+            <div className="relative" ref={bizRef}>
+              <Button
+                variant={location.startsWith("/for-businesses") || location.startsWith("/employer-services") || location.startsWith("/website-design") ? "default" : "ghost"}
+                size="sm"
+                className={`gap-1 ${
+                  location.startsWith("/for-businesses") || location.startsWith("/employer-services") || location.startsWith("/website-design")
+                    ? "bg-[#0D1B3D] text-white"
+                    : "text-foreground"
+                }`}
+                onClick={() => setBizOpen((o) => !o)}
+                data-testid="link-nav-for-businesses"
+              >
+                For Businesses
+                <ChevronDown className={`w-3.5 h-3.5 transition-transform ${bizOpen ? "rotate-180" : ""}`} />
+              </Button>
+              {bizOpen && (
+                <div className="absolute top-full left-0 mt-1 w-64 bg-white border border-border/50 rounded-xl shadow-lg py-1 z-50">
+                  {businessDropdownLinks.map((link) => (
+                    <Link key={link.href} href={link.href}>
+                      <span
+                        className="block px-4 py-2.5 text-sm text-foreground hover:bg-[#f8f9fb] cursor-pointer transition-colors"
+                        onClick={() => setBizOpen(false)}
+                        data-testid={`link-nav-dropdown-${link.label.toLowerCase().replace(/[^a-z0-9]+/g, "-")}`}
+                      >
+                        {link.label}
+                      </span>
+                    </Link>
+                  ))}
+                </div>
+              )}
+            </div>
+
             {/* Corporate dropdown — feature gated */}
             {CORPORATE_ENABLED && (
               <div className="relative" ref={corpRef}>
@@ -128,7 +171,7 @@ export default function Header() {
                   data-testid="link-nav-corporate"
                 >
                   <Building2 className="w-3.5 h-3.5" />
-                  Corporate
+                  Notary Pro-Plans
                   <ChevronDown className={`w-3.5 h-3.5 transition-transform ${corpOpen ? "rotate-180" : ""}`} />
                 </Button>
                 {corpOpen && (
@@ -175,16 +218,6 @@ export default function Header() {
                 </Button>
               </Link>
             ))}
-
-            <a href="https://www.myeasypass.net" target="_blank" rel="noopener noreferrer" data-testid="link-nav-exam-cram">
-              <Button
-                variant="ghost"
-                size="sm"
-                className="text-foreground"
-              >
-                Exam Cram
-              </Button>
-            </a>
 
             {navLinksEnd.map((link) => (
               <Link key={link.href} href={link.href}>
@@ -250,11 +283,28 @@ export default function Header() {
                       </Button>
                     </Link>
                   ))}
+                  <div className="pt-2 pb-1 px-1">
+                    <p className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground flex items-center gap-1.5">
+                      <ShieldCheck className="w-3 h-3" /> For Businesses
+                    </p>
+                  </div>
+                  {businessDropdownLinks.map((link) => (
+                    <Link key={link.href} href={link.href}>
+                      <Button
+                        variant="ghost"
+                        className="w-full justify-start text-sm pl-4"
+                        onClick={() => setMobileOpen(false)}
+                        data-testid={`link-mobile-dropdown-${link.label.toLowerCase().replace(/[^a-z0-9]+/g, "-")}`}
+                      >
+                        {link.label}
+                      </Button>
+                    </Link>
+                  ))}
                   {CORPORATE_ENABLED && (
                     <>
                       <div className="pt-2 pb-1 px-1">
                         <p className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground flex items-center gap-1.5">
-                          <Building2 className="w-3 h-3" /> Corporate
+                          <Building2 className="w-3 h-3" /> Notary Pro-Plans
                         </p>
                       </div>
                       {corporateMainLinks.map((link) => (
@@ -293,20 +343,6 @@ export default function Header() {
                       </Button>
                     </Link>
                   ))}
-                  <a
-                    href="https://www.myeasypass.net"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    onClick={() => setMobileOpen(false)}
-                  >
-                    <Button
-                      variant="ghost"
-                      className="w-full justify-start"
-                      data-testid="link-mobile-exam-cram"
-                    >
-                      Exam Cram
-                    </Button>
-                  </a>
                   {navLinksEnd.map((link) => (
                     <Link key={link.href} href={link.href}>
                       <Button
