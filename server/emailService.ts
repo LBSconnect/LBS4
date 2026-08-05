@@ -305,6 +305,217 @@ export async function sendPrivacyRequestAcknowledgement(data: {
   }
 }
 
+export async function sendEmployerConsultationNotification(data: {
+  contactName: string;
+  companyName: string;
+  businessEmail: string;
+  businessPhone: string;
+  companyAddress: string;
+  industry: string;
+  employeeCount: string;
+  newHiresPerMonth: string;
+  hiringLocations: string;
+  desiredService: string;
+  preferredConsultationMethod: string;
+  message?: string | null;
+}) {
+  try {
+    await sendEmail({
+      to: NOTIFICATION_EMAIL,
+      subject: `New Employer Consultation Request: ${data.companyName}`,
+      html: `
+        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+          <div style="background-color: #1e3a6e; color: white; padding: 20px; text-align: center;">
+            <h1 style="margin: 0; font-size: 22px;">LBS - New Employer Consultation Request</h1>
+            <p style="margin: 6px 0 0; font-size: 13px; color: #c9a84c;">New-Hire Verification &amp; Form I-9 Support</p>
+          </div>
+          <div style="padding: 24px; background-color: #f9fafb; border: 1px solid #e5e7eb;">
+            <table style="width: 100%; border-collapse: collapse;">
+              <tr><td style="padding: 8px 12px; font-weight: bold; color: #1e3a6e; width: 180px;">Contact Name:</td><td style="padding: 8px 12px;">${data.contactName}</td></tr>
+              <tr><td style="padding: 8px 12px; font-weight: bold; color: #1e3a6e;">Company:</td><td style="padding: 8px 12px;">${data.companyName}</td></tr>
+              <tr><td style="padding: 8px 12px; font-weight: bold; color: #1e3a6e;">Business Email:</td><td style="padding: 8px 12px;"><a href="mailto:${data.businessEmail}">${data.businessEmail}</a></td></tr>
+              <tr><td style="padding: 8px 12px; font-weight: bold; color: #1e3a6e;">Business Phone:</td><td style="padding: 8px 12px;">${data.businessPhone}</td></tr>
+              <tr><td style="padding: 8px 12px; font-weight: bold; color: #1e3a6e;">Company Address:</td><td style="padding: 8px 12px;">${data.companyAddress}</td></tr>
+              <tr><td style="padding: 8px 12px; font-weight: bold; color: #1e3a6e;">Industry:</td><td style="padding: 8px 12px;">${data.industry}</td></tr>
+              <tr><td style="padding: 8px 12px; font-weight: bold; color: #1e3a6e;">Approx. Employees:</td><td style="padding: 8px 12px;">${data.employeeCount}</td></tr>
+              <tr><td style="padding: 8px 12px; font-weight: bold; color: #1e3a6e;">Approx. New Hires/Month:</td><td style="padding: 8px 12px;">${data.newHiresPerMonth}</td></tr>
+              <tr><td style="padding: 8px 12px; font-weight: bold; color: #1e3a6e;">Hiring Locations:</td><td style="padding: 8px 12px;">${data.hiringLocations}</td></tr>
+              <tr><td style="padding: 8px 12px; font-weight: bold; color: #1e3a6e;">Desired Service:</td><td style="padding: 8px 12px;">${data.desiredService}</td></tr>
+              <tr><td style="padding: 8px 12px; font-weight: bold; color: #1e3a6e;">Preferred Contact Method:</td><td style="padding: 8px 12px;">${data.preferredConsultationMethod}</td></tr>
+            </table>
+            ${data.message ? `<div style="margin-top: 16px; padding: 16px; background-color: white; border: 1px solid #e5e7eb; border-radius: 6px;">
+              <p style="font-weight: bold; color: #1e3a6e; margin: 0 0 8px 0;">Message:</p>
+              <p style="margin: 0; white-space: pre-wrap;">${data.message}</p>
+            </div>` : ''}
+            <div style="margin-top: 16px; padding: 12px 16px; background-color: #fffbeb; border: 1px solid #fde68a; border-radius: 6px;">
+              <p style="margin: 0; color: #92400e; font-size: 12px;">Reminder: this is an administrative sales lead only. No employee Form I-9, SSN, or identity-document data should ever come through this form — if any appears, do not act on it and contact the requester to resubmit safely.</p>
+            </div>
+          </div>
+          <div style="padding: 12px; text-align: center; color: #6b7280; font-size: 12px;">
+            LBS Test &amp; Exam Center | ${BUSINESS_ADDRESS}
+          </div>
+        </div>
+      `,
+    });
+    console.log('Employer consultation notification email sent to', NOTIFICATION_EMAIL);
+  } catch (error: any) {
+    console.error('Failed to send employer consultation notification email:', error.message);
+  }
+}
+
+export async function sendEmployerConsultationAcknowledgement(data: {
+  contactName: string;
+  companyName: string;
+  businessEmail: string;
+  desiredService: string;
+}) {
+  try {
+    const content = `
+      <h2 style="margin:0 0 6px;color:#0d1b35;font-size:24px;font-weight:700;">We received your consultation request</h2>
+      <p style="margin:0 0 24px;color:#64748b;font-size:14px;">Hi ${data.contactName}, thank you for your interest in LBS New-Hire Verification &amp; Form I-9 Support for ${data.companyName}. A member of our employer-services team will follow up within one business day to discuss ${data.desiredService.toLowerCase()}.</p>
+
+      <div style="background:#f8fafc;border-radius:8px;padding:18px 20px;margin-bottom:20px;border-left:4px solid #c9a84c;">
+        <p style="margin:0 0 4px;color:#0d1b35;font-size:14px;font-weight:600;">A quick reminder</p>
+        <p style="margin:0;color:#374151;font-size:14px;">
+          Submitting this form does not enroll your company in E-Verify or establish a client relationship. LBS is
+          enrolled as an E-Verify Employer Agent and provides E-Verify case-management and Form I-9 administrative
+          support for participating employers. Please do not reply to this email with employee Form I-9 information,
+          Social Security numbers, identity documents, or other sensitive employee data.
+        </p>
+      </div>
+
+      <div style="background:#f0f4ff;border-radius:8px;padding:18px 20px;border-left:4px solid #1e3a6e;">
+        <p style="margin:0 0 4px;color:#0d1b35;font-size:14px;font-weight:600;">Need to reach us sooner?</p>
+        <p style="margin:0;color:#374151;font-size:14px;">
+          Call us at <a href="tel:${LBS_PHONE}" style="color:#1e3a6e;font-weight:600;">${LBS_PHONE}</a> or
+          email <a href="mailto:${NOTIFICATION_EMAIL}" style="color:#1e3a6e;">${NOTIFICATION_EMAIL}</a>.<br />
+          Mon–Fri 8 AM–5 PM &nbsp;|&nbsp; Sat 8 AM–4 PM CT
+        </p>
+      </div>
+    `;
+
+    await sendEmail({
+      to: data.businessEmail,
+      subject: `We received your employer consultation request: ${BUSINESS_NAME}`,
+      html: emailWrapper(content),
+    });
+    console.log('Employer consultation acknowledgement email sent to', data.businessEmail);
+  } catch (error: any) {
+    console.error('Failed to send employer consultation acknowledgement email:', error.message);
+  }
+}
+
+export async function sendEmployerIntakeNotification(data: {
+  companyLegalName: string;
+  dba?: string | null;
+  ein?: string | null;
+  companyAddress: string;
+  mailingAddress?: string | null;
+  hiringLocations: string;
+  industry: string;
+  naicsCategory?: string | null;
+  employeeCount: string;
+  averageMonthlyHires: string;
+  federalContractorStatus: string;
+  authorizedSignerName: string;
+  authorizedSignerEmail: string;
+  primaryAdministratorName: string;
+  primaryAdministratorEmail: string;
+  billingContactName: string;
+  billingContactEmail: string;
+  selectedPlan: string;
+  requestedAddOns?: string[];
+  preferredStartDate?: string | null;
+}) {
+  try {
+    const addOnsRow = data.requestedAddOns && data.requestedAddOns.length > 0
+      ? `<tr><td style="padding: 8px 12px; font-weight: bold; color: #1e3a6e;">Requested Add-Ons:</td><td style="padding: 8px 12px;">${data.requestedAddOns.join(', ')}</td></tr>`
+      : '';
+    await sendEmail({
+      to: NOTIFICATION_EMAIL,
+      subject: `New Employer Client Intake: ${data.companyLegalName}`,
+      html: `
+        <div style="font-family: Arial, sans-serif; max-width: 640px; margin: 0 auto;">
+          <div style="background-color: #1e3a6e; color: white; padding: 20px; text-align: center;">
+            <h1 style="margin: 0; font-size: 22px;">LBS - New Employer Client Intake</h1>
+            <p style="margin: 6px 0 0; font-size: 13px; color: #c9a84c;">New-Hire Verification &amp; Form I-9 Support — Onboarding</p>
+          </div>
+          <div style="padding: 24px; background-color: #f9fafb; border: 1px solid #e5e7eb;">
+            <table style="width: 100%; border-collapse: collapse;">
+              <tr><td style="padding: 8px 12px; font-weight: bold; color: #1e3a6e; width: 200px;">Company Legal Name:</td><td style="padding: 8px 12px;">${data.companyLegalName}</td></tr>
+              ${data.dba ? `<tr><td style="padding: 8px 12px; font-weight: bold; color: #1e3a6e;">DBA:</td><td style="padding: 8px 12px;">${data.dba}</td></tr>` : ''}
+              ${data.ein ? `<tr><td style="padding: 8px 12px; font-weight: bold; color: #1e3a6e;">EIN:</td><td style="padding: 8px 12px;">${data.ein}</td></tr>` : ''}
+              <tr><td style="padding: 8px 12px; font-weight: bold; color: #1e3a6e;">Company Address:</td><td style="padding: 8px 12px;">${data.companyAddress}</td></tr>
+              ${data.mailingAddress ? `<tr><td style="padding: 8px 12px; font-weight: bold; color: #1e3a6e;">Mailing Address:</td><td style="padding: 8px 12px;">${data.mailingAddress}</td></tr>` : ''}
+              <tr><td style="padding: 8px 12px; font-weight: bold; color: #1e3a6e;">Hiring Locations:</td><td style="padding: 8px 12px;">${data.hiringLocations}</td></tr>
+              <tr><td style="padding: 8px 12px; font-weight: bold; color: #1e3a6e;">Industry:</td><td style="padding: 8px 12px;">${data.industry}</td></tr>
+              ${data.naicsCategory ? `<tr><td style="padding: 8px 12px; font-weight: bold; color: #1e3a6e;">NAICS Category:</td><td style="padding: 8px 12px;">${data.naicsCategory}</td></tr>` : ''}
+              <tr><td style="padding: 8px 12px; font-weight: bold; color: #1e3a6e;">Employee Count:</td><td style="padding: 8px 12px;">${data.employeeCount}</td></tr>
+              <tr><td style="padding: 8px 12px; font-weight: bold; color: #1e3a6e;">Average Monthly Hires:</td><td style="padding: 8px 12px;">${data.averageMonthlyHires}</td></tr>
+              <tr><td style="padding: 8px 12px; font-weight: bold; color: #1e3a6e;">Federal Contractor Status:</td><td style="padding: 8px 12px;">${data.federalContractorStatus}</td></tr>
+              <tr><td style="padding: 8px 12px; font-weight: bold; color: #1e3a6e;">Authorized Signer:</td><td style="padding: 8px 12px;">${data.authorizedSignerName} (<a href="mailto:${data.authorizedSignerEmail}">${data.authorizedSignerEmail}</a>)</td></tr>
+              <tr><td style="padding: 8px 12px; font-weight: bold; color: #1e3a6e;">Primary Administrator:</td><td style="padding: 8px 12px;">${data.primaryAdministratorName} (<a href="mailto:${data.primaryAdministratorEmail}">${data.primaryAdministratorEmail}</a>)</td></tr>
+              <tr><td style="padding: 8px 12px; font-weight: bold; color: #1e3a6e;">Billing Contact:</td><td style="padding: 8px 12px;">${data.billingContactName} (<a href="mailto:${data.billingContactEmail}">${data.billingContactEmail}</a>)</td></tr>
+              <tr><td style="padding: 8px 12px; font-weight: bold; color: #1e3a6e;">Selected Plan:</td><td style="padding: 8px 12px;">${data.selectedPlan}</td></tr>
+              ${addOnsRow}
+              ${data.preferredStartDate ? `<tr><td style="padding: 8px 12px; font-weight: bold; color: #1e3a6e;">Preferred Start Date:</td><td style="padding: 8px 12px;">${data.preferredStartDate}</td></tr>` : ''}
+            </table>
+            <div style="margin-top: 16px; padding: 12px 16px; background-color: #fffbeb; border: 1px solid #fde68a; border-radius: 6px;">
+              <p style="margin: 0; color: #92400e; font-size: 12px;">This is business-level onboarding information only. No employee Form I-9 data, SSNs, or identity documents are collected through this form. Next steps: E-Verify Memorandum of Understanding and signed LBS service agreement.</p>
+            </div>
+          </div>
+          <div style="padding: 12px; text-align: center; color: #6b7280; font-size: 12px;">
+            LBS Test &amp; Exam Center | ${BUSINESS_ADDRESS}
+          </div>
+        </div>
+      `,
+    });
+    console.log('Employer intake notification email sent to', NOTIFICATION_EMAIL);
+  } catch (error: any) {
+    console.error('Failed to send employer intake notification email:', error.message);
+  }
+}
+
+export async function sendEmployerIntakeAcknowledgement(data: {
+  companyLegalName: string;
+  primaryAdministratorName: string;
+  primaryAdministratorEmail: string;
+}) {
+  try {
+    const content = `
+      <h2 style="margin:0 0 6px;color:#0d1b35;font-size:24px;font-weight:700;">We received your onboarding information</h2>
+      <p style="margin:0 0 24px;color:#64748b;font-size:14px;">Hi ${data.primaryAdministratorName}, thank you for submitting onboarding information for ${data.companyLegalName}. Our employer-services team will review it and follow up about next steps, including the E-Verify Memorandum of Understanding and the LBS service agreement.</p>
+
+      <div style="background:#f8fafc;border-radius:8px;padding:18px 20px;margin-bottom:20px;border-left:4px solid #c9a84c;">
+        <p style="margin:0 0 4px;color:#0d1b35;font-size:14px;font-weight:600;">A quick reminder</p>
+        <p style="margin:0;color:#374151;font-size:14px;">
+          This submission does not enroll your company in E-Verify or create a binding agreement. Please do not
+          reply to this email with employee Form I-9 information, Social Security numbers, identity documents, or
+          other sensitive employee data.
+        </p>
+      </div>
+
+      <div style="background:#f0f4ff;border-radius:8px;padding:18px 20px;border-left:4px solid #1e3a6e;">
+        <p style="margin:0 0 4px;color:#0d1b35;font-size:14px;font-weight:600;">Need to reach us sooner?</p>
+        <p style="margin:0;color:#374151;font-size:14px;">
+          Call us at <a href="tel:${LBS_PHONE}" style="color:#1e3a6e;font-weight:600;">${LBS_PHONE}</a> or
+          email <a href="mailto:${NOTIFICATION_EMAIL}" style="color:#1e3a6e;">${NOTIFICATION_EMAIL}</a>.<br />
+          Mon–Fri 8 AM–5 PM &nbsp;|&nbsp; Sat 8 AM–4 PM CT
+        </p>
+      </div>
+    `;
+
+    await sendEmail({
+      to: data.primaryAdministratorEmail,
+      subject: `We received your onboarding information: ${BUSINESS_NAME}`,
+      html: emailWrapper(content),
+    });
+    console.log('Employer intake acknowledgement email sent to', data.primaryAdministratorEmail);
+  } catch (error: any) {
+    console.error('Failed to send employer intake acknowledgement email:', error.message);
+  }
+}
+
 export async function sendPaymentNotification(data: {
   customerEmail?: string;
   customerName?: string;

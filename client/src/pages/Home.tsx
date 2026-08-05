@@ -433,6 +433,37 @@ export default function Home() {
         </div>
       </section>
 
+      {/* ── EMPLOYER SERVICES ── */}
+      <section className="py-14 bg-background border-y border-border/50" data-testid="section-employer-services">
+        <div className="max-w-7xl mx-auto px-6">
+          <div className="rounded-2xl bg-gradient-to-br from-[#0D1B3D] to-[#1A237E] p-8 md:p-10">
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-center">
+              <div className="lg:col-span-2 space-y-4">
+                <p className="text-xs font-bold uppercase tracking-widest text-[#FF2D55]">Employer Services</p>
+                <h2 className="text-2xl md:text-3xl font-bold text-white">New-Hire Verification &amp; Form I-9 Support</h2>
+                <p className="text-white/75 leading-relaxed max-w-2xl">
+                  LBS helps Houston employers manage Form I-9 administrative workflows and E-Verify cases:
+                  client enrollment, case creation, document examination, case monitoring, and monthly reporting.
+                </p>
+              </div>
+              <div className="flex lg:justify-end">
+                <Link href="/employer-services/new-hire-verification">
+                  <Button
+                    size="lg"
+                    variant="outline"
+                    className="border-white/30 text-white bg-white/5 backdrop-blur-sm rounded-full"
+                    data-testid="button-view-employer-services"
+                  >
+                    Explore Employer Services
+                    <ArrowRight className="w-4 h-4 ml-2" />
+                  </Button>
+                </Link>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* ── FAQ ── */}
       <section className="py-14 bg-muted/30" data-testid="section-faq">
         <div className="max-w-7xl mx-auto px-6">

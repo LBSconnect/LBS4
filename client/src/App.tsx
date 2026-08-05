@@ -28,6 +28,10 @@ import DocumentHandlingNotice from "@/pages/DocumentHandlingNotice";
 import Book from "@/pages/Book";
 import InsuranceExamPrepHub from "@/pages/InsuranceExamPrepHub";
 import WebsiteDesignLanding from "@/pages/WebsiteDesignLanding";
+import NewHireVerification from "@/pages/employer/NewHireVerification";
+import EmployerServiceAgreement from "@/pages/employer/ServiceAgreement";
+import EmployerClientIntake from "@/pages/employer/ClientIntake";
+import EmployerPricingSheet from "@/pages/employer/PricingSheet";
 import CorporateLanding from "@/pages/corporate/Landing";
 import CorporatePrograms from "@/pages/corporate/Programs";
 import CorporateEnroll from "@/pages/corporate/Enroll";
@@ -70,6 +74,10 @@ function Router() {
         <Route path="/texas-insurance-exam-prep-houston" component={InsuranceExamPrepHub} />
         <Route path="/website-design-houston-77090" component={WebsiteDesignLanding} />
         <Route path="/for-businesses" component={ForBusinesses} />
+        <Route path="/employer-services/new-hire-verification" component={NewHireVerification} />
+        <Route path="/employer-services/new-hire-verification/agreement" component={EmployerServiceAgreement} />
+        <Route path="/employer-services/new-hire-verification/intake" component={EmployerClientIntake} />
+        <Route path="/employer-services/new-hire-verification/pricing-sheet" component={EmployerPricingSheet} />
         <Route path="/resources" component={Resources} />
         <Route path="/about" component={About} />
         <Route path="/contact" component={Contact} />

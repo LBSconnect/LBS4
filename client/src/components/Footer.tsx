@@ -9,6 +9,7 @@ export default function Footer() {
     { href: "/website-design-houston-77090", label: "Website Design" },
     { href: "/certiport-testing-center-houston", label: "Certiport Exams" },
     { href: "/texas-insurance-exam-prep-houston", label: "Texas Insurance Exam Prep" },
+    { href: "/employer-services/new-hire-verification", label: "New-Hire Verification & I-9 Support" },
   ];
 
   return (

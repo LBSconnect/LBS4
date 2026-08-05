@@ -3,7 +3,7 @@ import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { getUncachableStripeClient, getStripePublishableKey } from "./stripeClient";
 import { insertContactSchema } from "@shared/schema";
-import { sendContactNotification, sendContactAcknowledgement, sendAppointmentConfirmation, sendAppointmentCalendarInvite, sendPrivacyRequestNotification, sendPrivacyRequestAcknowledgement } from "./emailService";
+import { sendContactNotification, sendContactAcknowledgement, sendAppointmentConfirmation, sendAppointmentCalendarInvite, sendPrivacyRequestNotification, sendPrivacyRequestAcknowledgement, sendEmployerConsultationNotification, sendEmployerConsultationAcknowledgement, sendEmployerIntakeNotification, sendEmployerIntakeAcknowledgement } from "./emailService";
 import { sendEmail } from "./smtpClient";
 import { registerCorporateRoutes } from "./corporateRoutes";
 import { z } from "zod";
@@ -298,6 +298,139 @@ export async function registerRoutes(
     } catch (error: any) {
       console.error('Privacy request error:', error.message);
       res.status(500).json({ error: 'Failed to process privacy request' });
+    }
+  });
+
+  const employerConsultationSchema = z.object({
+    contactName: z.string().min(1, "Contact name is required").max(200),
+    companyName: z.string().min(1, "Company name is required").max(200),
+    businessEmail: z.string().email("Invalid business email").max(200),
+    businessPhone: z.string().min(1, "Business phone is required").max(40),
+    companyAddress: z.string().min(1, "Company address is required").max(300),
+    industry: z.string().min(1, "Industry is required").max(150),
+    employeeCount: z.string().min(1).max(50),
+    newHiresPerMonth: z.string().min(1).max(50),
+    hiringLocations: z.string().min(1).max(50),
+    desiredService: z.enum([
+      'Monthly E-Verify case management',
+      'Form I-9 administrative support',
+      'In-office document examination',
+      'Mobile document examination',
+      'Hiring-event support',
+      'Form I-9 file review',
+      'Manager training',
+      'Not sure yet',
+    ]),
+    preferredConsultationMethod: z.enum(['Phone', 'Email', 'Video Call', 'In-Person']),
+    message: z.string().max(4000).optional().or(z.literal('')),
+    consent: z.boolean().refine((v) => v === true, { message: 'Consent is required' }),
+    captchaToken: z.string().optional(),
+  });
+
+  // Employer-services lead form (New-Hire Verification & Form I-9 Support).
+  // Intentionally collects only business-level contact/sizing info — never
+  // employee Form I-9 data, SSNs, or identity documents. See NewHireVerification.tsx.
+  app.post('/api/employer-consultations', async (req, res) => {
+    try {
+      const captchaSecretKey = process.env.RECAPTCHA_SECRET_KEY;
+      const { captchaToken, ...formData } = req.body;
+
+      if (captchaSecretKey) {
+        if (!captchaToken) {
+          return res.status(400).json({ error: 'Captcha verification required' });
+        }
+        const verifyResponse = await fetch('https://www.google.com/recaptcha/api/siteverify', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+          body: `secret=${captchaSecretKey}&response=${captchaToken}`,
+        });
+        const verifyResult = await verifyResponse.json() as { success: boolean };
+        if (!verifyResult.success) {
+          return res.status(400).json({ error: 'Captcha verification failed' });
+        }
+      }
+
+      const parsed = employerConsultationSchema.safeParse(formData);
+      if (!parsed.success) {
+        return res.status(400).json({ error: 'Invalid form data', details: parsed.error.flatten() });
+      }
+      const data = parsed.data;
+      await sendEmployerConsultationNotification(data);
+      await sendEmployerConsultationAcknowledgement({
+        contactName: data.contactName,
+        companyName: data.companyName,
+        businessEmail: data.businessEmail,
+        desiredService: data.desiredService,
+      });
+      res.json({ success: true, message: 'Consultation request received' });
+    } catch (error: any) {
+      console.error('Employer consultation error:', error.message);
+      res.status(500).json({ error: 'Failed to process consultation request' });
+    }
+  });
+
+  const employerIntakeSchema = z.object({
+    companyLegalName: z.string().min(1, "Company legal name is required").max(200),
+    dba: z.string().max(200).optional().or(z.literal('')),
+    ein: z.string().max(20).optional().or(z.literal('')),
+    companyAddress: z.string().min(1, "Company address is required").max(300),
+    mailingAddress: z.string().max(300).optional().or(z.literal('')),
+    hiringLocations: z.string().min(1).max(50),
+    industry: z.string().min(1, "Industry is required").max(150),
+    naicsCategory: z.string().max(100).optional().or(z.literal('')),
+    employeeCount: z.string().min(1).max(50),
+    averageMonthlyHires: z.string().min(1).max(50),
+    federalContractorStatus: z.enum(['Yes', 'No', 'Not sure']),
+    authorizedSignerName: z.string().min(1, "Authorized signer name is required").max(200),
+    authorizedSignerEmail: z.string().email("Invalid authorized signer email").max(200),
+    primaryAdministratorName: z.string().min(1, "Primary administrator name is required").max(200),
+    primaryAdministratorEmail: z.string().email("Invalid primary administrator email").max(200),
+    billingContactName: z.string().min(1, "Billing contact name is required").max(200),
+    billingContactEmail: z.string().email("Invalid billing contact email").max(200),
+    selectedPlan: z.string().min(1).max(100),
+    requestedAddOns: z.array(z.string()).max(20).optional(),
+    preferredStartDate: z.string().max(50).optional().or(z.literal('')),
+    acknowledgment: z.boolean().refine((v) => v === true, { message: 'Acknowledgment is required' }),
+    captchaToken: z.string().optional(),
+  });
+
+  // Employer client intake (business-level onboarding info only — never employee
+  // Form I-9 data, SSNs, or identity documents). See ClientIntake.tsx.
+  app.post('/api/employer-intake', async (req, res) => {
+    try {
+      const captchaSecretKey = process.env.RECAPTCHA_SECRET_KEY;
+      const { captchaToken, ...formData } = req.body;
+
+      if (captchaSecretKey) {
+        if (!captchaToken) {
+          return res.status(400).json({ error: 'Captcha verification required' });
+        }
+        const verifyResponse = await fetch('https://www.google.com/recaptcha/api/siteverify', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+          body: `secret=${captchaSecretKey}&response=${captchaToken}`,
+        });
+        const verifyResult = await verifyResponse.json() as { success: boolean };
+        if (!verifyResult.success) {
+          return res.status(400).json({ error: 'Captcha verification failed' });
+        }
+      }
+
+      const parsed = employerIntakeSchema.safeParse(formData);
+      if (!parsed.success) {
+        return res.status(400).json({ error: 'Invalid form data', details: parsed.error.flatten() });
+      }
+      const data = parsed.data;
+      await sendEmployerIntakeNotification(data);
+      await sendEmployerIntakeAcknowledgement({
+        companyLegalName: data.companyLegalName,
+        primaryAdministratorName: data.primaryAdministratorName,
+        primaryAdministratorEmail: data.primaryAdministratorEmail,
+      });
+      res.json({ success: true, message: 'Onboarding information received' });
+    } catch (error: any) {
+      console.error('Employer intake error:', error.message);
+      res.status(500).json({ error: 'Failed to process onboarding information' });
     }
   });
 
