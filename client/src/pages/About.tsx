@@ -94,8 +94,8 @@ export default function About() {
                     </p>
                   </div>
                   <p className="text-sm text-muted-foreground">
-                    Professional testing, proctoring, and business services for
-                    the greater Houston area.
+                    Professional Pearson VUE testing, Notary Signing Agents, Professional Passport photo,
+                    I-9 Employer Verification, and Business Support Services for the Greater Houston area.
                   </p>
                 </CardContent>
               </Card>
