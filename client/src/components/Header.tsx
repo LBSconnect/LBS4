@@ -13,10 +13,14 @@ const navLinksStart = [
   { href: "/services", label: "Services" },
 ];
 
+// Mirrors the section order on /for-businesses: Corporate Notary Program,
+// New-Hire Verification & Form I-9 Support, Website & Application Design
+// Services, then Everyday Business Services.
 const businessDropdownLinks = [
-  { href: "/for-businesses", label: "Business Services Overview" },
+  { href: "/corporate", label: "Corporate Notary Program" },
   { href: "/employer-services/new-hire-verification", label: "New-Hire Verification & I-9 Support" },
-  { href: "/website-design-houston-77090", label: "Website Design" },
+  { href: "/website-design-houston-77090", label: "Website & Application Design" },
+  { href: "/for-businesses", label: "Everyday Business Services" },
 ];
 
 const navLinksMid = [

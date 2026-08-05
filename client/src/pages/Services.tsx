@@ -45,6 +45,16 @@ export default function Services() {
     filter === "testing" ? "Exam Testing Services" :
     "Business Services";
 
+  const sectionHeading =
+    filter === "bootcamp" ? "Exam Prep Bootcamps" :
+    filter === "testing" ? "Exam Testing Services" :
+    "Everyday Business Services";
+
+  const sectionDescription =
+    filter === "bootcamp" ? "Saturday morning Boot Camps for Texas insurance licensing exams." :
+    filter === "testing" ? "Authorized Pearson VUE and Certiport exam testing at our Houston location." :
+    "Notary services, passport photos, and website design. Walk in during business hours, no appointment needed for most services.";
+
   return (
     <div className="min-h-screen flex flex-col bg-background">
       <SEO
@@ -83,6 +93,10 @@ export default function Services() {
               </a>
             </div>
           )}
+          <div className="text-center max-w-2xl mx-auto mb-8 space-y-3">
+            <h2 className="text-3xl font-bold" data-testid="text-services-list-heading">{sectionHeading}</h2>
+            <p className="text-muted-foreground">{sectionDescription}</p>
+          </div>
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
             {visibleServices.map((service) => (
               <CompactServiceCard
