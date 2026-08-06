@@ -191,7 +191,7 @@ export function registerI9Routes(app: Express): void {
         role: "client_authorized_signer",
       });
 
-      establishI9Session(req, res, user.id, "client_authorized_signer", company.id);
+      await establishI9Session(req, res, user.id, "client_authorized_signer", company.id);
       await store.logI9Audit({ actorUserId: user.id, actorRole: "client_authorized_signer", action: "user.register", entityType: "ClientCompany", entityId: company.id, clientCompanyId: company.id, ipAddress: req.ip });
       res.json({ success: true, user: { id: user.id, email: user.email, fullName: user.fullName, role: user.role }, companyId: company.id });
     } catch (err: any) {
@@ -212,7 +212,7 @@ export function registerI9Routes(app: Express): void {
         return res.status(401).json({ error: "Invalid email or password." });
       }
 
-      establishI9Session(req, res, user.id, user.role as I9Role, user.clientCompanyId);
+      await establishI9Session(req, res, user.id, user.role as I9Role, user.clientCompanyId);
       await store.touchI9ClientUserLogin(user.id);
       await store.logI9Audit({ actorUserId: user.id, actorRole: user.role, action: "auth.login", clientCompanyId: user.clientCompanyId ?? undefined, ipAddress: req.ip });
       res.json({ success: true, user: { id: user.id, email: user.email, fullName: user.fullName, role: user.role, clientCompanyId: user.clientCompanyId } });
