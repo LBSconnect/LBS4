@@ -147,6 +147,45 @@ function getAvailableTimeSlots(date: Date, serviceSlug?: string): string[] {
   return slots;
 }
 
+// Resolves the Stripe price the customer must actually be charged for a
+// given service, verified server-side against the live Stripe catalog —
+// never trusted from client input. `bookAppointmentSchema`'s `priceId` and
+// `priceAmount` fields are attacker-controlled (a direct POST to
+// /api/appointments can omit priceId and set priceAmount to any value, or
+// substitute a different service's real-but-cheaper priceId), so the
+// checkout session's `unit_amount` must never be derived from either one
+// directly. Matches the same "product name === service title" convention
+// server/seedProducts.ts and client/src/lib/services.ts already rely on.
+async function resolveVerifiedPriceId(
+  serviceName: string,
+  submittedPriceId?: string
+): Promise<string | null> {
+  const rows = await storage.listProductsWithPrices();
+  const normalizedServiceName = serviceName.trim().toLowerCase();
+  const matchingPriceIds = rows
+    .filter(
+      (row) =>
+        row.product_active &&
+        row.price_active &&
+        row.price_id &&
+        typeof row.product_name === 'string' &&
+        row.product_name.trim().toLowerCase() === normalizedServiceName
+    )
+    .map((row) => row.price_id as string);
+
+  if (matchingPriceIds.length === 0) return null;
+
+  // A priceId was submitted: only trust it if it's genuinely one of this
+  // service's own catalog prices. Otherwise it's either forged or belongs
+  // to a different (possibly cheaper) service — reject rather than charge
+  // the wrong amount.
+  if (submittedPriceId) {
+    return matchingPriceIds.includes(submittedPriceId) ? submittedPriceId : null;
+  }
+
+  return matchingPriceIds[0];
+}
+
 export async function registerRoutes(
   httpServer: Server,
   app: Express
@@ -636,18 +675,29 @@ export async function registerRoutes(
       // If paying now, create Stripe checkout session
       if (data.payNow && (data.priceId || data.priceAmount)) {
         try {
-          const stripe = await getUncachableStripeClient();
+          // SECURITY: the unit_amount actually charged must come from Stripe's
+          // own catalog for this service, never from the client-submitted
+          // priceId/priceAmount directly — see resolveVerifiedPriceId's comment.
+          const verifiedPriceId = await resolveVerifiedPriceId(data.serviceName, data.priceId);
 
-          const lineItems = data.priceId
-            ? [{ price: data.priceId, quantity: 1 }]
-            : [{
-                price_data: {
-                  currency: 'usd',
-                  product_data: { name: data.serviceName },
-                  unit_amount: data.priceAmount!,
-                },
-                quantity: 1,
-              }];
+          if (!verifiedPriceId) {
+            console.error(
+              `Price verification failed for appointment ${appointment.id}: service "${data.serviceName}", ` +
+              `submitted priceId "${data.priceId ?? '(none)'}" — no matching active Stripe price found.`
+            );
+            if (isBootcampService) {
+              await storage.updateAppointmentPayment(appointment.id, 'failed');
+              return res.status(500).json({
+                error: 'Payment processing failed. Please try again or call 281-836-5357 to book your Boot Camp session.',
+              });
+            }
+            return res.status(400).json({
+              error: 'Unable to verify pricing for this service. Please call 281-836-5357 to book.',
+            });
+          }
+
+          const stripe = await getUncachableStripeClient();
+          const lineItems = [{ price: verifiedPriceId, quantity: 1 }];
 
           const session = await stripe.checkout.sessions.create({
             payment_method_types: ['card'],

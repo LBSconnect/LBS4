@@ -22,6 +22,25 @@ export async function seedStripeProducts() {
       metadata: { category: 'certification', slug: 'certification-exam-testing' },
       priceAmount: 3500, // $35.00
     },
+    // Boot camps are pay-online-only (server/routes.ts's isBootcampService gate
+    // requires payment to book) but — unlike the three services above — had no
+    // entry here, so nothing ever provisioned or self-healed their Stripe
+    // product/price. If it was ever missing (as found while auditing: this
+    // account had none), checkout silently breaks for every Boot Camp booking
+    // with no operator alert. Prices match the existing $99 rate already
+    // displayed everywhere (client/src/lib/services.ts) — not a price change.
+    {
+      name: 'Texas Life Insurance Exam Boot Camp',
+      description: 'Intensive Saturday morning Boot Camp for the Texas Life Insurance license exam, 8:00 AM – 10:00 AM.',
+      metadata: { category: 'bootcamp', slug: 'life-insurance-boot-camp' },
+      priceAmount: 9900, // $99.00
+    },
+    {
+      name: 'Texas Property & Casualty Exam Boot Camp',
+      description: 'Intensive Saturday morning Boot Camp for the Texas Property & Casualty insurance license exam, 10:30 AM – 12:30 PM.',
+      metadata: { category: 'bootcamp', slug: 'property-casualty-boot-camp' },
+      priceAmount: 9900, // $99.00
+    },
   ];
 
   for (const productData of productsToCreate) {

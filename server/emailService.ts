@@ -5,6 +5,14 @@ const BUSINESS_NAME = 'LBS Test & Exam Center';
 const BUSINESS_ADDRESS = '616 FM 1960 Road West, Suite 101, Houston, Texas 77090-3048';
 const LBS_PHONE = '281-836-5357';
 
+// Every value interpolated into an HTML email below ultimately comes from a
+// public-facing form (booking, contact, privacy request, employer intake,
+// etc.) with no HTML-safety constraint at the schema level — a submitter can
+// type "<script>" or "<img onerror=...>" into their name, notes, or company
+// address today. Escape all such values before embedding them in HTML so a
+// malicious submission can only ever render as inert text, never break the
+// layout or inject markup into the email LBS staff (or the customer) opens.
+export function escapeHtml(value: unknown): string {
 // All form-submitted values below are interpolated into HTML email bodies.
 // Escape them so a submitted value like `<img src=x onerror=...>` or
 // `<a href="http://phish">` can never inject markup/links into staff or
@@ -580,7 +588,7 @@ export async function sendPaymentNotification(data: {
               </tr>
               <tr>
                 <td style="padding: 8px 12px; font-weight: bold; color: #1e3a6e;">Session ID:</td>
-                <td style="padding: 8px 12px; font-size: 12px; color: #6b7280;">${data.sessionId}</td>
+                <td style="padding: 8px 12px; font-size: 12px; color: #6b7280;">${escapeHtml(data.sessionId)}</td>
               </tr>
             </table>
           </div>
@@ -742,7 +750,7 @@ export async function sendAppointmentCalendarInvite(data: {
           ${remainingNotes ? `<tr><td style="font-size:14px;padding:4px 0;font-weight:600;color:#374151;">Notes:</td><td style="font-size:14px;padding:4px 0;color:#374151;">${escapeHtml(remainingNotes)}</td></tr>` : ''}
         </table>
       </div>
-      <span style="display:none;overflow:hidden;max-height:0">APPTSTART:${startISO}|APPTEND:${endISO}|APPTSERVICE:${data.serviceName}|APPTCUSTOMER:${data.customerName}</span>
+      <span style="display:none;overflow:hidden;max-height:0">APPTSTART:${startISO}|APPTEND:${endISO}|APPTSERVICE:${escapeHtml(data.serviceName)}|APPTCUSTOMER:${escapeHtml(data.customerName)}</span>
     `;
 
     await sendEmail({
