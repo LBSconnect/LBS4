@@ -2,7 +2,7 @@ import { useEffect, useState, useCallback, useRef } from "react";
 import { useParams } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { ArrowRight, FileText, Download, Upload } from "lucide-react";
+import { ArrowRight, FileText, Download, Upload, CheckCircle2 } from "lucide-react";
 import {
   i9Api,
   I9ApiError,
@@ -16,6 +16,7 @@ import {
   type I9HiringSite,
   type I9Role,
   type I9ClientAgreement,
+  type I9Appointment,
 } from "@/lib/i9Portal";
 import { PortalGuard, PortalShell, PortalCard, Field, ErrorBanner, SuccessBanner, ServiceGateBanner, useUnauthRedirect, NAVY } from "./_shared";
 
@@ -279,6 +280,69 @@ function EverifyEnrollmentSection({ company, canManage, onSaved }: { company: I9
   );
 }
 
+const APPT_TYPE_LABELS: Record<I9Appointment["appointmentType"], string> = {
+  in_office_examination: "In-Office Document Examination",
+  mobile_examination: "Mobile Document Examination",
+  hiring_event: "Hiring-Event Support",
+};
+
+/** Confirmation is intentionally blocked server-side for in-office/mobile
+ *  exams without an authorized-rep designation on file (see
+ *  server/i9Routes.ts's PATCH .../confirm) — the button here just surfaces
+ *  whatever reason the server gives rather than duplicating that check. */
+function AppointmentsAdminSection({ companyId }: { companyId: string }) {
+  const [appointments, setAppointments] = useState<I9Appointment[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [confirmingId, setConfirmingId] = useState<string | null>(null);
+  const [error, setError] = useState("");
+
+  const load = useCallback(() => {
+    i9Api<{ appointments: I9Appointment[] }>(`/api/i9/appointments?companyId=${companyId}`)
+      .then((r) => setAppointments(r.appointments))
+      .catch(() => {})
+      .finally(() => setLoading(false));
+  }, [companyId]);
+
+  useEffect(() => { load(); }, [load]);
+
+  async function confirm(id: string) {
+    setConfirmingId(id);
+    setError("");
+    try {
+      await i9Api(`/api/i9/appointments/${id}/confirm`, { method: "PATCH" });
+      setAppointments((prev) => prev.map((a) => (a.id === id ? { ...a, status: "confirmed" } : a)));
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Failed to confirm appointment.");
+    } finally {
+      setConfirmingId(null);
+    }
+  }
+
+  if (loading) return null;
+  if (appointments.length === 0) return null;
+
+  return (
+    <PortalCard title="Appointments">
+      {error && <ErrorBanner message={error} />}
+      <ul className="divide-y divide-border/50">
+        {appointments.map((a) => (
+          <li key={a.id} className="py-2.5 flex items-center justify-between gap-3 text-sm">
+            <div>
+              <p className="font-medium" style={{ color: NAVY }}>{APPT_TYPE_LABELS[a.appointmentType]}</p>
+              <p className="text-xs text-muted-foreground capitalize">{a.status}{a.employeeCountEstimate ? ` · ~${a.employeeCountEstimate} employees` : ""}</p>
+            </div>
+            {a.status === "requested" && (
+              <Button size="sm" variant="outline" disabled={confirmingId === a.id} onClick={() => confirm(a.id)} className="gap-1.5">
+                <CheckCircle2 className="w-3.5 h-3.5" /> {confirmingId === a.id ? "..." : "Confirm"}
+              </Button>
+            )}
+          </li>
+        ))}
+      </ul>
+    </PortalCard>
+  );
+}
+
 function CompanyDetail({ id, actorRole }: { id: string; actorRole: I9Role }) {
   const onUnauth = useUnauthRedirect();
   const [company, setCompany] = useState<I9ClientCompany | null>(null);
@@ -355,6 +419,8 @@ function CompanyDetail({ id, actorRole }: { id: string; actorRole: I9Role }) {
         <EverifyEnrollmentSection company={company} canManage={canChangeStatus} onSaved={(patch) => setCompany((c) => (c ? { ...c, ...patch } : c))} />
 
         <AgreementSection companyId={company.id} canManage={canChangeStatus} />
+
+        <AppointmentsAdminSection companyId={company.id} />
       </div>
 
       <div className="space-y-5">

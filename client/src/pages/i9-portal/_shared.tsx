@@ -10,7 +10,7 @@ import { Link, useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import SEO from "@/components/SEO";
-import { Loader2, LogOut, LayoutDashboard, Building2, MapPin, ClipboardList, Users, ShieldAlert, CreditCard } from "lucide-react";
+import { Loader2, LogOut, LayoutDashboard, Building2, MapPin, ClipboardList, Users, ShieldAlert, CreditCard, CalendarClock } from "lucide-react";
 import {
   i9Api,
   isI9Unauthorized,
@@ -149,6 +149,7 @@ const NAV_ITEMS: NavItem[] = [
   { href: PORTAL_ROUTES.businessIntake, label: "Business Intake", icon: Building2 },
   { href: PORTAL_ROUTES.hiringSites, label: "Hiring Sites", icon: MapPin },
   { href: PORTAL_ROUTES.billing, label: "Billing", icon: CreditCard, clientOnly: true },
+  { href: PORTAL_ROUTES.appointments, label: "Appointments", icon: CalendarClock, clientOnly: true },
   { href: PORTAL_ROUTES.requests, label: "New-Hire Requests", icon: ClipboardList },
   { href: PORTAL_ROUTES.adminCompanies, label: "Client Companies", icon: Users, internalOnly: true },
 ];

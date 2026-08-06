@@ -19,6 +19,7 @@ export const PORTAL_ROUTES = {
   businessIntake: `${PORTAL_BASE}/business-intake`,
   hiringSites: `${PORTAL_BASE}/hiring-sites`,
   billing: `${PORTAL_BASE}/billing`,
+  appointments: `${PORTAL_BASE}/appointments`,
   requests: `${PORTAL_BASE}/requests`,
   newRequest: `${PORTAL_BASE}/requests/new`,
   requestDetail: (id: string) => `${PORTAL_BASE}/requests/${id}`,
@@ -323,6 +324,33 @@ export interface I9Subscription {
 }
 export function formatCents(cents: number): string {
   return `$${(cents / 100).toFixed(2)}`;
+}
+
+export interface I9AuthorizedRepDesignation {
+  id: string;
+  clientCompanyId: string;
+  employerLegalName: string;
+  employeeNameOrClass: string;
+  designatedLbsRepresentativeName: string;
+  scopeOfAuthorization: string;
+  appointmentType: "in_office" | "mobile";
+  location: string;
+  effectiveDate: string;
+  employerAcknowledgedResponsibility: boolean;
+  signedByName: string | null;
+  createdAt: string | null;
+}
+
+export interface I9Appointment {
+  id: string;
+  clientCompanyId: string;
+  hiringSiteId: string | null;
+  appointmentType: "in_office_examination" | "mobile_examination" | "hiring_event";
+  authorizedRepDesignationId: string | null;
+  status: "requested" | "confirmed" | "completed" | "cancelled";
+  employeeCountEstimate: number | null;
+  i9Notes: string | null;
+  createdAt: string | null;
 }
 
 export interface I9ClientAgreement {
