@@ -2,12 +2,39 @@ import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { getUncachableStripeClient, getStripePublishableKey } from "./stripeClient";
-import { insertContactSchema } from "@shared/schema";
 import { sendContactNotification, sendContactAcknowledgement, sendAppointmentConfirmation, sendAppointmentCalendarInvite, sendPrivacyRequestNotification, sendPrivacyRequestAcknowledgement, sendEmployerConsultationNotification, sendEmployerConsultationAcknowledgement, sendEmployerIntakeNotification, sendEmployerIntakeAcknowledgement } from "./emailService";
-import { sendEmail } from "./smtpClient";
 import { registerCorporateRoutes } from "./corporateRoutes";
 import { registerI9Routes } from "./i9Routes";
 import { z } from "zod";
+import { checkRateLimit } from "./i9Security";
+
+// Public form/lead endpoints below had no rate limiting at all — reCAPTCHA
+// (where configured, via RECAPTCHA_SECRET_KEY) is the primary anti-spam
+// control, but it's opt-in per environment; this is unconditional
+// defense-in-depth against scripted spam/abuse of these forms, using the
+// same sliding-window limiter the I-9 portal uses (server/i9Security.ts).
+function publicFormRateLimit(bucket: string, limit: number, windowMs: number) {
+  return (req: any, res: any, next: any) => {
+    const { allowed } = checkRateLimit(`${bucket}:${req.ip}`, limit, windowMs);
+    if (!allowed) {
+      return res.status(429).json({ error: "Too many requests. Please wait a few minutes and try again." });
+    }
+    next();
+  };
+}
+
+// Validation schema for the public contact form. `insertContactSchema` (drizzle-zod,
+// derived straight from the DB column types) only checks that these fields are
+// strings — it has no min-length or email-format checks, so it silently accepted
+// empty strings and malformed emails. This schema enforces the same rules the
+// client-side form implies (required name/email/message, valid email format).
+const contactFormSchema = z.object({
+  name: z.string().trim().min(1, "Name is required").max(200),
+  email: z.string().trim().min(1, "Email is required").email("Invalid email address").max(200),
+  phone: z.string().trim().max(40).optional().or(z.literal('')),
+  service: z.string().trim().max(100).optional().or(z.literal('')),
+  message: z.string().trim().min(1, "Message is required").max(4000),
+});
 
 // Validation schema for appointment booking
 const bookAppointmentSchema = z.object({
@@ -18,7 +45,7 @@ const bookAppointmentSchema = z.object({
   serviceSlug: z.string().optional(),
   serviceId: z.string().optional(),
   priceId: z.string().optional(),
-  priceAmount: z.number().optional(),
+  priceAmount: z.number().nonnegative("Price amount cannot be negative").optional(),
   appointmentDate: z.string().refine((val) => {
     const date = new Date(val);
     return !isNaN(date.getTime());
@@ -258,7 +285,7 @@ export async function registerRoutes(
     }
   });
 
-  app.post('/api/contact', async (req, res) => {
+  app.post('/api/contact', publicFormRateLimit('contact', 10, 15 * 60 * 1000), async (req, res) => {
     try {
       // Verify captcha if secret key is configured
       const captchaSecretKey = process.env.RECAPTCHA_SECRET_KEY;
@@ -282,7 +309,7 @@ export async function registerRoutes(
         }
       }
 
-      const parsed = insertContactSchema.safeParse(formData);
+      const parsed = contactFormSchema.safeParse(formData);
       if (!parsed.success) {
         return res.status(400).json({ error: 'Invalid form data', details: parsed.error.flatten() });
       }
@@ -321,13 +348,28 @@ export async function registerRoutes(
     onBehalfOfAnother: z.boolean(),
   });
 
-  app.post('/api/privacy-requests', async (req, res) => {
+  app.post('/api/privacy-requests', publicFormRateLimit('privacy-requests', 10, 15 * 60 * 1000), async (req, res) => {
     try {
       const parsed = privacyRequestSchema.safeParse(req.body);
       if (!parsed.success) {
         return res.status(400).json({ error: 'Invalid form data', details: parsed.error.flatten() });
       }
       const data = parsed.data;
+      // Persist first — this was previously email-only, so a down/misconfigured
+      // mail provider silently lost the request while telling the submitter it
+      // succeeded. The DB row is now the durable record; email is best-effort.
+      await storage.createPrivacyRequest({
+        name: data.name,
+        email: data.email,
+        phone: data.phone || null,
+        organization: data.organization || null,
+        service: data.service,
+        requestType: data.requestType,
+        identifier: data.identifier || null,
+        description: data.description,
+        preferredResponseMethod: data.preferredResponseMethod || null,
+        onBehalfOfAnother: data.onBehalfOfAnother,
+      });
       await sendPrivacyRequestNotification(data);
       await sendPrivacyRequestAcknowledgement({
         name: data.name,
@@ -370,7 +412,7 @@ export async function registerRoutes(
   // Employer-services lead form (New-Hire Verification & Form I-9 Support).
   // Intentionally collects only business-level contact/sizing info — never
   // employee Form I-9 data, SSNs, or identity documents. See NewHireVerification.tsx.
-  app.post('/api/employer-consultations', async (req, res) => {
+  app.post('/api/employer-consultations', publicFormRateLimit('employer-consultations', 10, 15 * 60 * 1000), async (req, res) => {
     try {
       const captchaSecretKey = process.env.RECAPTCHA_SECRET_KEY;
       const { captchaToken, ...formData } = req.body;
@@ -436,7 +478,7 @@ export async function registerRoutes(
 
   // Employer client intake (business-level onboarding info only — never employee
   // Form I-9 data, SSNs, or identity documents). See ClientIntake.tsx.
-  app.post('/api/employer-intake', async (req, res) => {
+  app.post('/api/employer-intake', publicFormRateLimit('employer-intake', 10, 15 * 60 * 1000), async (req, res) => {
     try {
       const captchaSecretKey = process.env.RECAPTCHA_SECRET_KEY;
       const { captchaToken, ...formData } = req.body;
@@ -461,6 +503,32 @@ export async function registerRoutes(
         return res.status(400).json({ error: 'Invalid form data', details: parsed.error.flatten() });
       }
       const data = parsed.data;
+      // Persist first — this was previously email-only, so a down/misconfigured
+      // mail provider silently lost the onboarding submission while telling the
+      // submitter it succeeded. The DB row is now the durable record; email is
+      // best-effort.
+      await storage.createEmployerIntakeSubmission({
+        companyLegalName: data.companyLegalName,
+        dba: data.dba || null,
+        ein: data.ein || null,
+        companyAddress: data.companyAddress,
+        mailingAddress: data.mailingAddress || null,
+        hiringLocations: data.hiringLocations,
+        industry: data.industry,
+        naicsCategory: data.naicsCategory || null,
+        employeeCount: data.employeeCount,
+        averageMonthlyHires: data.averageMonthlyHires,
+        federalContractorStatus: data.federalContractorStatus,
+        authorizedSignerName: data.authorizedSignerName,
+        authorizedSignerEmail: data.authorizedSignerEmail,
+        primaryAdministratorName: data.primaryAdministratorName,
+        primaryAdministratorEmail: data.primaryAdministratorEmail,
+        billingContactName: data.billingContactName,
+        billingContactEmail: data.billingContactEmail,
+        selectedPlan: data.selectedPlan,
+        requestedAddOns: data.requestedAddOns || [],
+        preferredStartDate: data.preferredStartDate || null,
+      });
       await sendEmployerIntakeNotification(data);
       await sendEmployerIntakeAcknowledgement({
         companyLegalName: data.companyLegalName,
@@ -702,6 +770,14 @@ export async function registerRoutes(
   });
 
   // Update appointment payment status (called after successful payment)
+  // Security note: this endpoint is unauthenticated by design (it's polled/called
+  // from the client-side checkout-success page using only the appointment's
+  // unguessable UUID) — so it must never take the caller's word for it that
+  // payment succeeded. It verifies the appointment's actual Stripe Checkout
+  // Session status server-side before marking anything paid. Real-time payment
+  // status is still authoritative from the signed webhook in webhookHandlers.ts;
+  // this route only lets the success page reflect that status a little sooner
+  // without waiting on webhook delivery, and is safe to call repeatedly.
   app.post('/api/appointments/:id/payment-complete', async (req, res) => {
     try {
       const { id } = req.params;
@@ -711,7 +787,21 @@ export async function registerRoutes(
         return res.status(404).json({ error: 'Appointment not found' });
       }
 
-      const updatedAppointment = await storage.updateAppointmentPayment(id, 'paid');
+      if (appointment.paymentStatus === 'paid') {
+        return res.json({ success: true, appointment });
+      }
+
+      if (!appointment.stripeSessionId) {
+        return res.status(400).json({ error: 'No payment session is associated with this appointment.' });
+      }
+
+      const stripe = await getUncachableStripeClient();
+      const session = await stripe.checkout.sessions.retrieve(appointment.stripeSessionId);
+      if (session.payment_status !== 'paid') {
+        return res.status(409).json({ error: 'Payment has not been completed for this appointment yet.' });
+      }
+
+      const updatedAppointment = await storage.updateAppointmentPayment(id, 'paid', session.id);
 
       res.json({
         success: true,
@@ -763,44 +853,6 @@ export async function registerRoutes(
     }
   });
 
-
-  // Test email endpoint — remove after confirming email works
-  app.get('/api/test-email', async (req, res) => {
-    const to = (req.query.to as string) || process.env.NOTIFICATION_EMAIL || 'info@lbsconnect.net';
-
-    const smtpUser = process.env.SMTP_USER;
-    const smtpPass = process.env.SMTP_PASS;
-
-    if (!smtpUser || !smtpPass) {
-      return res.status(500).json({
-        success: false,
-        error: 'SMTP_USER or SMTP_PASS not set in environment variables',
-      });
-    }
-
-    try {
-      const result = await sendEmail({
-        to,
-        subject: 'LBS Email Test',
-        html: `
-          <div style="font-family: Arial, sans-serif; max-width: 500px; margin: 0 auto; padding: 24px;">
-            <h2 style="color: #1e3a6e;">LBS Email Test</h2>
-            <p>This is a test email from LBS Test & Exam Center.</p>
-            <p>If you received this, email notifications are working correctly.</p>
-            <p style="color: #6b7280; font-size: 12px;">Sent via Microsoft 365 SMTP from ${smtpUser}</p>
-          </div>
-        `,
-      });
-
-      if (result) {
-        res.json({ success: true, message: `Test email sent to ${to}` });
-      } else {
-        res.status(500).json({ success: false, error: 'Email sending failed — check server logs for details' });
-      }
-    } catch (error: any) {
-      res.status(500).json({ success: false, error: error.message });
-    }
-  });
 
   // Corporate Notary Division routes
   await registerCorporateRoutes(app);

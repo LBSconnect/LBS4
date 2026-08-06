@@ -179,7 +179,11 @@ export function PortalShell({
 
   return (
     <div className="min-h-screen bg-[#f8f9fb]">
-      <SEO title={noIndexTitle ?? title} canonical={PORTAL_ROUTES.dashboard} noIndex />
+      {/* canonical reflects the actual current portal route (not always the
+          dashboard) so each authenticated page doesn't collide with every
+          other page's canonical URL — moot for indexing since noIndex is
+          set, but keeps the tag itself correct. */}
+      <SEO title={noIndexTitle ?? title} canonical={location} noIndex />
 
       <div className="text-white" style={{ backgroundColor: NAVY }}>
         <div className="max-w-6xl mx-auto px-4 sm:px-6 py-3 flex items-center gap-4">

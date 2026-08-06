@@ -13,6 +13,12 @@ const LBS_PHONE = '281-836-5357';
 // malicious submission can only ever render as inert text, never break the
 // layout or inject markup into the email LBS staff (or the customer) opens.
 export function escapeHtml(value: unknown): string {
+// All form-submitted values below are interpolated into HTML email bodies.
+// Escape them so a submitted value like `<img src=x onerror=...>` or
+// `<a href="http://phish">` can never inject markup/links into staff or
+// customer-facing notification emails. Never call this on our own static
+// template strings (BUSINESS_NAME, LBS_PHONE, pre-built HTML fragments, etc).
+function escapeHtml(value: unknown): string {
   if (value === null || value === undefined) return '';
   return String(value)
     .replace(/&/g, '&amp;')
@@ -20,6 +26,20 @@ export function escapeHtml(value: unknown): string {
     .replace(/>/g, '&gt;')
     .replace(/"/g, '&quot;')
     .replace(/'/g, '&#39;');
+}
+
+// Sanitizes a value for use inside an .ics VEVENT field. Per RFC 5545, raw
+// newlines/semicolons/commas/backslashes are structural — an unescaped
+// newline in a user-submitted field (e.g. booking notes) could inject
+// additional ICS lines/properties into the calendar file. Escapes them into
+// their literal RFC 5545 forms instead of stripping content.
+function escapeICS(value: unknown): string {
+  if (value === null || value === undefined) return '';
+  return String(value)
+    .replace(/\\/g, '\\\\')
+    .replace(/;/g, '\\;')
+    .replace(/,/g, '\\,')
+    .replace(/\r\n|\r|\n/g, '\\n');
 }
 
 function emailWrapper(content: string): string {
@@ -117,7 +137,7 @@ function generateICSContent(data: {
   const start = formatICSDate(startDate);
   const end = formatICSDate(endDate);
 
-  const description = `Service: ${data.serviceName}\\nCustomer: ${data.customerName}\\nEmail: ${data.customerEmail}${data.customerPhone ? `\\nPhone: ${data.customerPhone}` : ''}${data.notes ? `\\nNotes: ${data.notes}` : ''}`;
+  const description = `Service: ${escapeICS(data.serviceName)}\\nCustomer: ${escapeICS(data.customerName)}\\nEmail: ${escapeICS(data.customerEmail)}${data.customerPhone ? `\\nPhone: ${escapeICS(data.customerPhone)}` : ''}${data.notes ? `\\nNotes: ${escapeICS(data.notes)}` : ''}`;
 
   return `BEGIN:VCALENDAR
 VERSION:2.0
@@ -129,11 +149,11 @@ UID:${uid}
 DTSTAMP:${now}
 DTSTART:${start}
 DTEND:${end}
-SUMMARY:${data.serviceName} - ${data.customerName}
+SUMMARY:${escapeICS(data.serviceName)} - ${escapeICS(data.customerName)}
 DESCRIPTION:${description}
 LOCATION:${BUSINESS_ADDRESS}
 ORGANIZER;CN=${BUSINESS_NAME}:mailto:${NOTIFICATION_EMAIL}
-ATTENDEE;CN=${data.customerName};RSVP=TRUE:mailto:${data.customerEmail}
+ATTENDEE;CN=${escapeICS(data.customerName)};RSVP=TRUE:mailto:${escapeICS(data.customerEmail)}
 STATUS:CONFIRMED
 SEQUENCE:0
 END:VEVENT

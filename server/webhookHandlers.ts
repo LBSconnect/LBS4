@@ -4,7 +4,19 @@ import { sendAppointmentConfirmation, sendAppointmentCalendarInvite, sendPayment
 import { updateCorporateAccountStripe, getCorporateAccount, logAudit } from './corporateStorage';
 import { sendActivationEmail } from './corporateEmailService';
 import { activateI9Subscription, getI9Subscription, logI9Audit } from './i9Storage';
+import { activateI9Subscription, logI9Audit, getI9Subscription } from './i9Storage';
 import type Stripe from 'stripe';
+
+/** Thrown when STRIPE_WEBHOOK_SECRET isn't configured. Kept as a distinct,
+ *  named error (rather than a generic Error) so the route handler in
+ *  server/index.ts can map it to a 503 "not configured" response instead of
+ *  the generic 400 used for a bad/forged signature. */
+export class StripeWebhookNotConfiguredError extends Error {
+  constructor() {
+    super('STRIPE_WEBHOOK_SECRET is not configured.');
+    this.name = 'StripeWebhookNotConfiguredError';
+  }
+}
 
 export class WebhookHandlers {
   static async processWebhook(payload: Buffer, signature: string): Promise<void> {
@@ -17,20 +29,22 @@ export class WebhookHandlers {
       );
     }
 
-    let event: Stripe.Event;
     const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET;
 
-    if (webhookSecret) {
-      // Verify signature when secret is configured
-      const stripe = await getUncachableStripeClient();
-      event = stripe.webhooks.constructEvent(payload, signature, webhookSecret);
-      console.log(`Webhook verified: ${event.type} - ${event.id}`);
-    } else {
-      // Process without verification (not recommended for production)
-      console.warn('STRIPE_WEBHOOK_SECRET not set — processing without signature verification');
-      event = JSON.parse(payload.toString()) as Stripe.Event;
-      console.log(`Webhook received (unverified): ${event.type} - ${event.id}`);
+    // Never process an unverified event: without a configured signing secret
+    // there is no way to distinguish a genuine Stripe event from a forged
+    // POST to this endpoint, and handled event types (checkout.session.completed
+    // in particular) mark appointments/subscriptions as paid and trigger
+    // confirmation emails — a forgeable "payment succeeded" signal. Fail
+    // loudly and safely instead, matching the "service unavailable" gating
+    // pattern used elsewhere (see i9Security.isProtectedDataEncryptionConfigured).
+    if (!webhookSecret) {
+      throw new StripeWebhookNotConfiguredError();
     }
+
+    const stripe = await getUncachableStripeClient();
+    const event: Stripe.Event = stripe.webhooks.constructEvent(payload, signature, webhookSecret);
+    console.log(`Webhook verified: ${event.type} - ${event.id}`);
 
     // Handle specific event types
     switch (event.type) {
@@ -82,6 +96,17 @@ export class WebhookHandlers {
         }
         if (existingAccount.status === 'active') {
           console.log(`Corporate account ${corporateAccountId} already active — ignoring duplicate webhook (session ${session.id})`);
+        // Idempotency guard — Stripe may retry/redeliver the same event.
+        // If this exact subscription is already on file and the account is
+        // already active, skip all side-effects (in particular, don't send
+        // a second "your account is active" email).
+        const existingAccount = await getCorporateAccount(corporateAccountId);
+        if (
+          existingAccount &&
+          existingAccount.status === 'active' &&
+          existingAccount.stripeSubscriptionId === (session.subscription as string)
+        ) {
+          console.log(`Corporate account ${corporateAccountId} already active for subscription ${session.subscription} — ignoring duplicate webhook (session ${session.id})`);
           return;
         }
 
@@ -118,6 +143,16 @@ export class WebhookHandlers {
         }
         if (existingSubscription.status === 'active') {
           console.log(`I-9 subscription ${i9SubscriptionId} already active — ignoring duplicate webhook (session ${session.id})`);
+        // Idempotency guard — same reasoning as the appointment/corporate
+        // paths above: don't re-log an already-applied activation when
+        // Stripe redelivers the same event.
+        const existingSub = await getI9Subscription(i9SubscriptionId);
+        if (
+          existingSub &&
+          existingSub.status === 'active' &&
+          existingSub.stripeSubscriptionId === ((session.subscription as string) || '')
+        ) {
+          console.log(`I-9 subscription ${i9SubscriptionId} already active for subscription ${session.subscription} — ignoring duplicate webhook (session ${session.id})`);
           return;
         }
 

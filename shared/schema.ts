@@ -192,12 +192,18 @@ export const insertCorporateAccountSchema = z.object({
   billingMethod: z.string().optional(),
   needsScanToEmail: z.boolean().default(false),
   authorizedUsers: z.array(z.object({ name: z.string(), email: z.string().email() })).default([]),
-  agreedToNoLegalAdvice: z.boolean(),
-  agreedToCertificateSelection: z.boolean(),
-  agreedToNoConfidentialDocs: z.boolean(),
-  agreedToTexasFees: z.boolean(),
-  agreedToOverageCharges: z.boolean(),
-  agreedToTerms: z.boolean(),
+  // These were previously plain z.boolean(), which accepts `false` — the
+  // client already requires all six to be checked before submitting (see
+  // Enroll.tsx's validation), but the server silently accepted an enrollment
+  // where every legal/consent checkbox was explicitly false. .refine(v ===
+  // true) makes the server actually enforce what the client already implies;
+  // the checkbox copy itself is untouched.
+  agreedToNoLegalAdvice: z.boolean().refine((v) => v === true, { message: "Required" }),
+  agreedToCertificateSelection: z.boolean().refine((v) => v === true, { message: "Required" }),
+  agreedToNoConfidentialDocs: z.boolean().refine((v) => v === true, { message: "Required" }),
+  agreedToTexasFees: z.boolean().refine((v) => v === true, { message: "Required" }),
+  agreedToOverageCharges: z.boolean().refine((v) => v === true, { message: "Required" }),
+  agreedToTerms: z.boolean().refine((v) => v === true, { message: "Required" }),
   specialRequirements: z.string().optional(),
 });
 
@@ -205,4 +211,63 @@ export type InsertCorporateAccount = z.infer<typeof insertCorporateAccountSchema
 export type CorporateAccount = typeof corporateAccounts.$inferSelect;
 export type CorporatePlan = typeof corporatePlans.$inferSelect;
 export type CorporateAppointment = typeof corporateAppointments.$inferSelect;
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Privacy requests (PrivacyRequest.tsx -> POST /api/privacy-requests)
+// Previously this endpoint only sent notification/acknowledgement emails with
+// no database record — if email delivery failed (or wasn't configured), the
+// request was silently lost even though the API told the submitter it
+// succeeded. This table gives every submission a durable, queryable record.
+// ─────────────────────────────────────────────────────────────────────────────
+export const privacyRequests = pgTable("privacy_requests", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  name: text("name").notNull(),
+  email: text("email").notNull(),
+  phone: text("phone"),
+  organization: text("organization"),
+  service: text("service").notNull(),
+  requestType: text("request_type").notNull(),
+  identifier: text("identifier"),
+  description: text("description").notNull(),
+  preferredResponseMethod: text("preferred_response_method"),
+  onBehalfOfAnother: boolean("on_behalf_of_another").notNull().default(false),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export type InsertPrivacyRequest = typeof privacyRequests.$inferInsert;
+export type PrivacyRequest = typeof privacyRequests.$inferSelect;
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Employer client intake (ClientIntake.tsx -> POST /api/employer-intake)
+// Same rationale as privacy_requests above — business onboarding data
+// (EIN, addresses, plan selection, billing contact) was previously only
+// ever sent by email, with no database row created.
+// ─────────────────────────────────────────────────────────────────────────────
+export const employerIntakeSubmissions = pgTable("employer_intake_submissions", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  companyLegalName: text("company_legal_name").notNull(),
+  dba: text("dba"),
+  ein: text("ein"),
+  companyAddress: text("company_address").notNull(),
+  mailingAddress: text("mailing_address"),
+  hiringLocations: text("hiring_locations").notNull(),
+  industry: text("industry").notNull(),
+  naicsCategory: text("naics_category"),
+  employeeCount: text("employee_count").notNull(),
+  averageMonthlyHires: text("average_monthly_hires").notNull(),
+  federalContractorStatus: text("federal_contractor_status").notNull(),
+  authorizedSignerName: text("authorized_signer_name").notNull(),
+  authorizedSignerEmail: text("authorized_signer_email").notNull(),
+  primaryAdministratorName: text("primary_administrator_name").notNull(),
+  primaryAdministratorEmail: text("primary_administrator_email").notNull(),
+  billingContactName: text("billing_contact_name").notNull(),
+  billingContactEmail: text("billing_contact_email").notNull(),
+  selectedPlan: text("selected_plan").notNull(),
+  requestedAddOns: jsonb("requested_add_ons").$type<string[]>().default([]),
+  preferredStartDate: text("preferred_start_date"),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export type InsertEmployerIntakeSubmission = typeof employerIntakeSubmissions.$inferInsert;
+export type EmployerIntakeSubmission = typeof employerIntakeSubmissions.$inferSelect;
 
