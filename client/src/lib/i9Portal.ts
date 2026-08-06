@@ -18,6 +18,7 @@ export const PORTAL_ROUTES = {
   dashboard: PORTAL_BASE,
   businessIntake: `${PORTAL_BASE}/business-intake`,
   hiringSites: `${PORTAL_BASE}/hiring-sites`,
+  billing: `${PORTAL_BASE}/billing`,
   requests: `${PORTAL_BASE}/requests`,
   newRequest: `${PORTAL_BASE}/requests/new`,
   requestDetail: (id: string) => `${PORTAL_BASE}/requests/${id}`,
@@ -289,6 +290,39 @@ export interface I9CaseActivity {
   actorUserId: string | null;
   note: string | null;
   createdAt: string | null;
+}
+
+export interface I9ServicePlan {
+  id: string;
+  slug: string;
+  name: string;
+  monthlyPriceCents: number;
+  setupFeeCents: number;
+  includedCasesPerMonth: number;
+  additionalCaseCents: number;
+  features: string[];
+  stripeMonthlyPriceId: string | null;
+  isActive: boolean;
+  sortOrder: number;
+}
+export interface I9AddOn {
+  id: string;
+  slug: string;
+  name: string;
+  startingPriceCents: number;
+  priceUnit: string;
+  isActive: boolean;
+}
+export interface I9Subscription {
+  id: string;
+  clientCompanyId: string;
+  servicePlanId: string;
+  status: "pending" | "active" | "past_due" | "canceled";
+  setupFeePaid: boolean;
+  createdAt: string | null;
+}
+export function formatCents(cents: number): string {
+  return `$${(cents / 100).toFixed(2)}`;
 }
 
 export interface I9ClientAgreement {

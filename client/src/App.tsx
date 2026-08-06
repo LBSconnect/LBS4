@@ -37,6 +37,7 @@ import PortalRegister from "@/pages/i9-portal/PortalRegister";
 import PortalDashboard from "@/pages/i9-portal/PortalDashboard";
 import PortalBusinessIntake from "@/pages/i9-portal/PortalBusinessIntake";
 import PortalHiringSites from "@/pages/i9-portal/PortalHiringSites";
+import PortalBilling from "@/pages/i9-portal/PortalBilling";
 import PortalNewHireRequests from "@/pages/i9-portal/PortalNewHireRequests";
 import PortalNewHireRequestNew from "@/pages/i9-portal/PortalNewHireRequestNew";
 import PortalNewHireRequestDetail from "@/pages/i9-portal/PortalNewHireRequestDetail";
@@ -94,6 +95,7 @@ function Router() {
         <Route path={PORTAL_ROUTES.dashboard} component={PortalDashboard} />
         <Route path={PORTAL_ROUTES.businessIntake} component={PortalBusinessIntake} />
         <Route path={PORTAL_ROUTES.hiringSites} component={PortalHiringSites} />
+        <Route path={PORTAL_ROUTES.billing} component={PortalBilling} />
         <Route path={PORTAL_ROUTES.newRequest} component={PortalNewHireRequestNew} />
         <Route path={PORTAL_ROUTES.requests} component={PortalNewHireRequests} />
         <Route path={`${PORTAL_ROUTES.requests}/:id`} component={PortalNewHireRequestDetail} />

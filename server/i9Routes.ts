@@ -40,6 +40,8 @@ import { verifyPassword, signDocumentToken, verifyDocumentToken, isProtectedData
 import { informationalCaseCreationTarget } from "./i9BusinessDays";
 import { sendI9NotificationEmail, sendI9InternalNotificationEmail } from "./i9EmailService";
 import { sendEmployerConsultationNotification } from "./emailService";
+import { syncI9StripeProducts } from "./i9StripeSync";
+import { getUncachableStripeClient } from "./stripeClient";
 
 const PRIVATE_UPLOAD_DIR = path.join(process.cwd(), "server", "private-uploads", "i9");
 const MAX_UPLOAD_BYTES = 8 * 1024 * 1024; // 8MB
@@ -129,6 +131,9 @@ export function registerI9Routes(app: Express): void {
     try {
       await store.runI9Migrations();
       if (process.env.DATABASE_URL) await store.seedI9Catalog();
+      if (process.env.DATABASE_URL && process.env.STRIPE_SECRET_KEY) {
+        await syncI9StripeProducts().catch((err) => console.error("[i9-portal] Stripe catalog sync failed:", err.message));
+      }
     } catch (err) {
       console.error("[i9-portal] Migrations/seed failed:", err);
     }
@@ -194,6 +199,61 @@ export function registerI9Routes(app: Express): void {
     } catch {
       res.status(500).json({ error: "Failed to load catalog" });
     }
+  });
+
+  // ═══════════════════════════════════════════════════════════════════════
+  // BILLING — plan checkout via the existing Stripe integration. Never puts
+  // sensitive employee data in metadata/invoice descriptions — only
+  // company/plan identifiers.
+  // ═══════════════════════════════════════════════════════════════════════
+
+  app.post("/api/i9/companies/:id/checkout", requireI9Auth, requireI9Csrf, requireI9TenantMatch((req) => pstr(req.params.id)), async (req: I9AuthedRequest, res: Response) => {
+    if (!process.env.STRIPE_SECRET_KEY) return secureConfigRequired(res, ["STRIPE_SECRET_KEY"]);
+    try {
+      const { servicePlanId } = req.body as { servicePlanId?: string };
+      if (!servicePlanId) return res.status(400).json({ error: "servicePlanId is required" });
+
+      const company = await store.getI9ClientCompany(pstr(req.params.id));
+      if (!company) return res.status(404).json({ error: "Company not found" });
+      const plan = await store.getI9ServicePlan(servicePlanId);
+      if (!plan || !plan.isActive) return res.status(404).json({ error: "Plan not found" });
+      if (!plan.stripeMonthlyPriceId) {
+        return secureConfigRequired(res, ["Stripe catalog sync has not run for this plan yet"]);
+      }
+
+      const existingSub = await store.getLatestI9SubscriptionForCompany(pstr(req.params.id));
+      const setupFeeAlreadyPaid = existingSub?.setupFeePaid === true;
+
+      const pending = await store.createI9PendingSubscription(pstr(req.params.id), servicePlanId);
+
+      const lineItems: { price: string; quantity: number }[] = [{ price: plan.stripeMonthlyPriceId, quantity: 1 }];
+      if (plan.stripeSetupPriceId && !setupFeeAlreadyPaid) {
+        lineItems.push({ price: plan.stripeSetupPriceId, quantity: 1 });
+      }
+
+      const stripe = await getUncachableStripeClient();
+      const baseUrl = process.env.BASE_URL || "https://www.lbs4.com";
+      const session = await stripe.checkout.sessions.create({
+        mode: "subscription",
+        customer_email: company.billingContactEmail || company.authorizedSignerEmail || undefined,
+        line_items: lineItems,
+        // Company/plan identifiers only — never employee or case data.
+        metadata: { app: "lbs4", i9SubscriptionId: pending.id, i9ClientCompanyId: company.id, i9ServicePlanId: plan.id, i9SetupFeeIncluded: String(!setupFeeAlreadyPaid) },
+        success_url: `${baseUrl}/employer-services/new-hire-verification/portal?checkout=success`,
+        cancel_url: `${baseUrl}/employer-services/new-hire-verification/portal/billing?checkout=cancelled`,
+      });
+
+      await store.logI9Audit({ actorUserId: req.i9User!.id, actorRole: req.i9User!.role, action: "billing.checkout_created", entityType: "ClientCompany", entityId: company.id, clientCompanyId: company.id, details: { servicePlanId, sessionId: session.id }, ipAddress: req.ip });
+      res.json({ success: true, checkoutUrl: session.url });
+    } catch (err: any) {
+      console.error("i9 checkout error:", err.message);
+      res.status(500).json({ error: "Failed to start checkout" });
+    }
+  });
+
+  app.get("/api/i9/companies/:id/subscription", requireI9Auth, requireI9TenantMatch((req) => pstr(req.params.id)), async (req: I9AuthedRequest, res: Response) => {
+    const sub = await store.getLatestI9SubscriptionForCompany(pstr(req.params.id));
+    res.json({ subscription: sub });
   });
 
   // ═══════════════════════════════════════════════════════════════════════

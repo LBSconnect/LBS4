@@ -660,6 +660,63 @@ export async function listI9AddOns() {
   const database = getDb();
   return database.select().from(i9AddOns).where(eq(i9AddOns.isActive, true));
 }
+export async function getI9ServicePlan(id: string) {
+  const database = getDb();
+  const rows = await database.select().from(i9ServicePlans).where(eq(i9ServicePlans.id, id));
+  return rows[0] ?? null;
+}
+/** Used by server/i9StripeSync.ts to persist the Stripe product/price IDs it
+ *  creates back onto the catalog row — the catalog itself is seeded once
+ *  from static data (seedI9Catalog), but the Stripe-side IDs only exist
+ *  once STRIPE_SECRET_KEY is configured and the sync has actually run. */
+export async function setI9ServicePlanStripeIds(id: string, ids: { stripeProductId: string; stripeMonthlyPriceId?: string; stripeSetupPriceId?: string }) {
+  const database = getDb();
+  await database.update(i9ServicePlans).set(ids as any).where(eq(i9ServicePlans.id, id));
+}
+export async function setI9AddOnStripeIds(id: string, ids: { stripeProductId: string; stripePriceId: string }) {
+  const database = getDb();
+  await database.update(i9AddOns).set(ids as any).where(eq(i9AddOns.id, id));
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Subscription — Stripe-backed. Created `pending` when checkout starts,
+// flipped to `active` by the checkout.session.completed webhook (see
+// server/webhookHandlers.ts) — never by the client directly, since only
+// Stripe confirming payment should ever mark a subscription active.
+// ─────────────────────────────────────────────────────────────────────────────
+
+export async function createI9PendingSubscription(clientCompanyId: string, servicePlanId: string) {
+  const database = getDb();
+  const [row] = await database
+    .insert(i9Subscriptions)
+    .values({ clientCompanyId, servicePlanId, status: "pending" } as any)
+    .returning();
+  return row;
+}
+
+export async function activateI9Subscription(id: string, data: { stripeCustomerId: string; stripeSubscriptionId: string; setupFeePaid: boolean }) {
+  const database = getDb();
+  await database
+    .update(i9Subscriptions)
+    .set({ status: "active", stripeCustomerId: data.stripeCustomerId, stripeSubscriptionId: data.stripeSubscriptionId, setupFeePaid: data.setupFeePaid, currentPeriodStart: new Date() } as any)
+    .where(eq(i9Subscriptions.id, id));
+}
+
+export async function getI9Subscription(id: string) {
+  const database = getDb();
+  const rows = await database.select().from(i9Subscriptions).where(eq(i9Subscriptions.id, id));
+  return rows[0] ?? null;
+}
+
+export async function getLatestI9SubscriptionForCompany(clientCompanyId: string) {
+  const database = getDb();
+  const rows = await database
+    .select()
+    .from(i9Subscriptions)
+    .where(eq(i9Subscriptions.clientCompanyId, clientCompanyId))
+    .orderBy(desc(i9Subscriptions.createdAt));
+  return rows[0] ?? null;
+}
 
 // ─────────────────────────────────────────────────────────────────────────────
 // NewHireRequest workflow
