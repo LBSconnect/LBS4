@@ -22,6 +22,9 @@ export default function CheckoutSuccess() {
             <h1 className="text-2xl font-bold" data-testid="text-success-title">
               Payment Successful!
             </h1>
+            {/* Visually-hidden: keeps the footer's <h3> from directly following
+                this page's <h1> and skipping h2 (WCAG 1.3.1 / heading-order). */}
+            <h2 className="sr-only">Next Steps</h2>
             <p className="text-muted-foreground">
               Thank you for your purchase! You will receive a confirmation email
               shortly. If you have any questions, please don't hesitate to

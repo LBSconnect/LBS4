@@ -92,7 +92,7 @@ export default function Resources() {
                   <div className="w-12 h-12 rounded-md bg-[#0D1B3D]/10 dark:bg-[#0077FF]/20 flex items-center justify-center">
                     <item.icon className="w-6 h-6 text-[#0D1B3D] dark:text-[#0077FF]" />
                   </div>
-                  <h3 className="font-semibold text-lg">{item.title}</h3>
+                  <h2 className="font-semibold text-lg">{item.title}</h2>
                   <p className="text-sm text-muted-foreground">{item.description}</p>
                   <div className="flex items-center gap-1.5 text-sm font-semibold text-[#BD4F00] dark:text-[#FF8A3D]">
                     {item.external ? "Visit site" : "Learn more"}

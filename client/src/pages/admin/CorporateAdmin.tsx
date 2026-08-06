@@ -254,8 +254,8 @@ function LoginScreen({ onLogin }: { onLogin: () => void }) {
         </div>
         <form onSubmit={submit} className="space-y-4">
           <div className="space-y-1.5">
-            <Label>Admin Password</Label>
-            <Input type="password" value={secret} onChange={(e) => setSecret(e.target.value)} placeholder="••••••••" autoFocus />
+            <Label htmlFor="admin-password">Admin Password</Label>
+            <Input id="admin-password" type="password" value={secret} onChange={(e) => setSecret(e.target.value)} placeholder="••••••••" autoFocus />
           </div>
           {error && <p className="text-red-500 text-sm">{error}</p>}
           <Button type="submit" className="w-full bg-[#0d1b35] hover:bg-[#1a2d52] text-white" disabled={loading || !secret}>

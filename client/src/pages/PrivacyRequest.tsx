@@ -224,13 +224,13 @@ export default function PrivacyRequest() {
                           />
                         </div>
                         <div className="space-y-2">
-                          <Label>Website or service involved *</Label>
+                          <Label htmlFor="pr-service">Website or service involved *</Label>
                           <Select
                             required
                             value={formData.service}
                             onValueChange={(v) => setFormData({ ...formData, service: v as typeof formData.service })}
                           >
-                            <SelectTrigger data-testid="select-privacy-service">
+                            <SelectTrigger id="pr-service" data-testid="select-privacy-service">
                               <SelectValue placeholder="Select a service" />
                             </SelectTrigger>
                             <SelectContent>
@@ -241,13 +241,13 @@ export default function PrivacyRequest() {
                           </Select>
                         </div>
                         <div className="space-y-2">
-                          <Label>Request type *</Label>
+                          <Label htmlFor="pr-request-type">Request type *</Label>
                           <Select
                             required
                             value={formData.requestType}
                             onValueChange={(v) => setFormData({ ...formData, requestType: v as typeof formData.requestType })}
                           >
-                            <SelectTrigger data-testid="select-privacy-request-type">
+                            <SelectTrigger id="pr-request-type" data-testid="select-privacy-request-type">
                               <SelectValue placeholder="Select a request type" />
                             </SelectTrigger>
                             <SelectContent>

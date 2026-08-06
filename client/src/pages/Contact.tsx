@@ -355,14 +355,14 @@ export default function Contact() {
                         </div>
                       </div>
                       <div className="space-y-2">
-                        <Label>Service of Interest</Label>
+                        <Label htmlFor="service">Service of Interest</Label>
                         <Select
                           value={formData.service}
                           onValueChange={(val) =>
                             setFormData({ ...formData, service: val })
                           }
                         >
-                          <SelectTrigger data-testid="select-service">
+                          <SelectTrigger id="service" data-testid="select-service">
                             <SelectValue placeholder="Select a service" />
                           </SelectTrigger>
                           <SelectContent>

@@ -34,14 +34,24 @@ export default function Book() {
 
       <section className="py-14 bg-background flex-1">
         <div className="max-w-3xl mx-auto px-6 space-y-4">
+          {/* Visually-hidden: the hero <h1> is otherwise followed directly by the
+              footer's <h3>, skipping h2 (WCAG 1.3.1 / heading-order). This keeps
+              the page's visual design unchanged while giving the document a
+              correct heading hierarchy. */}
+          <h2 className="sr-only">Available Services</h2>
           {services.map((service) => (
             <Link key={service.id} href={service.link ?? `/services/${service.slug}`}>
               <div className="group flex items-center justify-between gap-4 p-5 rounded-lg border border-border/50 bg-card hover:border-[#0D1B3D]/40 hover:shadow-md transition-all cursor-pointer">
-                <div className="flex items-center gap-4">
+                {/* min-w-0 lets this cluster's text actually shrink/wrap within
+                    the row instead of forcing the row past the viewport at
+                    320px — a flex child's default min-width is its content
+                    size, which was pushing the shrink-0 price/arrow cluster
+                    a few px off-screen. */}
+                <div className="flex items-center gap-4 min-w-0">
                   <div className="shrink-0 w-11 h-11 rounded-md bg-[#0D1B3D]/10 dark:bg-[#0077FF]/20 flex items-center justify-center text-[#0D1B3D] dark:text-[#0077FF]">
                     <service.icon className="w-5 h-5" />
                   </div>
-                  <div>
+                  <div className="min-w-0">
                     <p className="font-semibold leading-tight">{service.title}</p>
                     <p className="text-sm text-muted-foreground mt-0.5">{service.description}</p>
                   </div>
@@ -60,11 +70,11 @@ export default function Book() {
 
           <a href="https://www.myeasypass.net" target="_blank" rel="noopener noreferrer">
             <div className="group flex items-center justify-between gap-4 p-5 rounded-lg border border-border/50 bg-card hover:border-[#0D1B3D]/40 hover:shadow-md transition-all cursor-pointer">
-              <div className="flex items-center gap-4">
+              <div className="flex items-center gap-4 min-w-0">
                 <div className="shrink-0 w-11 h-11 rounded-md bg-[#0D1B3D]/10 dark:bg-[#0077FF]/20 flex items-center justify-center">
                   <img src="/images/myeasypass-logo.png" alt="MyEasyPass" className="w-8 h-8 object-contain" loading="lazy" decoding="async" />
                 </div>
-                <div>
+                <div className="min-w-0">
                   <p className="font-semibold leading-tight">Exam Cram (MyEasyPass)</p>
                   <p className="text-sm text-muted-foreground mt-0.5">Online practice tests for Texas licensing exams. Register at myeasypass.net</p>
                 </div>

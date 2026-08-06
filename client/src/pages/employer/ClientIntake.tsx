@@ -140,9 +140,11 @@ export default function ClientIntake() {
 
       <section className="relative py-14 bg-gradient-to-br from-[#0D1B3D] to-[#1A237E]" data-testid="section-intake-hero">
         <div className="relative z-10 max-w-4xl mx-auto px-6">
+          {/* whitespace-normal: this label is long enough that forcing it onto
+              one line (the Button default) pushed the page past 320px wide. */}
           <Link href={EMPLOYER_BASE_ROUTE}>
-            <Button variant="ghost" size="sm" className="text-white/80 mb-4" data-testid="button-back-employer-services">
-              <ArrowLeft className="w-4 h-4 mr-1" />
+            <Button variant="ghost" size="sm" className="text-white/80 mb-4 whitespace-normal text-left h-auto" data-testid="button-back-employer-services">
+              <ArrowLeft className="w-4 h-4 mr-1 shrink-0" />
               Back to New-Hire Verification &amp; Form I-9 Support
             </Button>
           </Link>
@@ -177,7 +179,7 @@ export default function ClientIntake() {
           <p className="text-xs text-muted-foreground italic">
             LBS does not collect sensitive employee records (Form I-9 documents, SSNs, immigration status, or
             identity-document copies) on this page. See the{" "}
-            <Link href={EMPLOYER_AGREEMENT_ROUTE} className="text-[#0D1B3D] dark:text-[#0077FF] hover:underline">
+            <Link href={EMPLOYER_AGREEMENT_ROUTE} className="text-[#0D1B3D] dark:text-[#0077FF] underline underline-offset-2">
               draft service agreement
             </Link>{" "}
             for secure-communication terms used once your company is a client.
@@ -260,9 +262,9 @@ export default function ClientIntake() {
                   </div>
 
                   <div className="space-y-2">
-                    <Label>Federal-Contractor Status *</Label>
+                    <Label htmlFor="ci-federal-contractor-status">Federal-Contractor Status *</Label>
                     <Select required value={formData.federalContractorStatus} onValueChange={(v) => setFormData({ ...formData, federalContractorStatus: v as typeof formData.federalContractorStatus })}>
-                      <SelectTrigger data-testid="select-federal-contractor-status">
+                      <SelectTrigger id="ci-federal-contractor-status" data-testid="select-federal-contractor-status">
                         <SelectValue placeholder="Select status" />
                       </SelectTrigger>
                       <SelectContent>
@@ -306,9 +308,9 @@ export default function ClientIntake() {
                   <div className="border-t border-border/50 pt-5 space-y-4">
                     <h3 className="font-semibold">Plan &amp; Start Date</h3>
                     <div className="space-y-2">
-                      <Label>Selected Plan *</Label>
+                      <Label htmlFor="ci-selected-plan">Selected Plan *</Label>
                       <Select required value={formData.selectedPlan} onValueChange={(v) => setFormData({ ...formData, selectedPlan: v })}>
-                        <SelectTrigger data-testid="select-intake-plan">
+                        <SelectTrigger id="ci-selected-plan" data-testid="select-intake-plan">
                           <SelectValue placeholder="Select a plan" />
                         </SelectTrigger>
                         <SelectContent>
