@@ -5,6 +5,23 @@ const BUSINESS_NAME = 'LBS Test & Exam Center';
 const BUSINESS_ADDRESS = '616 FM 1960 Road West, Suite 101, Houston, Texas 77090-3048';
 const LBS_PHONE = '281-836-5357';
 
+// Every value interpolated into an HTML email below ultimately comes from a
+// public-facing form (booking, contact, privacy request, employer intake,
+// etc.) with no HTML-safety constraint at the schema level — a submitter can
+// type "<script>" or "<img onerror=...>" into their name, notes, or company
+// address today. Escape all such values before embedding them in HTML so a
+// malicious submission can only ever render as inert text, never break the
+// layout or inject markup into the email LBS staff (or the customer) opens.
+export function escapeHtml(value: unknown): string {
+  if (value === null || value === undefined) return '';
+  return String(value)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
+
 function emailWrapper(content: string): string {
   return `<!DOCTYPE html>
 <html lang="en">
@@ -132,27 +149,27 @@ export async function sendContactAcknowledgement(data: {
 }) {
   try {
     const serviceRow = data.service
-      ? `<tr><td style="color:#374151;font-size:14px;padding:4px 0;font-weight:600;width:40%;">Service:</td><td style="color:#374151;font-size:14px;padding:4px 0;">${data.service}</td></tr>`
+      ? `<tr><td style="color:#374151;font-size:14px;padding:4px 0;font-weight:600;width:40%;">Service:</td><td style="color:#374151;font-size:14px;padding:4px 0;">${escapeHtml(data.service)}</td></tr>`
       : '';
     const phoneRow = data.phone
-      ? `<tr><td style="color:#374151;font-size:14px;padding:4px 0;font-weight:600;">Phone:</td><td style="color:#374151;font-size:14px;padding:4px 0;">${data.phone}</td></tr>`
+      ? `<tr><td style="color:#374151;font-size:14px;padding:4px 0;font-weight:600;">Phone:</td><td style="color:#374151;font-size:14px;padding:4px 0;">${escapeHtml(data.phone)}</td></tr>`
       : '';
 
     const content = `
       <h2 style="margin:0 0 6px;color:#0d1b35;font-size:24px;font-weight:700;">We received your message</h2>
-      <p style="margin:0 0 24px;color:#64748b;font-size:14px;">Hi ${data.name}, thank you for reaching out. A member of our team will get back to you within one business day.</p>
+      <p style="margin:0 0 24px;color:#64748b;font-size:14px;">Hi ${escapeHtml(data.name)}, thank you for reaching out. A member of our team will get back to you within one business day.</p>
 
       <div style="background:#f0f4ff;border-radius:8px;padding:20px 24px;margin-bottom:24px;border-left:4px solid #1e3a6e;">
         <div style="color:#64748b;font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:0.8px;margin-bottom:10px;">Your Submission</div>
         <table width="100%" cellpadding="0" cellspacing="0">
-          <tr><td style="color:#374151;font-size:14px;padding:4px 0;font-weight:600;width:40%;">Name:</td><td style="color:#374151;font-size:14px;padding:4px 0;">${data.name}</td></tr>
-          <tr><td style="color:#374151;font-size:14px;padding:4px 0;font-weight:600;">Email:</td><td style="color:#374151;font-size:14px;padding:4px 0;">${data.email}</td></tr>
+          <tr><td style="color:#374151;font-size:14px;padding:4px 0;font-weight:600;width:40%;">Name:</td><td style="color:#374151;font-size:14px;padding:4px 0;">${escapeHtml(data.name)}</td></tr>
+          <tr><td style="color:#374151;font-size:14px;padding:4px 0;font-weight:600;">Email:</td><td style="color:#374151;font-size:14px;padding:4px 0;">${escapeHtml(data.email)}</td></tr>
           ${phoneRow}
           ${serviceRow}
         </table>
         <div style="margin-top:14px;padding:14px 16px;background:#ffffff;border-radius:6px;border:1px solid #e2e8f0;">
           <div style="color:#64748b;font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:0.8px;margin-bottom:6px;">Message</div>
-          <p style="margin:0;color:#374151;font-size:14px;white-space:pre-wrap;line-height:1.6;">${data.message}</p>
+          <p style="margin:0;color:#374151;font-size:14px;white-space:pre-wrap;line-height:1.6;">${escapeHtml(data.message)}</p>
         </div>
       </div>
 
@@ -197,18 +214,18 @@ export async function sendContactNotification(data: {
             <table style="width: 100%; border-collapse: collapse;">
               <tr>
                 <td style="padding: 8px 12px; font-weight: bold; color: #1e3a6e; width: 120px;">Name:</td>
-                <td style="padding: 8px 12px;">${data.name}</td>
+                <td style="padding: 8px 12px;">${escapeHtml(data.name)}</td>
               </tr>
               <tr>
                 <td style="padding: 8px 12px; font-weight: bold; color: #1e3a6e;">Email:</td>
-                <td style="padding: 8px 12px;"><a href="mailto:${data.email}">${data.email}</a></td>
+                <td style="padding: 8px 12px;"><a href="mailto:${escapeHtml(data.email)}">${escapeHtml(data.email)}</a></td>
               </tr>
-              ${data.phone ? `<tr><td style="padding: 8px 12px; font-weight: bold; color: #1e3a6e;">Phone:</td><td style="padding: 8px 12px;">${data.phone}</td></tr>` : ''}
-              ${data.service ? `<tr><td style="padding: 8px 12px; font-weight: bold; color: #1e3a6e;">Service:</td><td style="padding: 8px 12px;">${data.service}</td></tr>` : ''}
+              ${data.phone ? `<tr><td style="padding: 8px 12px; font-weight: bold; color: #1e3a6e;">Phone:</td><td style="padding: 8px 12px;">${escapeHtml(data.phone)}</td></tr>` : ''}
+              ${data.service ? `<tr><td style="padding: 8px 12px; font-weight: bold; color: #1e3a6e;">Service:</td><td style="padding: 8px 12px;">${escapeHtml(data.service)}</td></tr>` : ''}
             </table>
             <div style="margin-top: 16px; padding: 16px; background-color: white; border: 1px solid #e5e7eb; border-radius: 6px;">
               <p style="font-weight: bold; color: #1e3a6e; margin: 0 0 8px 0;">Message:</p>
-              <p style="margin: 0; white-space: pre-wrap;">${data.message}</p>
+              <p style="margin: 0; white-space: pre-wrap;">${escapeHtml(data.message)}</p>
             </div>
           </div>
           <div style="padding: 12px; text-align: center; color: #6b7280; font-size: 12px;">
@@ -246,19 +263,19 @@ export async function sendPrivacyRequestNotification(data: {
           </div>
           <div style="padding: 24px; background-color: #f9fafb; border: 1px solid #e5e7eb;">
             <table style="width: 100%; border-collapse: collapse;">
-              <tr><td style="padding: 8px 12px; font-weight: bold; color: #1e3a6e; width: 160px;">Name:</td><td style="padding: 8px 12px;">${data.name}</td></tr>
-              <tr><td style="padding: 8px 12px; font-weight: bold; color: #1e3a6e;">Email:</td><td style="padding: 8px 12px;"><a href="mailto:${data.email}">${data.email}</a></td></tr>
-              ${data.phone ? `<tr><td style="padding: 8px 12px; font-weight: bold; color: #1e3a6e;">Phone:</td><td style="padding: 8px 12px;">${data.phone}</td></tr>` : ''}
-              ${data.organization ? `<tr><td style="padding: 8px 12px; font-weight: bold; color: #1e3a6e;">Organization:</td><td style="padding: 8px 12px;">${data.organization}</td></tr>` : ''}
-              <tr><td style="padding: 8px 12px; font-weight: bold; color: #1e3a6e;">Website/Service:</td><td style="padding: 8px 12px;">${data.service}</td></tr>
-              <tr><td style="padding: 8px 12px; font-weight: bold; color: #1e3a6e;">Request Type:</td><td style="padding: 8px 12px;">${data.requestType}</td></tr>
-              ${data.identifier ? `<tr><td style="padding: 8px 12px; font-weight: bold; color: #1e3a6e;">Account/Order ID:</td><td style="padding: 8px 12px;">${data.identifier}</td></tr>` : ''}
-              ${data.preferredResponseMethod ? `<tr><td style="padding: 8px 12px; font-weight: bold; color: #1e3a6e;">Preferred Response:</td><td style="padding: 8px 12px;">${data.preferredResponseMethod}</td></tr>` : ''}
+              <tr><td style="padding: 8px 12px; font-weight: bold; color: #1e3a6e; width: 160px;">Name:</td><td style="padding: 8px 12px;">${escapeHtml(data.name)}</td></tr>
+              <tr><td style="padding: 8px 12px; font-weight: bold; color: #1e3a6e;">Email:</td><td style="padding: 8px 12px;"><a href="mailto:${escapeHtml(data.email)}">${escapeHtml(data.email)}</a></td></tr>
+              ${data.phone ? `<tr><td style="padding: 8px 12px; font-weight: bold; color: #1e3a6e;">Phone:</td><td style="padding: 8px 12px;">${escapeHtml(data.phone)}</td></tr>` : ''}
+              ${data.organization ? `<tr><td style="padding: 8px 12px; font-weight: bold; color: #1e3a6e;">Organization:</td><td style="padding: 8px 12px;">${escapeHtml(data.organization)}</td></tr>` : ''}
+              <tr><td style="padding: 8px 12px; font-weight: bold; color: #1e3a6e;">Website/Service:</td><td style="padding: 8px 12px;">${escapeHtml(data.service)}</td></tr>
+              <tr><td style="padding: 8px 12px; font-weight: bold; color: #1e3a6e;">Request Type:</td><td style="padding: 8px 12px;">${escapeHtml(data.requestType)}</td></tr>
+              ${data.identifier ? `<tr><td style="padding: 8px 12px; font-weight: bold; color: #1e3a6e;">Account/Order ID:</td><td style="padding: 8px 12px;">${escapeHtml(data.identifier)}</td></tr>` : ''}
+              ${data.preferredResponseMethod ? `<tr><td style="padding: 8px 12px; font-weight: bold; color: #1e3a6e;">Preferred Response:</td><td style="padding: 8px 12px;">${escapeHtml(data.preferredResponseMethod)}</td></tr>` : ''}
               <tr><td style="padding: 8px 12px; font-weight: bold; color: #1e3a6e;">On behalf of another person:</td><td style="padding: 8px 12px;">${data.onBehalfOfAnother ? 'Yes' : 'No'}</td></tr>
             </table>
             <div style="margin-top: 16px; padding: 16px; background-color: white; border: 1px solid #e5e7eb; border-radius: 6px;">
               <p style="font-weight: bold; color: #1e3a6e; margin: 0 0 8px 0;">Description of Request:</p>
-              <p style="margin: 0; white-space: pre-wrap;">${data.description}</p>
+              <p style="margin: 0; white-space: pre-wrap;">${escapeHtml(data.description)}</p>
             </div>
           </div>
           <div style="padding: 12px; text-align: center; color: #6b7280; font-size: 12px;">
@@ -281,7 +298,7 @@ export async function sendPrivacyRequestAcknowledgement(data: {
   try {
     const content = `
       <h2 style="margin:0 0 6px;color:#0d1b35;font-size:24px;font-weight:700;">We received your privacy request</h2>
-      <p style="margin:0 0 24px;color:#64748b;font-size:14px;">Hi ${data.name}, we received your ${data.requestType} request and have recorded the date received. We may contact you to verify your identity before acting on the request.</p>
+      <p style="margin:0 0 24px;color:#64748b;font-size:14px;">Hi ${escapeHtml(data.name)}, we received your ${escapeHtml(data.requestType)} request and have recorded the date received. We may contact you to verify your identity before acting on the request.</p>
 
       <div style="background:#f8fafc;border-radius:8px;padding:18px 20px;margin-bottom:20px;border-left:4px solid #c9a84c;">
         <p style="margin:0 0 4px;color:#0d1b35;font-size:14px;font-weight:600;">What happens next?</p>
@@ -331,21 +348,21 @@ export async function sendEmployerConsultationNotification(data: {
           </div>
           <div style="padding: 24px; background-color: #f9fafb; border: 1px solid #e5e7eb;">
             <table style="width: 100%; border-collapse: collapse;">
-              <tr><td style="padding: 8px 12px; font-weight: bold; color: #1e3a6e; width: 180px;">Contact Name:</td><td style="padding: 8px 12px;">${data.contactName}</td></tr>
-              <tr><td style="padding: 8px 12px; font-weight: bold; color: #1e3a6e;">Company:</td><td style="padding: 8px 12px;">${data.companyName}</td></tr>
-              <tr><td style="padding: 8px 12px; font-weight: bold; color: #1e3a6e;">Business Email:</td><td style="padding: 8px 12px;"><a href="mailto:${data.businessEmail}">${data.businessEmail}</a></td></tr>
-              <tr><td style="padding: 8px 12px; font-weight: bold; color: #1e3a6e;">Business Phone:</td><td style="padding: 8px 12px;">${data.businessPhone}</td></tr>
-              <tr><td style="padding: 8px 12px; font-weight: bold; color: #1e3a6e;">Company Address:</td><td style="padding: 8px 12px;">${data.companyAddress}</td></tr>
-              <tr><td style="padding: 8px 12px; font-weight: bold; color: #1e3a6e;">Industry:</td><td style="padding: 8px 12px;">${data.industry}</td></tr>
-              <tr><td style="padding: 8px 12px; font-weight: bold; color: #1e3a6e;">Approx. Employees:</td><td style="padding: 8px 12px;">${data.employeeCount}</td></tr>
-              <tr><td style="padding: 8px 12px; font-weight: bold; color: #1e3a6e;">Approx. New Hires/Month:</td><td style="padding: 8px 12px;">${data.newHiresPerMonth}</td></tr>
-              <tr><td style="padding: 8px 12px; font-weight: bold; color: #1e3a6e;">Hiring Locations:</td><td style="padding: 8px 12px;">${data.hiringLocations}</td></tr>
-              <tr><td style="padding: 8px 12px; font-weight: bold; color: #1e3a6e;">Desired Service:</td><td style="padding: 8px 12px;">${data.desiredService}</td></tr>
-              <tr><td style="padding: 8px 12px; font-weight: bold; color: #1e3a6e;">Preferred Contact Method:</td><td style="padding: 8px 12px;">${data.preferredConsultationMethod}</td></tr>
+              <tr><td style="padding: 8px 12px; font-weight: bold; color: #1e3a6e; width: 180px;">Contact Name:</td><td style="padding: 8px 12px;">${escapeHtml(data.contactName)}</td></tr>
+              <tr><td style="padding: 8px 12px; font-weight: bold; color: #1e3a6e;">Company:</td><td style="padding: 8px 12px;">${escapeHtml(data.companyName)}</td></tr>
+              <tr><td style="padding: 8px 12px; font-weight: bold; color: #1e3a6e;">Business Email:</td><td style="padding: 8px 12px;"><a href="mailto:${escapeHtml(data.businessEmail)}">${escapeHtml(data.businessEmail)}</a></td></tr>
+              <tr><td style="padding: 8px 12px; font-weight: bold; color: #1e3a6e;">Business Phone:</td><td style="padding: 8px 12px;">${escapeHtml(data.businessPhone)}</td></tr>
+              <tr><td style="padding: 8px 12px; font-weight: bold; color: #1e3a6e;">Company Address:</td><td style="padding: 8px 12px;">${escapeHtml(data.companyAddress)}</td></tr>
+              <tr><td style="padding: 8px 12px; font-weight: bold; color: #1e3a6e;">Industry:</td><td style="padding: 8px 12px;">${escapeHtml(data.industry)}</td></tr>
+              <tr><td style="padding: 8px 12px; font-weight: bold; color: #1e3a6e;">Approx. Employees:</td><td style="padding: 8px 12px;">${escapeHtml(data.employeeCount)}</td></tr>
+              <tr><td style="padding: 8px 12px; font-weight: bold; color: #1e3a6e;">Approx. New Hires/Month:</td><td style="padding: 8px 12px;">${escapeHtml(data.newHiresPerMonth)}</td></tr>
+              <tr><td style="padding: 8px 12px; font-weight: bold; color: #1e3a6e;">Hiring Locations:</td><td style="padding: 8px 12px;">${escapeHtml(data.hiringLocations)}</td></tr>
+              <tr><td style="padding: 8px 12px; font-weight: bold; color: #1e3a6e;">Desired Service:</td><td style="padding: 8px 12px;">${escapeHtml(data.desiredService)}</td></tr>
+              <tr><td style="padding: 8px 12px; font-weight: bold; color: #1e3a6e;">Preferred Contact Method:</td><td style="padding: 8px 12px;">${escapeHtml(data.preferredConsultationMethod)}</td></tr>
             </table>
             ${data.message ? `<div style="margin-top: 16px; padding: 16px; background-color: white; border: 1px solid #e5e7eb; border-radius: 6px;">
               <p style="font-weight: bold; color: #1e3a6e; margin: 0 0 8px 0;">Message:</p>
-              <p style="margin: 0; white-space: pre-wrap;">${data.message}</p>
+              <p style="margin: 0; white-space: pre-wrap;">${escapeHtml(data.message)}</p>
             </div>` : ''}
             <div style="margin-top: 16px; padding: 12px 16px; background-color: #fffbeb; border: 1px solid #fde68a; border-radius: 6px;">
               <p style="margin: 0; color: #92400e; font-size: 12px;">Reminder: this is an administrative sales lead only. No employee Form I-9, SSN, or identity-document data should ever come through this form — if any appears, do not act on it and contact the requester to resubmit safely.</p>
@@ -372,7 +389,7 @@ export async function sendEmployerConsultationAcknowledgement(data: {
   try {
     const content = `
       <h2 style="margin:0 0 6px;color:#0d1b35;font-size:24px;font-weight:700;">We received your consultation request</h2>
-      <p style="margin:0 0 24px;color:#64748b;font-size:14px;">Hi ${data.contactName}, thank you for your interest in LBS New-Hire Verification &amp; Form I-9 Support for ${data.companyName}. A member of our employer-services team will follow up within one business day to discuss ${data.desiredService.toLowerCase()}.</p>
+      <p style="margin:0 0 24px;color:#64748b;font-size:14px;">Hi ${escapeHtml(data.contactName)}, thank you for your interest in LBS New-Hire Verification &amp; Form I-9 Support for ${escapeHtml(data.companyName)}. A member of our employer-services team will follow up within one business day to discuss ${escapeHtml(data.desiredService.toLowerCase())}.</p>
 
       <div style="background:#f8fafc;border-radius:8px;padding:18px 20px;margin-bottom:20px;border-left:4px solid #c9a84c;">
         <p style="margin:0 0 4px;color:#0d1b35;font-size:14px;font-weight:600;">A quick reminder</p>
@@ -429,7 +446,7 @@ export async function sendEmployerIntakeNotification(data: {
 }) {
   try {
     const addOnsRow = data.requestedAddOns && data.requestedAddOns.length > 0
-      ? `<tr><td style="padding: 8px 12px; font-weight: bold; color: #1e3a6e;">Requested Add-Ons:</td><td style="padding: 8px 12px;">${data.requestedAddOns.join(', ')}</td></tr>`
+      ? `<tr><td style="padding: 8px 12px; font-weight: bold; color: #1e3a6e;">Requested Add-Ons:</td><td style="padding: 8px 12px;">${escapeHtml(data.requestedAddOns.join(', '))}</td></tr>`
       : '';
     await sendEmail({
       to: NOTIFICATION_EMAIL,
@@ -442,23 +459,23 @@ export async function sendEmployerIntakeNotification(data: {
           </div>
           <div style="padding: 24px; background-color: #f9fafb; border: 1px solid #e5e7eb;">
             <table style="width: 100%; border-collapse: collapse;">
-              <tr><td style="padding: 8px 12px; font-weight: bold; color: #1e3a6e; width: 200px;">Company Legal Name:</td><td style="padding: 8px 12px;">${data.companyLegalName}</td></tr>
-              ${data.dba ? `<tr><td style="padding: 8px 12px; font-weight: bold; color: #1e3a6e;">DBA:</td><td style="padding: 8px 12px;">${data.dba}</td></tr>` : ''}
-              ${data.ein ? `<tr><td style="padding: 8px 12px; font-weight: bold; color: #1e3a6e;">EIN:</td><td style="padding: 8px 12px;">${data.ein}</td></tr>` : ''}
-              <tr><td style="padding: 8px 12px; font-weight: bold; color: #1e3a6e;">Company Address:</td><td style="padding: 8px 12px;">${data.companyAddress}</td></tr>
-              ${data.mailingAddress ? `<tr><td style="padding: 8px 12px; font-weight: bold; color: #1e3a6e;">Mailing Address:</td><td style="padding: 8px 12px;">${data.mailingAddress}</td></tr>` : ''}
-              <tr><td style="padding: 8px 12px; font-weight: bold; color: #1e3a6e;">Hiring Locations:</td><td style="padding: 8px 12px;">${data.hiringLocations}</td></tr>
-              <tr><td style="padding: 8px 12px; font-weight: bold; color: #1e3a6e;">Industry:</td><td style="padding: 8px 12px;">${data.industry}</td></tr>
-              ${data.naicsCategory ? `<tr><td style="padding: 8px 12px; font-weight: bold; color: #1e3a6e;">NAICS Category:</td><td style="padding: 8px 12px;">${data.naicsCategory}</td></tr>` : ''}
-              <tr><td style="padding: 8px 12px; font-weight: bold; color: #1e3a6e;">Employee Count:</td><td style="padding: 8px 12px;">${data.employeeCount}</td></tr>
-              <tr><td style="padding: 8px 12px; font-weight: bold; color: #1e3a6e;">Average Monthly Hires:</td><td style="padding: 8px 12px;">${data.averageMonthlyHires}</td></tr>
-              <tr><td style="padding: 8px 12px; font-weight: bold; color: #1e3a6e;">Federal Contractor Status:</td><td style="padding: 8px 12px;">${data.federalContractorStatus}</td></tr>
-              <tr><td style="padding: 8px 12px; font-weight: bold; color: #1e3a6e;">Authorized Signer:</td><td style="padding: 8px 12px;">${data.authorizedSignerName} (<a href="mailto:${data.authorizedSignerEmail}">${data.authorizedSignerEmail}</a>)</td></tr>
-              <tr><td style="padding: 8px 12px; font-weight: bold; color: #1e3a6e;">Primary Administrator:</td><td style="padding: 8px 12px;">${data.primaryAdministratorName} (<a href="mailto:${data.primaryAdministratorEmail}">${data.primaryAdministratorEmail}</a>)</td></tr>
-              <tr><td style="padding: 8px 12px; font-weight: bold; color: #1e3a6e;">Billing Contact:</td><td style="padding: 8px 12px;">${data.billingContactName} (<a href="mailto:${data.billingContactEmail}">${data.billingContactEmail}</a>)</td></tr>
-              <tr><td style="padding: 8px 12px; font-weight: bold; color: #1e3a6e;">Selected Plan:</td><td style="padding: 8px 12px;">${data.selectedPlan}</td></tr>
+              <tr><td style="padding: 8px 12px; font-weight: bold; color: #1e3a6e; width: 200px;">Company Legal Name:</td><td style="padding: 8px 12px;">${escapeHtml(data.companyLegalName)}</td></tr>
+              ${data.dba ? `<tr><td style="padding: 8px 12px; font-weight: bold; color: #1e3a6e;">DBA:</td><td style="padding: 8px 12px;">${escapeHtml(data.dba)}</td></tr>` : ''}
+              ${data.ein ? `<tr><td style="padding: 8px 12px; font-weight: bold; color: #1e3a6e;">EIN:</td><td style="padding: 8px 12px;">${escapeHtml(data.ein)}</td></tr>` : ''}
+              <tr><td style="padding: 8px 12px; font-weight: bold; color: #1e3a6e;">Company Address:</td><td style="padding: 8px 12px;">${escapeHtml(data.companyAddress)}</td></tr>
+              ${data.mailingAddress ? `<tr><td style="padding: 8px 12px; font-weight: bold; color: #1e3a6e;">Mailing Address:</td><td style="padding: 8px 12px;">${escapeHtml(data.mailingAddress)}</td></tr>` : ''}
+              <tr><td style="padding: 8px 12px; font-weight: bold; color: #1e3a6e;">Hiring Locations:</td><td style="padding: 8px 12px;">${escapeHtml(data.hiringLocations)}</td></tr>
+              <tr><td style="padding: 8px 12px; font-weight: bold; color: #1e3a6e;">Industry:</td><td style="padding: 8px 12px;">${escapeHtml(data.industry)}</td></tr>
+              ${data.naicsCategory ? `<tr><td style="padding: 8px 12px; font-weight: bold; color: #1e3a6e;">NAICS Category:</td><td style="padding: 8px 12px;">${escapeHtml(data.naicsCategory)}</td></tr>` : ''}
+              <tr><td style="padding: 8px 12px; font-weight: bold; color: #1e3a6e;">Employee Count:</td><td style="padding: 8px 12px;">${escapeHtml(data.employeeCount)}</td></tr>
+              <tr><td style="padding: 8px 12px; font-weight: bold; color: #1e3a6e;">Average Monthly Hires:</td><td style="padding: 8px 12px;">${escapeHtml(data.averageMonthlyHires)}</td></tr>
+              <tr><td style="padding: 8px 12px; font-weight: bold; color: #1e3a6e;">Federal Contractor Status:</td><td style="padding: 8px 12px;">${escapeHtml(data.federalContractorStatus)}</td></tr>
+              <tr><td style="padding: 8px 12px; font-weight: bold; color: #1e3a6e;">Authorized Signer:</td><td style="padding: 8px 12px;">${escapeHtml(data.authorizedSignerName)} (<a href="mailto:${escapeHtml(data.authorizedSignerEmail)}">${escapeHtml(data.authorizedSignerEmail)}</a>)</td></tr>
+              <tr><td style="padding: 8px 12px; font-weight: bold; color: #1e3a6e;">Primary Administrator:</td><td style="padding: 8px 12px;">${escapeHtml(data.primaryAdministratorName)} (<a href="mailto:${escapeHtml(data.primaryAdministratorEmail)}">${escapeHtml(data.primaryAdministratorEmail)}</a>)</td></tr>
+              <tr><td style="padding: 8px 12px; font-weight: bold; color: #1e3a6e;">Billing Contact:</td><td style="padding: 8px 12px;">${escapeHtml(data.billingContactName)} (<a href="mailto:${escapeHtml(data.billingContactEmail)}">${escapeHtml(data.billingContactEmail)}</a>)</td></tr>
+              <tr><td style="padding: 8px 12px; font-weight: bold; color: #1e3a6e;">Selected Plan:</td><td style="padding: 8px 12px;">${escapeHtml(data.selectedPlan)}</td></tr>
               ${addOnsRow}
-              ${data.preferredStartDate ? `<tr><td style="padding: 8px 12px; font-weight: bold; color: #1e3a6e;">Preferred Start Date:</td><td style="padding: 8px 12px;">${data.preferredStartDate}</td></tr>` : ''}
+              ${data.preferredStartDate ? `<tr><td style="padding: 8px 12px; font-weight: bold; color: #1e3a6e;">Preferred Start Date:</td><td style="padding: 8px 12px;">${escapeHtml(data.preferredStartDate)}</td></tr>` : ''}
             </table>
             <div style="margin-top: 16px; padding: 12px 16px; background-color: #fffbeb; border: 1px solid #fde68a; border-radius: 6px;">
               <p style="margin: 0; color: #92400e; font-size: 12px;">This is business-level onboarding information only. No employee Form I-9 data, SSNs, or identity documents are collected through this form. Next steps: E-Verify Memorandum of Understanding and signed LBS service agreement.</p>
@@ -484,7 +501,7 @@ export async function sendEmployerIntakeAcknowledgement(data: {
   try {
     const content = `
       <h2 style="margin:0 0 6px;color:#0d1b35;font-size:24px;font-weight:700;">We received your onboarding information</h2>
-      <p style="margin:0 0 24px;color:#64748b;font-size:14px;">Hi ${data.primaryAdministratorName}, thank you for submitting onboarding information for ${data.companyLegalName}. Our employer-services team will review it and follow up about next steps, including the E-Verify Memorandum of Understanding and the LBS service agreement.</p>
+      <p style="margin:0 0 24px;color:#64748b;font-size:14px;">Hi ${escapeHtml(data.primaryAdministratorName)}, thank you for submitting onboarding information for ${escapeHtml(data.companyLegalName)}. Our employer-services team will review it and follow up about next steps, including the E-Verify Memorandum of Understanding and the LBS service agreement.</p>
 
       <div style="background:#f8fafc;border-radius:8px;padding:18px 20px;margin-bottom:20px;border-left:4px solid #c9a84c;">
         <p style="margin:0 0 4px;color:#0d1b35;font-size:14px;font-weight:600;">A quick reminder</p>
@@ -542,16 +559,16 @@ export async function sendPaymentNotification(data: {
               <p style="margin: 4px 0 0 0; color: #047857;">Payment Successful</p>
             </div>
             <table style="width: 100%; border-collapse: collapse;">
-              <tr><td style="padding: 8px 12px; font-weight: bold; color: #1e3a6e; width: 140px;">Service:</td><td style="padding: 8px 12px;">${serviceName}</td></tr>
-              ${data.customerName ? `<tr><td style="padding: 8px 12px; font-weight: bold; color: #1e3a6e;">Customer Name:</td><td style="padding: 8px 12px;">${data.customerName}</td></tr>` : ''}
-              ${data.customerEmail ? `<tr><td style="padding: 8px 12px; font-weight: bold; color: #1e3a6e;">Customer Email:</td><td style="padding: 8px 12px;"><a href="mailto:${data.customerEmail}">${data.customerEmail}</a></td></tr>` : ''}
+              <tr><td style="padding: 8px 12px; font-weight: bold; color: #1e3a6e; width: 140px;">Service:</td><td style="padding: 8px 12px;">${escapeHtml(serviceName)}</td></tr>
+              ${data.customerName ? `<tr><td style="padding: 8px 12px; font-weight: bold; color: #1e3a6e;">Customer Name:</td><td style="padding: 8px 12px;">${escapeHtml(data.customerName)}</td></tr>` : ''}
+              ${data.customerEmail ? `<tr><td style="padding: 8px 12px; font-weight: bold; color: #1e3a6e;">Customer Email:</td><td style="padding: 8px 12px;"><a href="mailto:${escapeHtml(data.customerEmail)}">${escapeHtml(data.customerEmail)}</a></td></tr>` : ''}
               <tr>
                 <td style="padding: 8px 12px; font-weight: bold; color: #1e3a6e;">Amount:</td>
                 <td style="padding: 8px 12px;">${formattedAmount}</td>
               </tr>
               <tr>
                 <td style="padding: 8px 12px; font-weight: bold; color: #1e3a6e;">Session ID:</td>
-                <td style="padding: 8px 12px; font-size: 12px; color: #6b7280;">${data.sessionId}</td>
+                <td style="padding: 8px 12px; font-size: 12px; color: #6b7280;">${escapeHtml(data.sessionId)}</td>
               </tr>
             </table>
           </div>
@@ -605,13 +622,13 @@ export async function sendAppointmentConfirmation(data: {
 
     const content = `
       <h2 style="margin:0 0 6px;color:#0d1b35;font-size:24px;font-weight:700;">Appointment Confirmed</h2>
-      <p style="margin:0 0 24px;color:#64748b;font-size:14px;">Hello ${data.customerName}, your appointment has been confirmed. Please see the details below.</p>
+      <p style="margin:0 0 24px;color:#64748b;font-size:14px;">Hello ${escapeHtml(data.customerName)}, your appointment has been confirmed. Please see the details below.</p>
 
       <div style="background:#f0f4ff;border-radius:8px;padding:20px 24px;margin-bottom:24px;border-left:4px solid #1e3a6e;">
         <div style="color:#64748b;font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:0.8px;margin-bottom:10px;">Appointment Details</div>
         <table width="100%" cellpadding="0" cellspacing="0">
-          <tr><td style="color:#374151;font-size:14px;padding:4px 0;font-weight:600;width:40%;">Service:</td><td style="color:#374151;font-size:14px;padding:4px 0;">${data.serviceName}</td></tr>
-          ${exam ? `<tr><td style="color:#374151;font-size:14px;padding:4px 0;font-weight:600;">Exam:</td><td style="color:#374151;font-size:14px;padding:4px 0;">${exam}</td></tr>` : ''}
+          <tr><td style="color:#374151;font-size:14px;padding:4px 0;font-weight:600;width:40%;">Service:</td><td style="color:#374151;font-size:14px;padding:4px 0;">${escapeHtml(data.serviceName)}</td></tr>
+          ${exam ? `<tr><td style="color:#374151;font-size:14px;padding:4px 0;font-weight:600;">Exam:</td><td style="color:#374151;font-size:14px;padding:4px 0;">${escapeHtml(exam)}</td></tr>` : ''}
           ${durationDisplay ? `<tr><td style="color:#374151;font-size:14px;padding:4px 0;font-weight:600;">Duration:</td><td style="color:#374151;font-size:14px;padding:4px 0;">${durationDisplay}</td></tr>` : ''}
           <tr><td style="color:#374151;font-size:14px;padding:4px 0;font-weight:600;">Date:</td><td style="color:#374151;font-size:14px;padding:4px 0;">${formattedDate}</td></tr>
           <tr><td style="color:#374151;font-size:14px;padding:4px 0;font-weight:600;">Time:</td><td style="color:#374151;font-size:14px;padding:4px 0;">${formattedTime} CT</td></tr>
@@ -700,20 +717,20 @@ export async function sendAppointmentCalendarInvite(data: {
       <div style="background:#fff7ed;border-radius:8px;padding:20px 24px;margin-bottom:20px;border-left:4px solid #c9a84c;">
         <div style="color:#92400e;font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:0.8px;margin-bottom:12px;">Appointment Summary</div>
         <table width="100%" cellpadding="0" cellspacing="0">
-          <tr><td style="font-size:14px;padding:4px 0;font-weight:600;color:#374151;width:40%;">Service:</td><td style="font-size:14px;padding:4px 0;font-weight:700;color:#0d1b35;">${data.serviceName}</td></tr>
-          <tr><td style="font-size:14px;padding:4px 0;font-weight:600;color:#374151;">Customer:</td><td style="font-size:14px;padding:4px 0;color:#374151;">${data.customerName}</td></tr>
-          <tr><td style="font-size:14px;padding:4px 0;font-weight:600;color:#374151;">Email:</td><td style="font-size:14px;padding:4px 0;"><a href="mailto:${data.customerEmail}" style="color:#1e3a6e;">${data.customerEmail}</a></td></tr>
-          ${data.customerPhone ? `<tr><td style="font-size:14px;padding:4px 0;font-weight:600;color:#374151;">Phone:</td><td style="font-size:14px;padding:4px 0;"><a href="tel:${data.customerPhone}" style="color:#1e3a6e;">${data.customerPhone}</a></td></tr>` : ''}
-          ${exam ? `<tr><td style="font-size:14px;padding:4px 0;font-weight:600;color:#374151;">Exam:</td><td style="font-size:14px;padding:4px 0;color:#374151;">${exam}</td></tr>` : ''}
+          <tr><td style="font-size:14px;padding:4px 0;font-weight:600;color:#374151;width:40%;">Service:</td><td style="font-size:14px;padding:4px 0;font-weight:700;color:#0d1b35;">${escapeHtml(data.serviceName)}</td></tr>
+          <tr><td style="font-size:14px;padding:4px 0;font-weight:600;color:#374151;">Customer:</td><td style="font-size:14px;padding:4px 0;color:#374151;">${escapeHtml(data.customerName)}</td></tr>
+          <tr><td style="font-size:14px;padding:4px 0;font-weight:600;color:#374151;">Email:</td><td style="font-size:14px;padding:4px 0;"><a href="mailto:${escapeHtml(data.customerEmail)}" style="color:#1e3a6e;">${escapeHtml(data.customerEmail)}</a></td></tr>
+          ${data.customerPhone ? `<tr><td style="font-size:14px;padding:4px 0;font-weight:600;color:#374151;">Phone:</td><td style="font-size:14px;padding:4px 0;"><a href="tel:${escapeHtml(data.customerPhone)}" style="color:#1e3a6e;">${escapeHtml(data.customerPhone)}</a></td></tr>` : ''}
+          ${exam ? `<tr><td style="font-size:14px;padding:4px 0;font-weight:600;color:#374151;">Exam:</td><td style="font-size:14px;padding:4px 0;color:#374151;">${escapeHtml(exam)}</td></tr>` : ''}
           ${durationDisplay ? `<tr><td style="font-size:14px;padding:4px 0;font-weight:600;color:#374151;">Duration:</td><td style="font-size:14px;padding:4px 0;color:#374151;">${durationDisplay}</td></tr>` : ''}
           <tr><td style="font-size:14px;padding:4px 0;font-weight:600;color:#374151;">Date:</td><td style="font-size:14px;padding:4px 0;font-weight:600;color:#374151;">${formattedDate}</td></tr>
           <tr><td style="font-size:14px;padding:4px 0;font-weight:600;color:#374151;">Time:</td><td style="font-size:14px;padding:4px 0;font-weight:600;color:#374151;">${formattedTime} CT</td></tr>
           ${!isNotaryService ? `<tr><td style="font-size:14px;padding:4px 0;font-weight:600;color:#374151;">Price:</td><td style="font-size:14px;padding:4px 0;color:#374151;">${priceDisplay}</td></tr>` : ''}
           <tr><td style="font-size:14px;padding:4px 0;font-weight:600;color:#374151;">Payment:</td><td style="font-size:14px;padding:4px 0;">${paymentBadge}</td></tr>
-          ${remainingNotes ? `<tr><td style="font-size:14px;padding:4px 0;font-weight:600;color:#374151;">Notes:</td><td style="font-size:14px;padding:4px 0;color:#374151;">${remainingNotes}</td></tr>` : ''}
+          ${remainingNotes ? `<tr><td style="font-size:14px;padding:4px 0;font-weight:600;color:#374151;">Notes:</td><td style="font-size:14px;padding:4px 0;color:#374151;">${escapeHtml(remainingNotes)}</td></tr>` : ''}
         </table>
       </div>
-      <span style="display:none;overflow:hidden;max-height:0">APPTSTART:${startISO}|APPTEND:${endISO}|APPTSERVICE:${data.serviceName}|APPTCUSTOMER:${data.customerName}</span>
+      <span style="display:none;overflow:hidden;max-height:0">APPTSTART:${startISO}|APPTEND:${endISO}|APPTSERVICE:${escapeHtml(data.serviceName)}|APPTCUSTOMER:${escapeHtml(data.customerName)}</span>
     `;
 
     await sendEmail({
@@ -734,12 +751,12 @@ export async function sendAppointmentCalendarInvite(data: {
     createOutlookCalendarEvent({
       subject: `${data.serviceName}: ${data.customerName}`,
       bodyHtml: `
-        <p><strong>Service:</strong> ${data.serviceName}</p>
-        <p><strong>Customer:</strong> ${data.customerName}</p>
-        <p><strong>Email:</strong> ${data.customerEmail}</p>
-        ${data.customerPhone ? `<p><strong>Phone:</strong> ${data.customerPhone}</p>` : ''}
-        ${exam ? `<p><strong>Exam:</strong> ${exam}</p>` : ''}
-        ${remainingNotes ? `<p><strong>Notes:</strong> ${remainingNotes}</p>` : ''}
+        <p><strong>Service:</strong> ${escapeHtml(data.serviceName)}</p>
+        <p><strong>Customer:</strong> ${escapeHtml(data.customerName)}</p>
+        <p><strong>Email:</strong> ${escapeHtml(data.customerEmail)}</p>
+        ${data.customerPhone ? `<p><strong>Phone:</strong> ${escapeHtml(data.customerPhone)}</p>` : ''}
+        ${exam ? `<p><strong>Exam:</strong> ${escapeHtml(exam)}</p>` : ''}
+        ${remainingNotes ? `<p><strong>Notes:</strong> ${escapeHtml(remainingNotes)}</p>` : ''}
         <p><strong>Payment:</strong> ${data.paymentStatus === 'paid' ? 'Paid Online' : 'Pay at Visit'}</p>
       `,
       startDateTime: appointmentDateTime,

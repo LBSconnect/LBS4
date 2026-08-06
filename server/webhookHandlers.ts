@@ -3,7 +3,7 @@ import { storage } from './storage';
 import { sendAppointmentConfirmation, sendAppointmentCalendarInvite, sendPaymentNotification } from './emailService';
 import { updateCorporateAccountStripe, getCorporateAccount, logAudit } from './corporateStorage';
 import { sendActivationEmail } from './corporateEmailService';
-import { activateI9Subscription, logI9Audit } from './i9Storage';
+import { activateI9Subscription, getI9Subscription, logI9Audit } from './i9Storage';
 import type Stripe from 'stripe';
 
 export class WebhookHandlers {
@@ -69,6 +69,22 @@ export class WebhookHandlers {
     const corporateAccountId = parseInt(session.client_reference_id || session.metadata?.corporateAccountId || '', 10);
     if (!isNaN(corporateAccountId)) {
       try {
+        // Idempotency guard — Stripe redelivers webhooks (at-least-once
+        // delivery), and without this a replayed event would resend the
+        // customer's activation email and duplicate the audit log entry
+        // every time. Read current state first; skip all side-effects once
+        // the account is already active, mirroring the appointment-payment
+        // guard above.
+        const existingAccount = await getCorporateAccount(corporateAccountId);
+        if (!existingAccount) {
+          console.error('Corporate account not found for ID:', corporateAccountId);
+          return;
+        }
+        if (existingAccount.status === 'active') {
+          console.log(`Corporate account ${corporateAccountId} already active — ignoring duplicate webhook (session ${session.id})`);
+          return;
+        }
+
         await updateCorporateAccountStripe(
           corporateAccountId,
           session.customer as string,
@@ -91,6 +107,20 @@ export class WebhookHandlers {
     const i9SubscriptionId = session.metadata?.i9SubscriptionId;
     if (i9SubscriptionId) {
       try {
+        // Idempotency guard — same rationale as the corporate-account branch
+        // above: a replayed checkout.session.completed must not re-run
+        // activation (duplicate audit log entries, and — if this handler is
+        // ever extended to email the client on activation — duplicate emails).
+        const existingSubscription = await getI9Subscription(i9SubscriptionId);
+        if (!existingSubscription) {
+          console.error('I-9 subscription not found for ID:', i9SubscriptionId);
+          return;
+        }
+        if (existingSubscription.status === 'active') {
+          console.log(`I-9 subscription ${i9SubscriptionId} already active — ignoring duplicate webhook (session ${session.id})`);
+          return;
+        }
+
         await activateI9Subscription(i9SubscriptionId, {
           stripeCustomerId: (session.customer as string) || '',
           stripeSubscriptionId: (session.subscription as string) || '',

@@ -240,7 +240,18 @@ export function registerI9Routes(app: Express): void {
       const existingSub = await store.getLatestI9SubscriptionForCompany(pstr(req.params.id));
       const setupFeeAlreadyPaid = existingSub?.setupFeePaid === true;
 
-      const pending = await store.createI9PendingSubscription(pstr(req.params.id), servicePlanId);
+      // Repeat-submission guard: a double-click (or a second checkout tab left
+      // open) before the first Stripe Checkout Session completes previously
+      // created a brand-new "pending" subscription row every time, so two
+      // completed sessions could each activate their own row — duplicating
+      // the company's subscription and, if the setup fee was included on
+      // both, double-charging it. Reuse the existing pending row for the same
+      // plan instead of minting another one; combined with handleCheckoutCompleted's
+      // idempotency guard (server/webhookHandlers.ts), only the first
+      // completed session for this row can ever activate it.
+      const pending = existingSub && existingSub.status === "pending" && existingSub.servicePlanId === servicePlanId
+        ? existingSub
+        : await store.createI9PendingSubscription(pstr(req.params.id), servicePlanId);
 
       const lineItems: { price: string; quantity: number }[] = [{ price: plan.stripeMonthlyPriceId, quantity: 1 }];
       if (plan.stripeSetupPriceId && !setupFeeAlreadyPaid) {
