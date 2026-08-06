@@ -38,7 +38,14 @@ import { getUncachableStripeClient } from "./stripeClient";
 import { z } from "zod";
 import { checkRateLimit } from "./i9Security";
 
-const ADMIN_SECRET = process.env.ADMIN_SECRET || "changeme-dev-only";
+// IMPORTANT: unlike SESSION_SECRET (server/i9Auth.ts) or PROTECTED_DATA_ENCRYPTION_KEY
+// (server/i9Security.ts), this secret is not just used to *sign* things —
+// requireAdminToken below also accepts it directly, in the clear, as a bearer
+// token. A hardcoded fallback here would be a well-known, guessable admin
+// credential for any deployment that forgets to set ADMIN_SECRET. So, unlike
+// those modules, we deliberately do NOT fall back to a "changeme" default —
+// isAdminAuthConfigured() gates every admin/portal route closed (503) instead.
+const ADMIN_SECRET = process.env.ADMIN_SECRET;
 const JWT_SECRET = process.env.JWT_SECRET || ADMIN_SECRET;
 
 // ─── Rate limiting ──────────────────────────────────────────────────────────
@@ -57,9 +64,26 @@ function corporateRateLimit(bucket: string, limit: number, windowMs: number) {
   };
 }
 
+if (!ADMIN_SECRET) {
+  console.warn(
+    "[corporate] ADMIN_SECRET is not set — the corporate admin dashboard and portal login " +
+    "are disabled (503) until it is configured. Set ADMIN_SECRET (and optionally a separate " +
+    "JWT_SECRET) before deploying the Corporate Notary Division admin/portal features."
+  );
+}
+
+function corporateAuthNotConfigured(res: Response) {
+  return res.status(503).json({
+    error: "Admin authentication is not configured",
+    detail: "Set ADMIN_SECRET (and optionally JWT_SECRET) before using the corporate admin dashboard or portal.",
+  });
+}
+
 // ─── Auth Middleware ──────────────────────────────────────────────────────────
 
 function requirePortalToken(req: Request, res: Response, next: NextFunction) {
+  if (!JWT_SECRET) return corporateAuthNotConfigured(res);
+
   const auth = req.headers.authorization;
   if (!auth) return res.status(401).json({ error: "Missing Authorization header" });
 
@@ -78,6 +102,8 @@ function requirePortalToken(req: Request, res: Response, next: NextFunction) {
 }
 
 function requireAdminToken(req: Request, res: Response, next: NextFunction) {
+  if (!ADMIN_SECRET || !JWT_SECRET) return corporateAuthNotConfigured(res);
+
   const auth = req.headers.authorization;
   if (!auth) return res.status(401).json({ error: "Missing Authorization header" });
 
@@ -108,6 +134,7 @@ export async function registerCorporateRoutes(app: Express): Promise<void> {
   // ── Admin Auth ──────────────────────────────────────────────────────────────
 
   app.post("/api/admin/corporate/login", corporateRateLimit("corp-admin-login", 10, 15 * 60 * 1000), (req: Request, res: Response) => {
+    if (!ADMIN_SECRET || !JWT_SECRET) return corporateAuthNotConfigured(res);
     const { secret } = req.body as { secret?: string };
     if (!secret || secret !== ADMIN_SECRET) {
       return res.status(401).json({ error: "Invalid admin secret" });
@@ -600,6 +627,7 @@ export async function registerCorporateRoutes(app: Express): Promise<void> {
   // ── Customer Portal: Login ────────────────────────────────────────────────────
 
   app.post("/api/corporate/portal/login", corporateRateLimit("corp-portal-login", 10, 15 * 60 * 1000), async (req: Request, res: Response) => {
+    if (!JWT_SECRET) return corporateAuthNotConfigured(res);
     try {
       const { accountCode, email } = req.body as { accountCode?: string; email?: string };
       if (!accountCode || !email) {
