@@ -18,6 +18,21 @@ const LBS_PHONE = "281-836-5357";
 const LBS_EMAIL = process.env.MAIL_FROM_ADDRESS || "info@lbsconnect.net";
 const SITE_URL = "https://www.lbs4.com";
 
+// Account/appointment fields below (company name, contact info, employee
+// name, special instructions, portal message sender/subject, etc.) all
+// originate from public enrollment/booking forms with no HTML-safety
+// constraint at the schema level — escape before embedding in HTML, same
+// rationale as server/emailService.ts's escapeHtml.
+export function escapeHtml(value: unknown): string {
+  if (value === null || value === undefined) return '';
+  return String(value)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
+
 function emailWrapper(content: string): string {
   return `
 <!DOCTYPE html>
@@ -85,7 +100,7 @@ export async function sendEnrollmentConfirmation(account: CorporateAccount): Pro
     <div style="background:#f0f4ff;border-radius:8px;padding:20px 24px;margin-bottom:24px;border-left:4px solid #1e3a6e;">
       <div style="color:#64748b;font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:0.8px;margin-bottom:10px;">Enrollment Summary</div>
       <table width="100%" cellpadding="0" cellspacing="0">
-        <tr><td style="color:#374151;font-size:14px;padding:4px 0;font-weight:600;">Company:</td><td style="color:#374151;font-size:14px;padding:4px 0;">${account.companyName}</td></tr>
+        <tr><td style="color:#374151;font-size:14px;padding:4px 0;font-weight:600;">Company:</td><td style="color:#374151;font-size:14px;padding:4px 0;">${escapeHtml(account.companyName)}</td></tr>
         <tr><td style="color:#374151;font-size:14px;padding:4px 0;font-weight:600;">Account Code:</td><td style="color:#0d1b35;font-size:14px;padding:4px 0;font-weight:700;font-family:monospace;">${account.accountCode}</td></tr>
         <tr><td style="color:#374151;font-size:14px;padding:4px 0;font-weight:600;">Selected Plan:</td><td style="color:#374151;font-size:14px;padding:4px 0;">${planName}: ${planPrice}</td></tr>
         <tr><td style="color:#374151;font-size:14px;padding:4px 0;font-weight:600;">Status:</td><td style="padding:4px 0;"><span style="background:#fef3c7;color:#92400e;font-size:12px;font-weight:600;padding:2px 8px;border-radius:20px;">Pending Review</span></td></tr>
@@ -133,29 +148,29 @@ export async function sendEnrollmentNotificationToAdmin(
       <div style="color:#92400e;font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:0.8px;margin-bottom:12px;">Action Required. Pending Approval</div>
       <table width="100%" cellpadding="0" cellspacing="0">
         <tr><td style="font-size:14px;padding:5px 0;font-weight:600;color:#374151;width:40%;">Account Code:</td><td style="font-size:14px;padding:5px 0;font-family:monospace;font-weight:700;color:#0d1b35;">${account.accountCode}</td></tr>
-        <tr><td style="font-size:14px;padding:5px 0;font-weight:600;color:#374151;">Company:</td><td style="font-size:14px;padding:5px 0;color:#374151;">${account.companyName}</td></tr>
+        <tr><td style="font-size:14px;padding:5px 0;font-weight:600;color:#374151;">Company:</td><td style="font-size:14px;padding:5px 0;color:#374151;">${escapeHtml(account.companyName)}</td></tr>
         <tr><td style="font-size:14px;padding:5px 0;font-weight:600;color:#374151;">Plan:</td><td style="font-size:14px;padding:5px 0;color:#374151;"><strong>${planName}</strong>: ${planPrice}</td></tr>
-        <tr><td style="font-size:14px;padding:5px 0;font-weight:600;color:#374151;">Address:</td><td style="font-size:14px;padding:5px 0;color:#374151;">${account.businessAddress}, ${account.city}, ${account.state} ${account.zip}</td></tr>
-        <tr><td style="font-size:14px;padding:5px 0;font-weight:600;color:#374151;">Contact:</td><td style="font-size:14px;padding:5px 0;color:#374151;">${account.primaryContactName}</td></tr>
-        <tr><td style="font-size:14px;padding:5px 0;font-weight:600;color:#374151;">Email:</td><td style="font-size:14px;padding:5px 0;"><a href="mailto:${account.primaryContactEmail}" style="color:#1e3a6e;">${account.primaryContactEmail}</a></td></tr>
-        <tr><td style="font-size:14px;padding:5px 0;font-weight:600;color:#374151;">Phone:</td><td style="font-size:14px;padding:5px 0;color:#374151;">${account.primaryContactPhone || "N/A"}</td></tr>
-        <tr><td style="font-size:14px;padding:5px 0;font-weight:600;color:#374151;">Company Size:</td><td style="font-size:14px;padding:5px 0;color:#374151;">${account.companySize || "N/A"}</td></tr>
+        <tr><td style="font-size:14px;padding:5px 0;font-weight:600;color:#374151;">Address:</td><td style="font-size:14px;padding:5px 0;color:#374151;">${escapeHtml(account.businessAddress)}, ${escapeHtml(account.city)}, ${escapeHtml(account.state)} ${escapeHtml(account.zip)}</td></tr>
+        <tr><td style="font-size:14px;padding:5px 0;font-weight:600;color:#374151;">Contact:</td><td style="font-size:14px;padding:5px 0;color:#374151;">${escapeHtml(account.primaryContactName)}</td></tr>
+        <tr><td style="font-size:14px;padding:5px 0;font-weight:600;color:#374151;">Email:</td><td style="font-size:14px;padding:5px 0;"><a href="mailto:${escapeHtml(account.primaryContactEmail)}" style="color:#1e3a6e;">${escapeHtml(account.primaryContactEmail)}</a></td></tr>
+        <tr><td style="font-size:14px;padding:5px 0;font-weight:600;color:#374151;">Phone:</td><td style="font-size:14px;padding:5px 0;color:#374151;">${escapeHtml(account.primaryContactPhone) || "N/A"}</td></tr>
+        <tr><td style="font-size:14px;padding:5px 0;font-weight:600;color:#374151;">Company Size:</td><td style="font-size:14px;padding:5px 0;color:#374151;">${escapeHtml(account.companySize) || "N/A"}</td></tr>
         <tr><td style="font-size:14px;padding:5px 0;font-weight:600;color:#374151;">Est. Monthly Vol:</td><td style="font-size:14px;padding:5px 0;color:#374151;">${account.estimatedMonthlyVolume || "N/A"} acts</td></tr>
         <tr><td style="font-size:14px;padding:5px 0;font-weight:600;color:#374151;">Scan-to-Email:</td><td style="font-size:14px;padding:5px 0;color:#374151;">${account.needsScanToEmail ? "Yes" : "No"}</td></tr>
-        <tr><td style="font-size:14px;padding:5px 0;font-weight:600;color:#374151;">Billing Method:</td><td style="font-size:14px;padding:5px 0;color:#374151;">${account.billingMethod || "N/A"}</td></tr>
+        <tr><td style="font-size:14px;padding:5px 0;font-weight:600;color:#374151;">Billing Method:</td><td style="font-size:14px;padding:5px 0;color:#374151;">${escapeHtml(account.billingMethod) || "N/A"}</td></tr>
       </table>
     </div>
 
     ${users.length > 0 ? `
     <div style="background:#f8fafc;border-radius:8px;padding:16px 24px;margin-bottom:20px;">
       <div style="font-size:13px;font-weight:700;color:#0d1b35;margin-bottom:10px;">Authorized Users (${users.length})</div>
-      ${users.map((u: any) => `<div style="font-size:13px;color:#374151;padding:3px 0;">${u.name}: <a href="mailto:${u.email}" style="color:#1e3a6e;">${u.email}</a></div>`).join("")}
+      ${users.map((u: any) => `<div style="font-size:13px;color:#374151;padding:3px 0;">${escapeHtml(u.name)}: <a href="mailto:${escapeHtml(u.email)}" style="color:#1e3a6e;">${escapeHtml(u.email)}</a></div>`).join("")}
     </div>` : ""}
 
     ${account.specialRequirements ? `
     <div style="background:#f8fafc;border-radius:8px;padding:16px 24px;margin-bottom:20px;">
       <div style="font-size:13px;font-weight:700;color:#0d1b35;margin-bottom:6px;">Special Requirements</div>
-      <div style="font-size:13px;color:#374151;">${account.specialRequirements}</div>
+      <div style="font-size:13px;color:#374151;">${escapeHtml(account.specialRequirements)}</div>
     </div>` : ""}
 
     <div style="margin-top:20px;text-align:center;">
@@ -187,7 +202,7 @@ export async function sendApprovalEmail(
 
     <div style="background:#f0f4ff;border-radius:8px;padding:20px 24px;margin-bottom:24px;border-left:4px solid #c9a84c;">
       <table width="100%" cellpadding="0" cellspacing="0">
-        <tr><td style="font-size:14px;padding:4px 0;font-weight:600;color:#374151;width:40%;">Company:</td><td style="font-size:14px;padding:4px 0;color:#374151;">${account.companyName}</td></tr>
+        <tr><td style="font-size:14px;padding:4px 0;font-weight:600;color:#374151;width:40%;">Company:</td><td style="font-size:14px;padding:4px 0;color:#374151;">${escapeHtml(account.companyName)}</td></tr>
         <tr><td style="font-size:14px;padding:4px 0;font-weight:600;color:#374151;">Account Code:</td><td style="font-size:14px;padding:4px 0;font-family:monospace;font-weight:700;color:#0d1b35;">${account.accountCode}</td></tr>
         <tr><td style="font-size:14px;padding:4px 0;font-weight:600;color:#374151;">Plan:</td><td style="font-size:14px;padding:4px 0;color:#374151;">${planName}: ${planPrice}</td></tr>
       </table>
@@ -248,7 +263,7 @@ export async function sendActivationEmail(account: CorporateAccount): Promise<bo
 
     <div style="background:#f0f4ff;border-radius:8px;padding:20px 24px;margin-bottom:24px;border-left:4px solid #c9a84c;">
       <table width="100%" cellpadding="0" cellspacing="0">
-        <tr><td style="font-size:14px;padding:4px 0;font-weight:600;color:#374151;width:40%;">Company:</td><td style="font-size:14px;padding:4px 0;color:#374151;">${account.companyName}</td></tr>
+        <tr><td style="font-size:14px;padding:4px 0;font-weight:600;color:#374151;width:40%;">Company:</td><td style="font-size:14px;padding:4px 0;color:#374151;">${escapeHtml(account.companyName)}</td></tr>
         <tr><td style="font-size:14px;padding:4px 0;font-weight:600;color:#374151;">Account Code:</td><td style="font-size:14px;padding:4px 0;font-family:monospace;font-weight:700;color:#0d1b35;">${account.accountCode}</td></tr>
         <tr><td style="font-size:14px;padding:4px 0;font-weight:600;color:#374151;">Plan:</td><td style="font-size:14px;padding:4px 0;color:#374151;">${planName}: ${planPrice}</td></tr>
       </table>
@@ -302,9 +317,9 @@ export async function sendRejectionEmail(
     <h2 style="margin:0 0 6px;color:#0d1b35;font-size:22px;font-weight:700;">Application Update</h2>
     <p style="margin:0 0 20px;color:#64748b;font-size:14px;">Thank you for your interest in LBS Enterprise Corporate Notary Services.</p>
 
-    <p style="color:#374151;font-size:14px;line-height:1.7;">We've reviewed your application for <strong>${account.companyName}</strong> and are unable to proceed with the enrollment at this time.</p>
+    <p style="color:#374151;font-size:14px;line-height:1.7;">We've reviewed your application for <strong>${escapeHtml(account.companyName)}</strong> and are unable to proceed with the enrollment at this time.</p>
 
-    ${account.rejectionReason ? `<div style="background:#fef2f2;border-radius:8px;padding:16px 20px;margin:20px 0;border-left:4px solid #ef4444;"><p style="margin:0;color:#991b1b;font-size:14px;">${account.rejectionReason}</p></div>` : ""}
+    ${account.rejectionReason ? `<div style="background:#fef2f2;border-radius:8px;padding:16px 20px;margin:20px 0;border-left:4px solid #ef4444;"><p style="margin:0;color:#991b1b;font-size:14px;">${escapeHtml(account.rejectionReason)}</p></div>` : ""}
 
     <p style="color:#374151;font-size:14px;line-height:1.7;">We encourage you to contact us directly to discuss your needs. We may be able to accommodate your requirements or suggest an alternative arrangement.</p>
 
@@ -346,12 +361,12 @@ export async function sendCorporateBookingConfirmation(
         <tr><td style="color:#374151;font-size:14px;padding:4px 0;font-weight:600;width:45%;">Confirmation Code:</td><td style="color:#0d1b35;font-size:14px;padding:4px 0;font-family:monospace;font-weight:700;">${appt.appointmentCode}</td></tr>
         <tr><td style="color:#374151;font-size:14px;padding:4px 0;font-weight:600;">Date:</td><td style="color:#374151;font-size:14px;padding:4px 0;">${formattedDate}</td></tr>
         <tr><td style="color:#374151;font-size:14px;padding:4px 0;font-weight:600;">Time:</td><td style="color:#374151;font-size:14px;padding:4px 0;">${formattedTime} CT</td></tr>
-        <tr><td style="color:#374151;font-size:14px;padding:4px 0;font-weight:600;">Employee:</td><td style="color:#374151;font-size:14px;padding:4px 0;">${appt.employeeName}</td></tr>
-        <tr><td style="color:#374151;font-size:14px;padding:4px 0;font-weight:600;">Company:</td><td style="color:#374151;font-size:14px;padding:4px 0;">${account.companyName}</td></tr>
+        <tr><td style="color:#374151;font-size:14px;padding:4px 0;font-weight:600;">Employee:</td><td style="color:#374151;font-size:14px;padding:4px 0;">${escapeHtml(appt.employeeName)}</td></tr>
+        <tr><td style="color:#374151;font-size:14px;padding:4px 0;font-weight:600;">Company:</td><td style="color:#374151;font-size:14px;padding:4px 0;">${escapeHtml(account.companyName)}</td></tr>
         <tr><td style="color:#374151;font-size:14px;padding:4px 0;font-weight:600;">Account:</td><td style="color:#0d1b35;font-size:14px;padding:4px 0;font-family:monospace;">${account.accountCode}</td></tr>
         <tr><td style="color:#374151;font-size:14px;padding:4px 0;font-weight:600;">Signers:</td><td style="color:#374151;font-size:14px;padding:4px 0;">${appt.numSigners}</td></tr>
         <tr><td style="color:#374151;font-size:14px;padding:4px 0;font-weight:600;">Documents:</td><td style="color:#374151;font-size:14px;padding:4px 0;">${appt.numDocuments}</td></tr>
-        ${appt.idType ? `<tr><td style="color:#374151;font-size:14px;padding:4px 0;font-weight:600;">ID Type:</td><td style="color:#374151;font-size:14px;padding:4px 0;">${appt.idType}</td></tr>` : ""}
+        ${appt.idType ? `<tr><td style="color:#374151;font-size:14px;padding:4px 0;font-weight:600;">ID Type:</td><td style="color:#374151;font-size:14px;padding:4px 0;">${escapeHtml(appt.idType)}</td></tr>` : ""}
         ${appt.needWitnesses ? `<tr><td style="color:#374151;font-size:14px;padding:4px 0;font-weight:600;">Witnesses:</td><td style="color:#374151;font-size:14px;padding:4px 0;">Requested</td></tr>` : ""}
         ${appt.needScanEmail ? `<tr><td style="color:#374151;font-size:14px;padding:4px 0;font-weight:600;">Scan-to-Email:</td><td style="color:#374151;font-size:14px;padding:4px 0;">Requested</td></tr>` : ""}
       </table>
@@ -410,18 +425,18 @@ export async function sendCorporateBookingNotificationToAdmin(
       <table width="100%" cellpadding="0" cellspacing="0">
         <tr><td style="font-size:14px;padding:4px 0;font-weight:600;color:#374151;width:42%;">Confirmation Code:</td><td style="font-size:14px;padding:4px 0;font-family:monospace;font-weight:700;color:#0d1b35;">${appt.appointmentCode}</td></tr>
         <tr><td style="font-size:14px;padding:4px 0;font-weight:600;color:#374151;">Date &amp; Time:</td><td style="font-size:14px;padding:4px 0;color:#374151;font-weight:600;">${formattedDate} at ${formattedTime} CT</td></tr>
-        <tr><td style="font-size:14px;padding:4px 0;font-weight:600;color:#374151;">Employee:</td><td style="font-size:14px;padding:4px 0;color:#374151;">${appt.employeeName}</td></tr>
-        <tr><td style="font-size:14px;padding:4px 0;font-weight:600;color:#374151;">Employee Email:</td><td style="font-size:14px;padding:4px 0;"><a href="mailto:${appt.employeeEmail}" style="color:#1e3a6e;">${appt.employeeEmail}</a></td></tr>
-        ${appt.employeePhone ? `<tr><td style="font-size:14px;padding:4px 0;font-weight:600;color:#374151;">Phone:</td><td style="font-size:14px;padding:4px 0;color:#374151;">${appt.employeePhone}</td></tr>` : ""}
-        <tr><td style="font-size:14px;padding:4px 0;font-weight:600;color:#374151;">Company:</td><td style="font-size:14px;padding:4px 0;font-weight:600;color:#0d1b35;">${account.companyName}</td></tr>
+        <tr><td style="font-size:14px;padding:4px 0;font-weight:600;color:#374151;">Employee:</td><td style="font-size:14px;padding:4px 0;color:#374151;">${escapeHtml(appt.employeeName)}</td></tr>
+        <tr><td style="font-size:14px;padding:4px 0;font-weight:600;color:#374151;">Employee Email:</td><td style="font-size:14px;padding:4px 0;"><a href="mailto:${escapeHtml(appt.employeeEmail)}" style="color:#1e3a6e;">${escapeHtml(appt.employeeEmail)}</a></td></tr>
+        ${appt.employeePhone ? `<tr><td style="font-size:14px;padding:4px 0;font-weight:600;color:#374151;">Phone:</td><td style="font-size:14px;padding:4px 0;color:#374151;">${escapeHtml(appt.employeePhone)}</td></tr>` : ""}
+        <tr><td style="font-size:14px;padding:4px 0;font-weight:600;color:#374151;">Company:</td><td style="font-size:14px;padding:4px 0;font-weight:600;color:#0d1b35;">${escapeHtml(account.companyName)}</td></tr>
         <tr><td style="font-size:14px;padding:4px 0;font-weight:600;color:#374151;">Account Code:</td><td style="font-size:14px;padding:4px 0;font-family:monospace;color:#0d1b35;">${account.accountCode}</td></tr>
         <tr><td style="font-size:14px;padding:4px 0;font-weight:600;color:#374151;">Plan:</td><td style="font-size:14px;padding:4px 0;color:#374151;text-transform:capitalize;">${account.planTier}</td></tr>
         <tr><td style="font-size:14px;padding:4px 0;font-weight:600;color:#374151;">Signers / Docs:</td><td style="font-size:14px;padding:4px 0;color:#374151;">${appt.numSigners} signer(s) / ${appt.numDocuments} document(s)</td></tr>
-        ${appt.idType ? `<tr><td style="font-size:14px;padding:4px 0;font-weight:600;color:#374151;">ID Type:</td><td style="font-size:14px;padding:4px 0;color:#374151;">${appt.idType}</td></tr>` : ""}
+        ${appt.idType ? `<tr><td style="font-size:14px;padding:4px 0;font-weight:600;color:#374151;">ID Type:</td><td style="font-size:14px;padding:4px 0;color:#374151;">${escapeHtml(appt.idType)}</td></tr>` : ""}
         ${appt.needWitnesses ? `<tr><td style="font-size:14px;padding:4px 0;font-weight:600;color:#374151;">Witnesses:</td><td style="font-size:14px;padding:4px 0;color:#d97706;font-weight:600;">Requested</td></tr>` : ""}
         ${appt.needPrinting ? `<tr><td style="font-size:14px;padding:4px 0;font-weight:600;color:#374151;">Printing:</td><td style="font-size:14px;padding:4px 0;color:#d97706;font-weight:600;">Requested</td></tr>` : ""}
         ${appt.needScanEmail ? `<tr><td style="font-size:14px;padding:4px 0;font-weight:600;color:#374151;">Scan-to-Email:</td><td style="font-size:14px;padding:4px 0;color:#d97706;font-weight:600;">Requested</td></tr>` : ""}
-        ${appt.specialInstructions ? `<tr><td style="font-size:14px;padding:4px 0;font-weight:600;color:#374151;">Instructions:</td><td style="font-size:14px;padding:4px 0;color:#374151;">${appt.specialInstructions}</td></tr>` : ""}
+        ${appt.specialInstructions ? `<tr><td style="font-size:14px;padding:4px 0;font-weight:600;color:#374151;">Instructions:</td><td style="font-size:14px;padding:4px 0;color:#374151;">${escapeHtml(appt.specialInstructions)}</td></tr>` : ""}
       </table>
     </div>
 
@@ -461,16 +476,16 @@ export async function sendPortalMessage(
     <h2 style="margin:0 0 20px;font-size:20px;color:#0d1b35;">Message from Client Portal</h2>
     <div style="background:#f0f4ff;border-left:4px solid #1e3a6e;padding:16px 20px;border-radius:0 8px 8px 0;margin-bottom:20px;">
       <p style="margin:0;font-size:13px;color:#5a6a7e;font-weight:600;text-transform:uppercase;letter-spacing:0.5px;">Account</p>
-      <p style="margin:4px 0 0;font-size:16px;font-weight:700;color:#0d1b35;">${account.companyName}</p>
-      <p style="margin:2px 0 0;font-size:13px;color:#5a6a7e;">Code: ${account.accountCode} &nbsp;|&nbsp; Plan: ${PLAN_NAMES[account.planTier || ""] || account.planTier}</p>
+      <p style="margin:4px 0 0;font-size:16px;font-weight:700;color:#0d1b35;">${escapeHtml(account.companyName)}</p>
+      <p style="margin:2px 0 0;font-size:13px;color:#5a6a7e;">Code: ${account.accountCode} &nbsp;|&nbsp; Plan: ${escapeHtml(PLAN_NAMES[account.planTier || ""] || account.planTier)}</p>
     </div>
     <div style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;padding:16px 20px;margin-bottom:20px;">
-      <p style="margin:0;font-size:13px;color:#5a6a7e;"><strong>From:</strong> ${senderName} &lt;${senderEmail}&gt;</p>
-      <p style="margin:8px 0 0;font-size:13px;color:#5a6a7e;"><strong>Subject:</strong> ${subject}</p>
+      <p style="margin:0;font-size:13px;color:#5a6a7e;"><strong>From:</strong> ${escapeHtml(senderName)} &lt;${escapeHtml(senderEmail)}&gt;</p>
+      <p style="margin:8px 0 0;font-size:13px;color:#5a6a7e;"><strong>Subject:</strong> ${escapeHtml(subject)}</p>
     </div>
-    <div style="font-size:15px;color:#1f2d40;line-height:1.7;white-space:pre-wrap;">${message.replace(/</g, "&lt;").replace(/>/g, "&gt;")}</div>
+    <div style="font-size:15px;color:#1f2d40;line-height:1.7;white-space:pre-wrap;">${escapeHtml(message)}</div>
     <div style="margin-top:28px;padding-top:20px;border-top:1px solid #e2e8f0;">
-      <p style="margin:0;font-size:13px;color:#5a6a7e;">Reply directly to <a href="mailto:${senderEmail}" style="color:#1e3a6e;">${senderEmail}</a> to respond to this message.</p>
+      <p style="margin:0;font-size:13px;color:#5a6a7e;">Reply directly to <a href="mailto:${escapeHtml(senderEmail)}" style="color:#1e3a6e;">${escapeHtml(senderEmail)}</a> to respond to this message.</p>
     </div>
   `);
 

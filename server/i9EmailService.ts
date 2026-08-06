@@ -20,6 +20,20 @@ const BUSINESS_ADDRESS = "616 FM 1960 Road West, Suite 101, Houston, Texas 77090
 const LBS_PHONE = "281-836-5357";
 const PORTAL_LOGIN_URL = `${process.env.PUBLIC_SITE_URL || "https://www.lbs4.com"}/employer-services/new-hire-verification/portal/login`;
 
+// recipientName/companyName/detail below all ultimately trace back to
+// client-submitted registration/company data with no HTML-safety constraint
+// at the schema level — escape before embedding in HTML, same rationale as
+// server/emailService.ts's escapeHtml.
+export function escapeHtml(value: unknown): string {
+  if (value === null || value === undefined) return '';
+  return String(value)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
+
 function emailWrapper(content: string): string {
   return `<!DOCTYPE html>
 <html lang="en">
@@ -87,7 +101,7 @@ export async function sendI9NotificationEmail(data: {
   const label = EVENT_LABELS[data.event];
   const content = `
     <h2 style="margin:0 0 6px;color:#0d1b35;font-size:22px;font-weight:700;">${label}</h2>
-    <p style="margin:0 0 24px;color:#64748b;font-size:14px;">Hi ${data.recipientName}, there's an update on your ${data.companyName} account in the secure LBS employer portal.</p>
+    <p style="margin:0 0 24px;color:#64748b;font-size:14px;">Hi ${escapeHtml(data.recipientName)}, there's an update on your ${escapeHtml(data.companyName)} account in the secure LBS employer portal.</p>
     <div style="text-align:center;margin:28px 0;">
       <a href="${PORTAL_LOGIN_URL}" style="display:inline-block;background:linear-gradient(90deg,#FF6A00,#FF2D55);color:#ffffff;font-weight:700;font-size:14px;padding:14px 32px;border-radius:999px;text-decoration:none;">
         Log In to the Secure Portal
@@ -109,7 +123,7 @@ export async function sendI9PasswordResetEmail(data: {
 }): Promise<boolean> {
   const content = `
     <h2 style="margin:0 0 6px;color:#0d1b35;font-size:22px;font-weight:700;">Reset your password</h2>
-    <p style="margin:0 0 24px;color:#64748b;font-size:14px;">Hi ${data.recipientName}, we received a request to reset the password on your LBS employer portal account. This link expires in 1 hour and can only be used once.</p>
+    <p style="margin:0 0 24px;color:#64748b;font-size:14px;">Hi ${escapeHtml(data.recipientName)}, we received a request to reset the password on your LBS employer portal account. This link expires in 1 hour and can only be used once.</p>
     <div style="text-align:center;margin:28px 0;">
       <a href="${data.resetUrl}" style="display:inline-block;background:linear-gradient(90deg,#FF6A00,#FF2D55);color:#ffffff;font-weight:700;font-size:14px;padding:14px 32px;border-radius:999px;text-decoration:none;">
         Reset Password
@@ -130,8 +144,8 @@ export async function sendI9InternalNotificationEmail(data: {
   const label = EVENT_LABELS[data.event];
   const content = `
     <h2 style="margin:0 0 6px;color:#0d1b35;font-size:22px;font-weight:700;">${label}</h2>
-    <p style="margin:0 0 16px;color:#64748b;font-size:14px;">Company: <strong>${data.companyName}</strong></p>
-    ${data.detail ? `<p style="margin:0 0 16px;color:#374151;font-size:14px;">${data.detail}</p>` : ""}
+    <p style="margin:0 0 16px;color:#64748b;font-size:14px;">Company: <strong>${escapeHtml(data.companyName)}</strong></p>
+    ${data.detail ? `<p style="margin:0 0 16px;color:#374151;font-size:14px;">${escapeHtml(data.detail)}</p>` : ""}
     <div style="text-align:center;margin:20px 0;">
       <a href="${PORTAL_LOGIN_URL}" style="display:inline-block;background:#0d1b35;color:#ffffff;font-weight:700;font-size:14px;padding:12px 28px;border-radius:999px;text-decoration:none;">
         Open Admin Portal

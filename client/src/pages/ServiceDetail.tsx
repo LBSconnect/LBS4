@@ -633,7 +633,7 @@ export default function ServiceDetail({ slugOverride }: { slugOverride?: string 
                           )}
                           {!service?.saturdayOnly && (
                             <p className="text-xs text-muted-foreground mt-1">
-                              Mon–Fri: 9AM–5PM | Sat: 9AM–2PM
+                              Mon–Fri: 8AM–5PM | Sat: 8AM–4PM
                             </p>
                           )}
                         </div>

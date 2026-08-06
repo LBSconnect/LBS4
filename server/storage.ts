@@ -4,10 +4,16 @@ import { eq, and, gte, lte } from "drizzle-orm";
 import {
   contactSubmissions,
   appointments,
+  privacyRequests,
+  employerIntakeSubmissions,
   type InsertContact,
   type ContactSubmission,
   type InsertAppointment,
   type Appointment,
+  type InsertPrivacyRequest,
+  type PrivacyRequest,
+  type InsertEmployerIntakeSubmission,
+  type EmployerIntakeSubmission,
 } from "@shared/schema";
 import { getUncachableStripeClient } from "./stripeClient";
 
@@ -31,6 +37,8 @@ export interface IStorage {
   getPrice(priceId: string): Promise<any | null>;
   getPricesForProduct(productId: string): Promise<any[]>;
   createContactSubmission(data: InsertContact): Promise<ContactSubmission>;
+  createPrivacyRequest(data: InsertPrivacyRequest): Promise<PrivacyRequest>;
+  createEmployerIntakeSubmission(data: InsertEmployerIntakeSubmission): Promise<EmployerIntakeSubmission>;
   createAppointment(data: InsertAppointment): Promise<Appointment>;
   getAppointment(id: string): Promise<Appointment | null>;
   updateAppointmentPayment(id: string, paymentStatus: string, stripeSessionId?: string): Promise<Appointment | null>;
@@ -127,6 +135,22 @@ export class DatabaseStorage implements IStorage {
       throw new Error('Database not configured');
     }
     const [result] = await db.insert(contactSubmissions).values(data).returning();
+    return result;
+  }
+
+  async createPrivacyRequest(data: InsertPrivacyRequest): Promise<PrivacyRequest> {
+    if (!db) {
+      throw new Error('Database not configured');
+    }
+    const [result] = await db.insert(privacyRequests).values(data).returning();
+    return result;
+  }
+
+  async createEmployerIntakeSubmission(data: InsertEmployerIntakeSubmission): Promise<EmployerIntakeSubmission> {
+    if (!db) {
+      throw new Error('Database not configured');
+    }
+    const [result] = await db.insert(employerIntakeSubmissions).values(data).returning();
     return result;
   }
 

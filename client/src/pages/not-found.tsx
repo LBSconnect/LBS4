@@ -1,5 +1,6 @@
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
+import SEO from "@/components/SEO";
 import { Button } from "@/components/ui/button";
 import { Link } from "wouter";
 import { ArrowLeft } from "lucide-react";
@@ -7,6 +8,7 @@ import { ArrowLeft } from "lucide-react";
 export default function NotFound() {
   return (
     <div className="min-h-screen flex flex-col bg-background">
+      <SEO title="Page Not Found" noIndex />
       <Header />
       <div className="flex-1 flex items-center justify-center py-20 px-6">
         <div className="text-center space-y-4 max-w-md">
