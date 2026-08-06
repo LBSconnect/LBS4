@@ -774,7 +774,7 @@ export default function ServiceDetail({ slugOverride }: { slugOverride?: string 
           <section className="py-14 bg-muted/30" data-testid="section-testing-center-overview">
             <div className="max-w-7xl mx-auto px-6">
               <div className="text-center max-w-3xl mx-auto mb-10 space-y-3">
-                <p className="text-xs font-bold uppercase tracking-widest text-[#FF6A00]">Testing Center</p>
+                <p className="text-xs font-bold uppercase tracking-widest text-[#BD4F00] dark:text-[#FF8A3D]">Testing Center</p>
                 <h2 className="text-3xl md:text-4xl font-bold">
                   Testing, Preparation and Support in One Convenient Location
                 </h2>
@@ -884,7 +884,7 @@ export default function ServiceDetail({ slugOverride }: { slugOverride?: string 
           <section className="py-14 bg-background" data-testid="section-testing-faq">
             <div className="max-w-7xl mx-auto px-6">
               <div className="text-center max-w-2xl mx-auto mb-10 space-y-3">
-                <p className="text-xs font-bold uppercase tracking-widest text-[#FF6A00]">Common Questions</p>
+                <p className="text-xs font-bold uppercase tracking-widest text-[#BD4F00] dark:text-[#FF8A3D]">Common Questions</p>
                 <h2 className="text-3xl font-bold">Testing Center FAQ</h2>
               </div>
               <div className="max-w-2xl mx-auto divide-y divide-border/50 border border-border/50 rounded-xl overflow-hidden bg-card">
@@ -918,7 +918,7 @@ export default function ServiceDetail({ slugOverride }: { slugOverride?: string 
         <section className="py-14 bg-muted/30" data-testid="section-service-faq">
           <div className="max-w-7xl mx-auto px-6">
             <div className="text-center max-w-2xl mx-auto mb-10 space-y-3">
-              <p className="text-xs font-bold uppercase tracking-widest text-[#FF6A00]">Common Questions</p>
+              <p className="text-xs font-bold uppercase tracking-widest text-[#BD4F00] dark:text-[#FF8A3D]">Common Questions</p>
               <h2 className="text-3xl font-bold">Frequently Asked Questions</h2>
             </div>
             <div className="max-w-2xl mx-auto divide-y divide-border/50 border border-border/50 rounded-xl overflow-hidden bg-card">
@@ -951,13 +951,13 @@ export default function ServiceDetail({ slugOverride }: { slugOverride?: string 
         <section className="py-14 bg-background" data-testid="section-service-reviews">
           <div className="max-w-7xl mx-auto px-6">
             <div className="text-center max-w-2xl mx-auto mb-10 space-y-3">
-              <p className="text-xs font-bold uppercase tracking-widest text-[#FF6A00]">What Our Clients Say</p>
+              <p className="text-xs font-bold uppercase tracking-widest text-[#BD4F00] dark:text-[#FF8A3D]">What Our Clients Say</p>
               <h2 className="text-3xl font-bold">Customer Reviews</h2>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-5xl mx-auto">
               {testimonials.map((t) => (
                 <div key={t.name} className="bg-card border border-border/50 rounded-md p-6 space-y-3">
-                  <div className="text-[#FF6A00] text-sm" aria-hidden="true">★★★★★</div>
+                  <div className="text-[#BD4F00] dark:text-[#FF8A3D] text-sm" aria-hidden="true">★★★★★</div>
                   <p className="text-sm text-muted-foreground leading-relaxed line-clamp-6">{t.quote}</p>
                   <div className="flex items-center gap-3 pt-2">
                     <div className="w-9 h-9 rounded-full bg-[#0D1B3D]/10 dark:bg-[#0077FF]/20 flex items-center justify-center text-xs font-bold text-[#0D1B3D] dark:text-[#0077FF]">

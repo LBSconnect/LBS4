@@ -17,6 +17,8 @@ export const PORTAL_ROUTES = {
   register: `${PORTAL_BASE}/register`,
   forgotPassword: `${PORTAL_BASE}/forgot-password`,
   resetPassword: `${PORTAL_BASE}/reset-password`,
+  onboarding: `${PORTAL_BASE}/onboarding`,
+  security: `${PORTAL_BASE}/security`,
   dashboard: PORTAL_BASE,
   businessIntake: `${PORTAL_BASE}/business-intake`,
   hiringSites: `${PORTAL_BASE}/hiring-sites`,
@@ -317,6 +319,13 @@ export interface I9AddOn {
   startingPriceCents: number;
   priceUnit: string;
   isActive: boolean;
+}
+export interface I9SubscriptionAddOn {
+  id: string;
+  subscriptionId: string;
+  addOnId: string;
+  stripeSubscriptionItemId: string | null;
+  createdAt: string | null;
 }
 export interface I9Subscription {
   id: string;

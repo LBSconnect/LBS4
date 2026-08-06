@@ -10,11 +10,16 @@
 // STRIPE_SECRET_KEY is configured — call site (server/i9Routes.ts) already
 // guards on that.
 //
-// Simplification (documented, not hidden): every add-on gets a single flat
-// one-time Stripe price at its startingPriceCents, regardless of priceUnit
-// (per_case / per_employee / per_form). True metered/tiered billing per unit
-// is a real Stripe feature but a larger integration than this pass covers —
-// see the deliverables doc.
+// Add-ons with priceUnit "flat" get a single flat one-time Stripe price, same
+// as before. Add-ons with a real per-unit priceUnit (per_case / per_employee
+// / per_form) get true Stripe metered billing instead: a Billing Meter plus
+// a recurring metered Price referencing it. The meter aggregates usage
+// events reported under a deterministic event_name (`i9-addon-usage-<slug>`)
+// — see attachI9AddOnRoute / reportI9AddOnUsage in i9Routes.ts for where
+// those events actually get sent. Nothing in the case workflow reports usage
+// automatically; it's always an explicit LBS-staff action, since the exact
+// moment "1 unit" of a given add-on is consumed is a billing judgment call
+// LBS makes, not something inferable from case-status transitions.
 // ─────────────────────────────────────────────────────────────────────────────
 
 import { getUncachableStripeClient } from "./stripeClient";
@@ -76,7 +81,7 @@ export async function syncI9StripeProducts(): Promise<void> {
   const addOns = await store.listI9AddOns();
   for (const addOn of addOns) {
     try {
-      if (addOn.stripeProductId && addOn.stripePriceId) continue;
+      if (addOn.stripeProductId && addOn.stripePriceId && (addOn.priceUnit === "flat" || addOn.stripeMeterId)) continue;
       let productId = addOn.stripeProductId;
       if (!productId) {
         const existing = await stripe.products.search({ query: `name:'LBS I-9 Add-on: ${addOn.name}'` });
@@ -86,19 +91,58 @@ export async function syncI9StripeProducts(): Promise<void> {
           metadata: { app: "lbs4", i9AddOnId: addOn.id },
         })).id;
       }
-      let priceId = addOn.stripePriceId;
+
+      if (addOn.priceUnit === "flat") {
+        let priceId = addOn.stripePriceId;
+        if (!priceId) {
+          const prices = await stripe.prices.list({ product: productId, active: true });
+          const match = prices.data.find((p) => p.unit_amount === addOn.startingPriceCents && !p.recurring);
+          priceId = match?.id ?? (await stripe.prices.create({
+            product: productId,
+            unit_amount: addOn.startingPriceCents,
+            currency: "usd",
+            metadata: { app: "lbs4", i9AddOnId: addOn.id },
+          })).id;
+        }
+        if (productId !== addOn.stripeProductId || priceId !== addOn.stripePriceId) {
+          await store.setI9AddOnStripeIds(addOn.id, { stripeProductId: productId, stripePriceId: priceId });
+        }
+        continue;
+      }
+
+      // Metered add-on: find-or-create the Billing Meter, then a metered
+      // recurring price referencing it.
+      const eventName = `i9-addon-usage-${addOn.slug}`;
+      let meterId = addOn.stripeMeterId;
+      if (!meterId) {
+        const meters = await stripe.billing.meters.list({ status: "active" });
+        const existingMeter = meters.data.find((m) => m.event_name === eventName);
+        meterId = existingMeter?.id ?? (await stripe.billing.meters.create({
+          display_name: `LBS I-9 Add-on Usage: ${addOn.name}`,
+          event_name: eventName,
+          default_aggregation: { formula: "sum" },
+        })).id;
+      }
+
+      // Only trust the stored stripePriceId here if it was already paired
+      // with a meter — an add-on synced before metered billing existed may
+      // have a stale flat one-time price ID left over from that older
+      // logic, which must NOT be reused as if it were the metered price.
+      let priceId = addOn.stripeMeterId ? addOn.stripePriceId : null;
       if (!priceId) {
         const prices = await stripe.prices.list({ product: productId, active: true });
-        const match = prices.data.find((p) => p.unit_amount === addOn.startingPriceCents && !p.recurring);
+        const match = prices.data.find((p) => p.recurring?.meter === meterId);
         priceId = match?.id ?? (await stripe.prices.create({
           product: productId,
           unit_amount: addOn.startingPriceCents,
           currency: "usd",
-          metadata: { app: "lbs4", i9AddOnId: addOn.id },
+          recurring: { interval: "month", usage_type: "metered", meter: meterId },
+          metadata: { app: "lbs4", i9AddOnId: addOn.id, priceUnit: addOn.priceUnit },
         })).id;
       }
-      if (productId !== addOn.stripeProductId || priceId !== addOn.stripePriceId) {
-        await store.setI9AddOnStripeIds(addOn.id, { stripeProductId: productId, stripePriceId: priceId });
+
+      if (productId !== addOn.stripeProductId || priceId !== addOn.stripePriceId || meterId !== addOn.stripeMeterId) {
+        await store.setI9AddOnStripeIds(addOn.id, { stripeProductId: productId, stripePriceId: priceId, stripeMeterId: meterId });
       }
     } catch (err: any) {
       console.error(`[i9-stripe-sync] Failed to sync add-on "${addOn.name}":`, err.message);

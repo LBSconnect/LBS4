@@ -51,7 +51,7 @@ export default function PortalRegister() {
       trackEvent("employer_onboarding_registered");
       session.setUser(result.user);
       session.setStatus("authed");
-      setLocation(PORTAL_ROUTES.dashboard);
+      setLocation(PORTAL_ROUTES.onboarding);
     } catch (err) {
       if (err instanceof I9ApiError && err.status === 503) {
         setError("The secure portal is not yet configured on this environment. Please contact LBS directly to begin onboarding.");

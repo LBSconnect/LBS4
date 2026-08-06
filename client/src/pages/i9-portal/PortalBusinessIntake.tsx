@@ -85,7 +85,7 @@ function companyToForm(c: I9ClientCompany): FormState {
   };
 }
 
-function BusinessIntakeForm({ companyId }: { companyId: string }) {
+export function BusinessIntakeForm({ companyId }: { companyId: string }) {
   const onUnauth = useUnauthRedirect();
   const [company, setCompany] = useState<I9ClientCompany | null>(null);
   const [form, setForm] = useState<FormState>(EMPTY);

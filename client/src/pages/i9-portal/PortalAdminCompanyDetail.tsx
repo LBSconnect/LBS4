@@ -2,11 +2,12 @@ import { useEffect, useState, useCallback, useRef } from "react";
 import { useParams } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { ArrowRight, FileText, Download, Upload, CheckCircle2 } from "lucide-react";
+import { ArrowRight, FileText, Download, Upload, CheckCircle2, Link2, PlusCircle } from "lucide-react";
 import {
   i9Api,
   I9ApiError,
   isI9ServiceUnavailable,
+  formatCents,
   COMPANY_STATUS_LABELS,
   COMPANY_ONBOARDING_TRANSITIONS,
   fileToBase64,
@@ -17,6 +18,9 @@ import {
   type I9Role,
   type I9ClientAgreement,
   type I9Appointment,
+  type I9AddOn,
+  type I9Subscription,
+  type I9SubscriptionAddOn,
 } from "@/lib/i9Portal";
 import { PortalGuard, PortalShell, PortalCard, Field, ErrorBanner, SuccessBanner, ServiceGateBanner, useUnauthRedirect, NAVY } from "./_shared";
 
@@ -343,6 +347,114 @@ function AppointmentsAdminSection({ companyId }: { companyId: string }) {
   );
 }
 
+/** Metered add-on management: attaching an add-on to the company's active
+ *  subscription (one-time, creates the Stripe subscription item) and
+ *  recording usage against it as LBS staff actually perform the service.
+ *  There is no client self-service purchase flow here — see PortalBilling's
+ *  "Add-on services are billed by LBS as they're used" note — this is where
+ *  that billing actually happens. */
+function ManagedAddOnsSection({ companyId }: { companyId: string }) {
+  const [addOns, setAddOns] = useState<I9AddOn[]>([]);
+  const [subscription, setSubscription] = useState<I9Subscription | null>(null);
+  const [attached, setAttached] = useState<I9SubscriptionAddOn[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+  const [busyAddOnId, setBusyAddOnId] = useState<string | null>(null);
+  const [usageQty, setUsageQty] = useState<Record<string, string>>({});
+
+  const load = useCallback(() => {
+    return Promise.all([
+      i9Api<{ addOns: I9AddOn[] }>("/api/i9/catalog"),
+      i9Api<{ subscription: I9Subscription | null; attached: I9SubscriptionAddOn[] }>(`/api/i9/companies/${companyId}/add-ons`),
+    ]).then(([catalog, sub]) => {
+      setAddOns(catalog.addOns.filter((a) => a.priceUnit !== "flat"));
+      setSubscription(sub.subscription);
+      setAttached(sub.attached);
+    });
+  }, [companyId]);
+
+  useEffect(() => {
+    load().catch(() => {}).finally(() => setLoading(false));
+  }, [load]);
+
+  async function attach(addOnId: string) {
+    setBusyAddOnId(addOnId);
+    setError("");
+    try {
+      await i9Api(`/api/i9/companies/${companyId}/add-ons/${addOnId}/attach`, { method: "POST" });
+      await load();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Failed to attach add-on.");
+    } finally {
+      setBusyAddOnId(null);
+    }
+  }
+
+  async function recordUsage(addOnId: string) {
+    const qty = Number(usageQty[addOnId] || "1");
+    if (!qty || qty < 1) return;
+    setBusyAddOnId(addOnId);
+    setError("");
+    try {
+      await i9Api(`/api/i9/companies/${companyId}/add-ons/${addOnId}/usage`, { method: "POST", body: JSON.stringify({ quantity: qty }) });
+      setUsageQty((q) => ({ ...q, [addOnId]: "" }));
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Failed to record usage.");
+    } finally {
+      setBusyAddOnId(null);
+    }
+  }
+
+  if (loading || addOns.length === 0) return null;
+
+  return (
+    <PortalCard title="Metered Add-On Services">
+      {!subscription || subscription.status !== "active" ? (
+        <p className="text-sm text-muted-foreground">Add-ons can be attached once this company has an active subscription.</p>
+      ) : (
+        <>
+          {error && <ErrorBanner message={error} />}
+          <ul className="divide-y divide-border/50">
+            {addOns.map((a) => {
+              const isAttached = attached.some((x) => x.addOnId === a.id);
+              return (
+                <li key={a.id} className="py-3 space-y-2">
+                  <div className="flex items-center justify-between gap-3">
+                    <div>
+                      <p className="text-sm font-medium" style={{ color: NAVY }}>{a.name}</p>
+                      <p className="text-xs text-muted-foreground">{formatCents(a.startingPriceCents)} {a.priceUnit.replace(/_/g, " ")}</p>
+                    </div>
+                    {!isAttached && (
+                      <Button size="sm" variant="outline" disabled={busyAddOnId === a.id} onClick={() => attach(a.id)} className="gap-1.5 shrink-0">
+                        <Link2 className="w-3.5 h-3.5" /> {busyAddOnId === a.id ? "..." : "Attach"}
+                      </Button>
+                    )}
+                  </div>
+                  {isAttached && (
+                    <div className="flex items-center gap-2">
+                      <Input
+                        type="number"
+                        min="1"
+                        placeholder="Qty"
+                        value={usageQty[a.id] || ""}
+                        onChange={(e) => setUsageQty((q) => ({ ...q, [a.id]: e.target.value }))}
+                        className="w-24 h-8 text-sm"
+                      />
+                      <Button size="sm" variant="outline" disabled={busyAddOnId === a.id || !usageQty[a.id]} onClick={() => recordUsage(a.id)} className="gap-1.5">
+                        <PlusCircle className="w-3.5 h-3.5" /> {busyAddOnId === a.id ? "..." : "Record Usage"}
+                      </Button>
+                    </div>
+                  )}
+                </li>
+              );
+            })}
+          </ul>
+        </>
+      )}
+    </PortalCard>
+  );
+}
+
 function CompanyDetail({ id, actorRole }: { id: string; actorRole: I9Role }) {
   const onUnauth = useUnauthRedirect();
   const [company, setCompany] = useState<I9ClientCompany | null>(null);
@@ -421,6 +533,7 @@ function CompanyDetail({ id, actorRole }: { id: string; actorRole: I9Role }) {
         <AgreementSection companyId={company.id} canManage={canChangeStatus} />
 
         <AppointmentsAdminSection companyId={company.id} />
+        <ManagedAddOnsSection companyId={company.id} />
       </div>
 
       <div className="space-y-5">
