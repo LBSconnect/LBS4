@@ -64,7 +64,12 @@ test('Card 3 - View all services workflow (full unfiltered list, matching top-na
   // Testing & Exam Programs section — same content a visitor gets from the
   // top-nav "Services" link.
   await expect(page.locator('[data-testid="section-testing-exam-programs"]')).toBeVisible();
-  const bootcamp = await page.locator('text=Texas Life Insurance Exam Boot Camp').count();
+  // This row renders each service's abbreviated `shortTitle` ("Life Insurance
+  // Boot Camp"), not the full `title` ("Texas Life Insurance Exam Boot
+  // Camp") — see the card-testing-row-* markup in Services.tsx. Assert via
+  // the stable data-testid (keyed off the service id) rather than display
+  // text, so this doesn't drift again if the label copy changes.
+  const bootcamp = await page.locator('[data-testid="card-testing-row-life-insurance-boot-camp"]').count();
   console.log('Bootcamp cards shown (should be 1, in the testing row):', bootcamp);
   expect(bootcamp).toBeGreaterThan(0);
 

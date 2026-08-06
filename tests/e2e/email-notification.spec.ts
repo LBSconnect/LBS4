@@ -248,11 +248,16 @@ test.describe("Email data integrity — appointment time in DB matches booked sl
     expect(row.payment_status).toBe("paid");
   });
 
-  test("Certiport Exam Testing — Monday 5 PM (last weekday slot) is stored correctly", async () => {
+  test("Certiport Exam Testing — Monday 4 PM (last weekday slot) is stored correctly", async () => {
     test.skip(NO_DB, "Requires live DATABASE_URL to persist and verify appointment records");
     test.skip(NO_STRIPE_WEBHOOK, "Requires STRIPE_WEBHOOK_SECRET to send signed webhook events to live server");
     const mon = nextDayOfWeek(1);
-    const expectedSlot = slotISO(mon, 17); // 5 PM CT Monday — last valid slot
+    // Weekday slots run 8am-4pm (business closes 5pm, last slot is 1hr before
+    // close) per getAvailableTimeSlots() in server/routes.ts — 5pm is not a
+    // bookable slot and the API correctly rejects it. This test previously
+    // hardcoded hour 17 (5pm), which always failed booking validation; fixed
+    // to hour 16 (4pm), the actual last valid weekday slot.
+    const expectedSlot = slotISO(mon, 16); // 4 PM CT Monday — last valid slot
     const email = `notify-cert+${Date.now()}@e2e.test`;
 
     const body = await createBooking({
@@ -279,7 +284,7 @@ test.describe("Email data integrity — appointment time in DB matches booked sl
     const offset = isCDT(storedDate) ? 5 : 6;
     const ctHour = (storedDate.getUTCHours() - offset + 24) % 24;
 
-    expect(ctHour).toBe(17); // 5 PM — last weekday slot
+    expect(ctHour).toBe(16); // 4 PM — last weekday slot
     expect(row.service_name).toBe("Certiport Exam Testing");
     expect(row.payment_status).toBe("paid");
   });
