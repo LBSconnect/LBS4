@@ -2,7 +2,6 @@ import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { getUncachableStripeClient, getStripePublishableKey } from "./stripeClient";
-import { insertContactSchema } from "@shared/schema";
 import { sendContactNotification, sendContactAcknowledgement, sendAppointmentConfirmation, sendAppointmentCalendarInvite, sendPrivacyRequestNotification, sendPrivacyRequestAcknowledgement, sendEmployerConsultationNotification, sendEmployerConsultationAcknowledgement, sendEmployerIntakeNotification, sendEmployerIntakeAcknowledgement } from "./emailService";
 import { registerCorporateRoutes } from "./corporateRoutes";
 import { registerI9Routes } from "./i9Routes";
@@ -23,6 +22,19 @@ function publicFormRateLimit(bucket: string, limit: number, windowMs: number) {
     next();
   };
 }
+
+// Validation schema for the public contact form. `insertContactSchema` (drizzle-zod,
+// derived straight from the DB column types) only checks that these fields are
+// strings — it has no min-length or email-format checks, so it silently accepted
+// empty strings and malformed emails. This schema enforces the same rules the
+// client-side form implies (required name/email/message, valid email format).
+const contactFormSchema = z.object({
+  name: z.string().trim().min(1, "Name is required").max(200),
+  email: z.string().trim().min(1, "Email is required").email("Invalid email address").max(200),
+  phone: z.string().trim().max(40).optional().or(z.literal('')),
+  service: z.string().trim().max(100).optional().or(z.literal('')),
+  message: z.string().trim().min(1, "Message is required").max(4000),
+});
 
 // Validation schema for appointment booking
 const bookAppointmentSchema = z.object({
@@ -258,7 +270,7 @@ export async function registerRoutes(
         }
       }
 
-      const parsed = insertContactSchema.safeParse(formData);
+      const parsed = contactFormSchema.safeParse(formData);
       if (!parsed.success) {
         return res.status(400).json({ error: 'Invalid form data', details: parsed.error.flatten() });
       }
@@ -304,6 +316,21 @@ export async function registerRoutes(
         return res.status(400).json({ error: 'Invalid form data', details: parsed.error.flatten() });
       }
       const data = parsed.data;
+      // Persist first — this was previously email-only, so a down/misconfigured
+      // mail provider silently lost the request while telling the submitter it
+      // succeeded. The DB row is now the durable record; email is best-effort.
+      await storage.createPrivacyRequest({
+        name: data.name,
+        email: data.email,
+        phone: data.phone || null,
+        organization: data.organization || null,
+        service: data.service,
+        requestType: data.requestType,
+        identifier: data.identifier || null,
+        description: data.description,
+        preferredResponseMethod: data.preferredResponseMethod || null,
+        onBehalfOfAnother: data.onBehalfOfAnother,
+      });
       await sendPrivacyRequestNotification(data);
       await sendPrivacyRequestAcknowledgement({
         name: data.name,
@@ -437,6 +464,32 @@ export async function registerRoutes(
         return res.status(400).json({ error: 'Invalid form data', details: parsed.error.flatten() });
       }
       const data = parsed.data;
+      // Persist first — this was previously email-only, so a down/misconfigured
+      // mail provider silently lost the onboarding submission while telling the
+      // submitter it succeeded. The DB row is now the durable record; email is
+      // best-effort.
+      await storage.createEmployerIntakeSubmission({
+        companyLegalName: data.companyLegalName,
+        dba: data.dba || null,
+        ein: data.ein || null,
+        companyAddress: data.companyAddress,
+        mailingAddress: data.mailingAddress || null,
+        hiringLocations: data.hiringLocations,
+        industry: data.industry,
+        naicsCategory: data.naicsCategory || null,
+        employeeCount: data.employeeCount,
+        averageMonthlyHires: data.averageMonthlyHires,
+        federalContractorStatus: data.federalContractorStatus,
+        authorizedSignerName: data.authorizedSignerName,
+        authorizedSignerEmail: data.authorizedSignerEmail,
+        primaryAdministratorName: data.primaryAdministratorName,
+        primaryAdministratorEmail: data.primaryAdministratorEmail,
+        billingContactName: data.billingContactName,
+        billingContactEmail: data.billingContactEmail,
+        selectedPlan: data.selectedPlan,
+        requestedAddOns: data.requestedAddOns || [],
+        preferredStartDate: data.preferredStartDate || null,
+      });
       await sendEmployerIntakeNotification(data);
       await sendEmployerIntakeAcknowledgement({
         companyLegalName: data.companyLegalName,
