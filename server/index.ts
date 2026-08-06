@@ -3,7 +3,7 @@ import { registerRoutes } from "./routes";
 import { serveStatic } from "./static";
 import { createServer } from "http";
 import { getUncachableStripeClient } from './stripeClient';
-import { WebhookHandlers } from './webhookHandlers';
+import { WebhookHandlers, StripeWebhookNotConfiguredError } from './webhookHandlers';
 import { seedStripeProducts } from './seedProducts';
 import { storage } from './storage';
 import { createI9SessionMiddleware } from './i9Auth';
@@ -64,6 +64,10 @@ app.post(
 
       res.status(200).json({ received: true });
     } catch (error: any) {
+      if (error instanceof StripeWebhookNotConfiguredError) {
+        console.error('STRIPE WEBHOOK: rejected — STRIPE_WEBHOOK_SECRET is not configured, refusing to process an unverified event.');
+        return res.status(503).json({ error: 'Webhook processing unavailable: STRIPE_WEBHOOK_SECRET is not configured.' });
+      }
       console.error('Webhook error:', error.message);
       res.status(400).json({ error: 'Webhook processing error' });
     }

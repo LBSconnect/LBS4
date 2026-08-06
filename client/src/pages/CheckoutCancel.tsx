@@ -1,6 +1,7 @@
 import { useEffect } from "react";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
+import SEO from "@/components/SEO";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Link } from "wouter";
@@ -22,6 +23,7 @@ export default function CheckoutCancel() {
 
   return (
     <div className="min-h-screen flex flex-col bg-background">
+      <SEO title="Checkout Cancelled" canonical="/checkout/cancel" noIndex />
       <Header />
 
       <section className="flex-1 flex items-center justify-center py-20 px-6">

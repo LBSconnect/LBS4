@@ -4,7 +4,6 @@ import { storage } from "./storage";
 import { getUncachableStripeClient, getStripePublishableKey } from "./stripeClient";
 import { insertContactSchema } from "@shared/schema";
 import { sendContactNotification, sendContactAcknowledgement, sendAppointmentConfirmation, sendAppointmentCalendarInvite, sendPrivacyRequestNotification, sendPrivacyRequestAcknowledgement, sendEmployerConsultationNotification, sendEmployerConsultationAcknowledgement, sendEmployerIntakeNotification, sendEmployerIntakeAcknowledgement } from "./emailService";
-import { sendEmail } from "./smtpClient";
 import { registerCorporateRoutes } from "./corporateRoutes";
 import { registerI9Routes } from "./i9Routes";
 import { z } from "zod";

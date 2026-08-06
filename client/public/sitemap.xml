@@ -141,4 +141,67 @@
     <priority>0.3</priority>
   </url>
 
+  <url>
+    <loc>https://www.lbs4.com/cookie-policy</loc>
+    <lastmod>2026-08-04</lastmod>
+    <changefreq>yearly</changefreq>
+    <priority>0.2</priority>
+  </url>
+
+  <url>
+    <loc>https://www.lbs4.com/notice-at-collection</loc>
+    <lastmod>2026-08-04</lastmod>
+    <changefreq>yearly</changefreq>
+    <priority>0.2</priority>
+  </url>
+
+  <url>
+    <loc>https://www.lbs4.com/privacy-request</loc>
+    <lastmod>2026-08-04</lastmod>
+    <changefreq>yearly</changefreq>
+    <priority>0.2</priority>
+  </url>
+
+  <url>
+    <loc>https://www.lbs4.com/accessibility-statement</loc>
+    <lastmod>2026-08-04</lastmod>
+    <changefreq>yearly</changefreq>
+    <priority>0.2</priority>
+  </url>
+
+  <url>
+    <loc>https://www.lbs4.com/copyright-dmca-policy</loc>
+    <lastmod>2026-08-04</lastmod>
+    <changefreq>yearly</changefreq>
+    <priority>0.2</priority>
+  </url>
+
+  <url>
+    <loc>https://www.lbs4.com/electronic-communications-terms</loc>
+    <lastmod>2026-08-04</lastmod>
+    <changefreq>yearly</changefreq>
+    <priority>0.2</priority>
+  </url>
+
+  <url>
+    <loc>https://www.lbs4.com/booking-cancellation-policy</loc>
+    <lastmod>2026-08-04</lastmod>
+    <changefreq>yearly</changefreq>
+    <priority>0.2</priority>
+  </url>
+
+  <url>
+    <loc>https://www.lbs4.com/candidate-rules-surveillance-notice</loc>
+    <lastmod>2026-08-04</lastmod>
+    <changefreq>yearly</changefreq>
+    <priority>0.2</priority>
+  </url>
+
+  <url>
+    <loc>https://www.lbs4.com/document-handling-notice</loc>
+    <lastmod>2026-08-04</lastmod>
+    <changefreq>yearly</changefreq>
+    <priority>0.2</priority>
+  </url>
+
 </urlset>
