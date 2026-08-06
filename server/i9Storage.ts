@@ -457,6 +457,23 @@ export async function runI9Migrations(): Promise<void> {
       created_at TIMESTAMP DEFAULT NOW()
     );
   `);
+
+  // Auth-critical drift fix: the CREATE TABLE above never grew MFA/password-reset
+  // columns as those features were added to the Drizzle schema (shared/i9Schema.ts)
+  // — drizzle-kit push doesn't cover this table (drizzle.config.ts points at
+  // shared/schema.ts only), so this raw-SQL migration is the only thing that
+  // creates/maintains i9_client_users. Without these columns, every write that
+  // goes through the Drizzle query builder (register, bootstrap-admin, login's
+  // RETURNING clause, password reset, MFA enroll/verify/disable) fails outright
+  // on any database that hasn't already had them added by hand. ADD COLUMN IF
+  // NOT EXISTS keeps this idempotent for databases that already have them.
+  await pg.query(`
+    ALTER TABLE i9_client_users ADD COLUMN IF NOT EXISTS mfa_secret_encrypted TEXT;
+    ALTER TABLE i9_client_users ADD COLUMN IF NOT EXISTS mfa_pending_secret_encrypted TEXT;
+    ALTER TABLE i9_client_users ADD COLUMN IF NOT EXISTS mfa_last_used_step INTEGER;
+    ALTER TABLE i9_client_users ADD COLUMN IF NOT EXISTS password_reset_token_hash TEXT;
+    ALTER TABLE i9_client_users ADD COLUMN IF NOT EXISTS password_reset_expires_at TIMESTAMP;
+  `);
 }
 
 /** Seeds the 3 monthly plans + 8 add-ons if the table is empty. Prices match
