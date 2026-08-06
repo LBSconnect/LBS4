@@ -463,6 +463,8 @@ export async function runI9Migrations(): Promise<void> {
   await pg.query(`
     ALTER TABLE i9_add_ons
     ADD COLUMN IF NOT EXISTS stripe_meter_id VARCHAR(100);
+  `);
+
   // Auth-critical drift fix: the CREATE TABLE above never grew MFA/password-reset
   // columns as those features were added to the Drizzle schema (shared/i9Schema.ts)
   // — drizzle-kit push doesn't cover this table (drizzle.config.ts points at
