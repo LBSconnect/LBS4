@@ -11,3 +11,6 @@ vite.config.ts.*
 # Playwright output
 playwright-report/
 test-results/
+
+# Private I-9 portal file storage — never publicly served, never committed
+server/private-uploads/

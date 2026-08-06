@@ -1,0 +1,188 @@
+// ─────────────────────────────────────────────────────────────────────────────
+// Security primitives for the New-Hire Verification & Form I-9 Support portal.
+//
+// This module is the ONLY place that touches raw protected employee values
+// (SSNs, document numbers) or session secrets. Everything here uses Node's
+// built-in `crypto` module — no new third-party dependency.
+//
+// Encryption: AES-256-GCM, keyed from PROTECTED_DATA_ENCRYPTION_KEY (required,
+// 32-byte key, base64). Each value gets a fresh random IV; the auth tag is
+// stored alongside the ciphertext so tampering is detected on decrypt.
+//
+// Passwords: scrypt with a random salt per user (Node's recommended KDF when
+// bcrypt/argon2 aren't installed) + timing-safe comparison.
+//
+// Signed download tokens: HMAC-SHA256 over {documentId, expiresAt}, so a
+// SecureDocument can be served through a short-lived link without a public
+// object-storage bucket or its own auth model.
+// ─────────────────────────────────────────────────────────────────────────────
+
+import { randomBytes, scryptSync, timingSafeEqual, createCipheriv, createDecipheriv, createHmac } from "crypto";
+
+const ENCRYPTION_KEY_B64 = process.env.PROTECTED_DATA_ENCRYPTION_KEY;
+const SESSION_SECRET = process.env.SESSION_SECRET || process.env.ADMIN_SECRET || "changeme-dev-only-do-not-use-in-production";
+
+let cachedKey: Buffer | null = null;
+
+/** Throws loudly if PROTECTED_DATA_ENCRYPTION_KEY is missing/malformed — we never
+ *  silently fall back to an insecure default for real employee data. Callers that
+ *  handle ProtectedEmployeeData must catch this and surface the "Secure portal
+ *  configuration required" gate rather than storing anything unencrypted. */
+function getEncryptionKey(): Buffer {
+  if (cachedKey) return cachedKey;
+  if (!ENCRYPTION_KEY_B64) {
+    throw new Error(
+      "PROTECTED_DATA_ENCRYPTION_KEY is not configured. Generate one with " +
+      "`node -e \"console.log(require('crypto').randomBytes(32).toString('base64'))\"` " +
+      "and set it as an environment variable before collecting protected employee data."
+    );
+  }
+  const key = Buffer.from(ENCRYPTION_KEY_B64, "base64");
+  if (key.length !== 32) {
+    throw new Error("PROTECTED_DATA_ENCRYPTION_KEY must decode to exactly 32 bytes (AES-256).");
+  }
+  cachedKey = key;
+  return key;
+}
+
+/** True once a real encryption key is configured — routes that touch
+ *  ProtectedEmployeeData/SecureDocument check this before accepting writes. */
+export function isProtectedDataEncryptionConfigured(): boolean {
+  return !!ENCRYPTION_KEY_B64 && Buffer.from(ENCRYPTION_KEY_B64, "base64").length === 32;
+}
+
+export interface EncryptedField {
+  ciphertext: string; // base64
+  iv: string; // base64
+  authTag: string; // base64
+}
+
+export function encryptField(plaintext: string): EncryptedField {
+  const key = getEncryptionKey();
+  const iv = randomBytes(12); // 96-bit IV recommended for GCM
+  const cipher = createCipheriv("aes-256-gcm", key, iv);
+  const ciphertext = Buffer.concat([cipher.update(plaintext, "utf8"), cipher.final()]);
+  const authTag = cipher.getAuthTag();
+  return {
+    ciphertext: ciphertext.toString("base64"),
+    iv: iv.toString("base64"),
+    authTag: authTag.toString("base64"),
+  };
+}
+
+export function decryptField(encrypted: EncryptedField): string {
+  const key = getEncryptionKey();
+  const decipher = createDecipheriv("aes-256-gcm", key, Buffer.from(encrypted.iv, "base64"));
+  decipher.setAuthTag(Buffer.from(encrypted.authTag, "base64"));
+  const plaintext = Buffer.concat([
+    decipher.update(Buffer.from(encrypted.ciphertext, "base64")),
+    decipher.final(),
+  ]);
+  return plaintext.toString("utf8");
+}
+
+/** Serializes an EncryptedField into one string for a single DB column (JSON is
+ *  fine here — the value is meaningless without the server-side key). */
+export function encryptToColumn(plaintext: string): string {
+  return JSON.stringify(encryptField(plaintext));
+}
+export function decryptFromColumn(column: string): string {
+  return decryptField(JSON.parse(column) as EncryptedField);
+}
+
+/** Masks a protected value for display outside the narrow "reveal" flow —
+ *  e.g. SSN -> "***-**-1234". Never render the unmasked value in list views,
+ *  reports, notifications, analytics, or URLs. */
+export function maskSSN(ssn: string): string {
+  const digits = ssn.replace(/\D/g, "");
+  if (digits.length !== 9) return "***-**-****";
+  return `***-**-${digits.slice(5)}`;
+}
+export function maskDocumentNumber(value: string): string {
+  if (value.length <= 4) return "*".repeat(value.length);
+  return `${"*".repeat(value.length - 4)}${value.slice(-4)}`;
+}
+
+// ─── Password hashing (scrypt) ─────────────────────────────────────────────
+
+export function hashPassword(password: string): string {
+  const salt = randomBytes(16);
+  const derivedKey = scryptSync(password, salt, 64);
+  return `scrypt:${salt.toString("hex")}:${derivedKey.toString("hex")}`;
+}
+
+export function verifyPassword(password: string, stored: string): boolean {
+  try {
+    const [scheme, saltHex, hashHex] = stored.split(":");
+    if (scheme !== "scrypt") return false;
+    const salt = Buffer.from(saltHex, "hex");
+    const expected = Buffer.from(hashHex, "hex");
+    const actual = scryptSync(password, salt, 64);
+    if (actual.length !== expected.length) return false;
+    return timingSafeEqual(actual, expected);
+  } catch {
+    return false;
+  }
+}
+
+// ─── Signed, short-lived document download tokens ──────────────────────────
+
+export function signDocumentToken(documentId: string, expiresAtMs: number): string {
+  const payload = `${documentId}.${expiresAtMs}`;
+  const sig = createHmac("sha256", SESSION_SECRET).update(payload).digest("base64url");
+  return `${Buffer.from(payload).toString("base64url")}.${sig}`;
+}
+
+export function verifyDocumentToken(token: string, documentId: string): { valid: boolean; reason?: string } {
+  const [payloadB64, sig] = token.split(".");
+  if (!payloadB64 || !sig) return { valid: false, reason: "malformed" };
+  const payload = Buffer.from(payloadB64, "base64url").toString("utf8");
+  const expectedSig = createHmac("sha256", SESSION_SECRET).update(payload).digest("base64url");
+  if (sig.length !== expectedSig.length || !timingSafeEqual(Buffer.from(sig), Buffer.from(expectedSig))) {
+    return { valid: false, reason: "invalid_signature" };
+  }
+  const [id, expStr] = payload.split(".");
+  if (id !== documentId) return { valid: false, reason: "document_mismatch" };
+  const exp = Number(expStr);
+  if (!exp || Date.now() > exp) return { valid: false, reason: "expired" };
+  return { valid: true };
+}
+
+// ─── CSRF (double-submit cookie) ────────────────────────────────────────────
+
+export function generateCsrfToken(): string {
+  return randomBytes(32).toString("base64url");
+}
+
+export function verifyCsrfToken(cookieToken: string | undefined, headerToken: string | undefined): boolean {
+  if (!cookieToken || !headerToken) return false;
+  if (cookieToken.length !== headerToken.length) return false;
+  return timingSafeEqual(Buffer.from(cookieToken), Buffer.from(headerToken));
+}
+
+// ─── Minimal in-memory rate limiter ─────────────────────────────────────────
+// Sliding-window counter per key (e.g. IP+route). Good enough for a single
+// Node process; a multi-instance deployment should move this to Redis, but
+// this still stops naive brute-force/spam without adding a dependency.
+
+const rateLimitBuckets = new Map<string, { count: number; resetAt: number }>();
+
+export function checkRateLimit(key: string, limit: number, windowMs: number): { allowed: boolean; remaining: number } {
+  const now = Date.now();
+  const bucket = rateLimitBuckets.get(key);
+  if (!bucket || now > bucket.resetAt) {
+    rateLimitBuckets.set(key, { count: 1, resetAt: now + windowMs });
+    return { allowed: true, remaining: limit - 1 };
+  }
+  bucket.count += 1;
+  if (bucket.count > limit) return { allowed: false, remaining: 0 };
+  return { allowed: true, remaining: limit - bucket.count };
+}
+
+// Periodic cleanup so the map doesn't grow unbounded in a long-running process.
+setInterval(() => {
+  const now = Date.now();
+  Array.from(rateLimitBuckets.entries()).forEach(([key, bucket]) => {
+    if (now > bucket.resetAt) rateLimitBuckets.delete(key);
+  });
+}, 5 * 60 * 1000).unref?.();
