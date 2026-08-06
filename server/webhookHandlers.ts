@@ -3,7 +3,7 @@ import { storage } from './storage';
 import { sendAppointmentConfirmation, sendAppointmentCalendarInvite, sendPaymentNotification } from './emailService';
 import { updateCorporateAccountStripe, getCorporateAccount, logAudit } from './corporateStorage';
 import { sendActivationEmail } from './corporateEmailService';
-import { activateI9Subscription, logI9Audit } from './i9Storage';
+import { activateI9Subscription, logI9Audit, getI9Subscription } from './i9Storage';
 import type Stripe from 'stripe';
 
 /** Thrown when STRIPE_WEBHOOK_SECRET isn't configured. Kept as a distinct,
@@ -82,6 +82,20 @@ export class WebhookHandlers {
     const corporateAccountId = parseInt(session.client_reference_id || session.metadata?.corporateAccountId || '', 10);
     if (!isNaN(corporateAccountId)) {
       try {
+        // Idempotency guard — Stripe may retry/redeliver the same event.
+        // If this exact subscription is already on file and the account is
+        // already active, skip all side-effects (in particular, don't send
+        // a second "your account is active" email).
+        const existingAccount = await getCorporateAccount(corporateAccountId);
+        if (
+          existingAccount &&
+          existingAccount.status === 'active' &&
+          existingAccount.stripeSubscriptionId === (session.subscription as string)
+        ) {
+          console.log(`Corporate account ${corporateAccountId} already active for subscription ${session.subscription} — ignoring duplicate webhook (session ${session.id})`);
+          return;
+        }
+
         await updateCorporateAccountStripe(
           corporateAccountId,
           session.customer as string,
@@ -104,6 +118,19 @@ export class WebhookHandlers {
     const i9SubscriptionId = session.metadata?.i9SubscriptionId;
     if (i9SubscriptionId) {
       try {
+        // Idempotency guard — same reasoning as the appointment/corporate
+        // paths above: don't re-log an already-applied activation when
+        // Stripe redelivers the same event.
+        const existingSub = await getI9Subscription(i9SubscriptionId);
+        if (
+          existingSub &&
+          existingSub.status === 'active' &&
+          existingSub.stripeSubscriptionId === ((session.subscription as string) || '')
+        ) {
+          console.log(`I-9 subscription ${i9SubscriptionId} already active for subscription ${session.subscription} — ignoring duplicate webhook (session ${session.id})`);
+          return;
+        }
+
         await activateI9Subscription(i9SubscriptionId, {
           stripeCustomerId: (session.customer as string) || '',
           stripeSubscriptionId: (session.subscription as string) || '',
