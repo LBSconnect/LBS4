@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import SEO from "@/components/SEO";
-import { LogIn, ShieldCheck } from "lucide-react";
+import { LogIn, ShieldCheck, KeyRound } from "lucide-react";
 import { i9Api, I9ApiError, PORTAL_ROUTES, type I9User } from "@/lib/i9Portal";
 import { useI9Session } from "./_shared";
 import { NAVY } from "./_shared";
@@ -16,6 +16,11 @@ export default function PortalLogin() {
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  // Set once the password step succeeds on an MFA-enabled account — the
+  // form then switches to asking for the 6-digit code instead of
+  // re-prompting for the password.
+  const [mfaToken, setMfaToken] = useState<string | null>(null);
+  const [mfaCode, setMfaCode] = useState("");
 
   // Already signed in? Skip straight to the dashboard.
   useEffect(() => {
@@ -27,10 +32,15 @@ export default function PortalLogin() {
     setLoading(true);
     setError("");
     try {
-      const result = await i9Api<{ user: I9User }>("/api/i9/auth/login", {
+      const result = await i9Api<{ user: I9User; mfaRequired?: boolean; mfaToken?: string }>("/api/i9/auth/login", {
         method: "POST",
         body: JSON.stringify({ email, password }),
       });
+      if (result.mfaRequired && result.mfaToken) {
+        setMfaToken(result.mfaToken);
+        setLoading(false);
+        return;
+      }
       session.setUser(result.user);
       session.setStatus("authed");
       setLocation(PORTAL_ROUTES.dashboard);
@@ -40,9 +50,68 @@ export default function PortalLogin() {
       } else {
         setError(err instanceof Error ? err.message : "Sign in failed. Please check your details.");
       }
-    } finally {
       setLoading(false);
     }
+  }
+
+  async function submitMfa(e: React.FormEvent) {
+    e.preventDefault();
+    setLoading(true);
+    setError("");
+    try {
+      const result = await i9Api<{ user: I9User }>("/api/i9/auth/mfa/verify", {
+        method: "POST",
+        body: JSON.stringify({ mfaToken, code: mfaCode }),
+      });
+      session.setUser(result.user);
+      session.setStatus("authed");
+      setLocation(PORTAL_ROUTES.dashboard);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Invalid authentication code.");
+      setLoading(false);
+    }
+  }
+
+  if (mfaToken) {
+    return (
+      <div className="min-h-screen flex items-center justify-center px-6" style={{ backgroundColor: NAVY }}>
+        <SEO title="Verify | LBS New-Hire Verification" canonical={PORTAL_ROUTES.login} noIndex />
+        <div className="w-full max-w-sm bg-white rounded-2xl shadow-xl p-8 space-y-6">
+          <div className="text-center space-y-1">
+            <KeyRound className="w-10 h-10 mx-auto" style={{ color: NAVY }} />
+            <h1 className="text-xl font-bold" style={{ color: NAVY }}>Enter Your Authentication Code</h1>
+            <p className="text-sm text-muted-foreground">Open your authenticator app and enter the current 6-digit code.</p>
+          </div>
+          <form onSubmit={submitMfa} className="space-y-4">
+            <div className="space-y-1.5">
+              <Label htmlFor="i9-mfa-code">Authentication Code</Label>
+              <Input
+                id="i9-mfa-code"
+                inputMode="numeric"
+                autoComplete="one-time-code"
+                maxLength={6}
+                value={mfaCode}
+                onChange={(e) => setMfaCode(e.target.value.replace(/\D/g, "").slice(0, 6))}
+                placeholder="123456"
+                autoFocus
+                required
+              />
+            </div>
+            {error && <p className="text-red-500 text-sm">{error}</p>}
+            <Button type="submit" className="w-full text-white gap-1.5" style={{ backgroundColor: NAVY }} disabled={loading || mfaCode.length !== 6}>
+              <KeyRound className="w-4 h-4" /> {loading ? "Verifying..." : "Verify"}
+            </Button>
+          </form>
+          <button
+            type="button"
+            onClick={() => { setMfaToken(null); setMfaCode(""); setError(""); }}
+            className="text-center text-xs text-muted-foreground hover:underline w-full"
+          >
+            Back to sign in
+          </button>
+        </div>
+      </div>
+    );
   }
 
   return (

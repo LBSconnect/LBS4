@@ -19,6 +19,7 @@ import {
   i9ServicePlans,
   i9AddOns,
   i9Subscriptions,
+  i9SubscriptionAddOns,
   i9ClientAgreements,
   i9AuthorizedRepDesignations,
   i9ClientEnrollments,
@@ -666,6 +667,36 @@ export async function touchI9ClientUserLogin(id: string): Promise<void> {
   await database.update(i9ClientUsers).set({ lastLoginAt: new Date() } as any).where(eq(i9ClientUsers.id, id));
 }
 
+/** Stores a freshly-generated TOTP secret as *pending* — not yet trusted for
+ *  login, until the user proves they can generate a matching code. */
+export async function setI9ClientUserMfaPendingSecret(id: string, encryptedSecret: string): Promise<void> {
+  const database = getDb();
+  await database.update(i9ClientUsers).set({ mfaPendingSecretEncrypted: encryptedSecret } as any).where(eq(i9ClientUsers.id, id));
+}
+
+/** Promotes the pending secret to active and flips mfaEnabled on — called
+ *  only after the enrolling user has submitted one valid code. */
+export async function confirmI9ClientUserMfaEnrollment(id: string, encryptedSecret: string): Promise<void> {
+  const database = getDb();
+  await database
+    .update(i9ClientUsers)
+    .set({ mfaEnabled: true, mfaSecretEncrypted: encryptedSecret, mfaPendingSecretEncrypted: null } as any)
+    .where(eq(i9ClientUsers.id, id));
+}
+
+export async function setI9ClientUserMfaLastUsedStep(id: string, step: number): Promise<void> {
+  const database = getDb();
+  await database.update(i9ClientUsers).set({ mfaLastUsedStep: step } as any).where(eq(i9ClientUsers.id, id));
+}
+
+export async function disableI9ClientUserMfa(id: string): Promise<void> {
+  const database = getDb();
+  await database
+    .update(i9ClientUsers)
+    .set({ mfaEnabled: false, mfaSecretEncrypted: null, mfaPendingSecretEncrypted: null } as any)
+    .where(eq(i9ClientUsers.id, id));
+}
+
 // ─────────────────────────────────────────────────────────────────────────────
 // HiringSite
 // ─────────────────────────────────────────────────────────────────────────────
@@ -706,9 +737,45 @@ export async function setI9ServicePlanStripeIds(id: string, ids: { stripeProduct
   const database = getDb();
   await database.update(i9ServicePlans).set(ids as any).where(eq(i9ServicePlans.id, id));
 }
-export async function setI9AddOnStripeIds(id: string, ids: { stripeProductId: string; stripePriceId: string }) {
+export async function setI9AddOnStripeIds(id: string, ids: { stripeProductId: string; stripePriceId: string; stripeMeterId?: string }) {
   const database = getDb();
   await database.update(i9AddOns).set(ids as any).where(eq(i9AddOns.id, id));
+}
+export async function getI9AddOn(id: string) {
+  const database = getDb();
+  const rows = await database.select().from(i9AddOns).where(eq(i9AddOns.id, id));
+  return rows[0] ?? null;
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Subscription add-ons — metered/per-unit billing. Attaching creates the
+// Stripe subscription item once; usage is reported against it separately
+// each time LBS staff actually perform the add-on service (see i9Routes.ts —
+// there's no automatic trigger anywhere in the case workflow that reports
+// usage on its own, by design).
+// ─────────────────────────────────────────────────────────────────────────────
+
+export async function attachI9SubscriptionAddOn(subscriptionId: string, addOnId: string, stripeSubscriptionItemId: string) {
+  const database = getDb();
+  const [row] = await database
+    .insert(i9SubscriptionAddOns)
+    .values({ subscriptionId, addOnId, stripeSubscriptionItemId } as any)
+    .returning();
+  return row;
+}
+
+export async function getI9SubscriptionAddOn(subscriptionId: string, addOnId: string) {
+  const database = getDb();
+  const rows = await database
+    .select()
+    .from(i9SubscriptionAddOns)
+    .where(and(eq(i9SubscriptionAddOns.subscriptionId, subscriptionId), eq(i9SubscriptionAddOns.addOnId, addOnId)));
+  return rows[0] ?? null;
+}
+
+export async function listI9SubscriptionAddOns(subscriptionId: string) {
+  const database = getDb();
+  return database.select().from(i9SubscriptionAddOns).where(eq(i9SubscriptionAddOns.subscriptionId, subscriptionId));
 }
 
 // ─────────────────────────────────────────────────────────────────────────────

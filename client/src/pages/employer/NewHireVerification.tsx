@@ -457,7 +457,7 @@ export default function NewHireVerification() {
       <section className="py-16 bg-background" data-testid="section-what-lbs-manages">
         <div className="max-w-7xl mx-auto px-6">
           <div className="text-center max-w-2xl mx-auto mb-10 space-y-3">
-            <p className="text-xs font-bold uppercase tracking-widest text-[#FF6A00]">Employer Support</p>
+            <p className="text-xs font-bold uppercase tracking-widest text-[#BD4F00] dark:text-[#FF8A3D]">Employer Support</p>
             <h2 className="text-3xl md:text-4xl font-bold">What LBS Manages for Your Business</h2>
             <p className="text-muted-foreground">{EVERIFY_AGENT_DESCRIPTION}</p>
           </div>
@@ -476,7 +476,7 @@ export default function NewHireVerification() {
                   <h3 className="font-semibold">{item.title}</h3>
                   <p className="text-sm text-muted-foreground leading-relaxed">{item.copy}</p>
                   {item.disclaimer && (
-                    <p className="text-xs text-muted-foreground/80 italic border-t border-border/40 pt-2">
+                    <p className="text-xs text-muted-foreground italic border-t border-border/40 pt-2">
                       {item.disclaimer}
                     </p>
                   )}
@@ -491,7 +491,7 @@ export default function NewHireVerification() {
       <section className="py-16 bg-muted/30" data-testid="section-featured-package">
         <div className="max-w-3xl mx-auto px-6">
           <div className="text-center mb-6">
-            <span className="inline-flex items-center gap-1.5 bg-[#FF6A00] text-white rounded-full px-4 py-1.5 text-xs font-bold uppercase tracking-wide">
+            <span className="inline-flex items-center gap-1.5 bg-[#BD4F00] text-white rounded-full px-4 py-1.5 text-xs font-bold uppercase tracking-wide">
               Most Popular
             </span>
           </div>
@@ -538,7 +538,7 @@ export default function NewHireVerification() {
       <section id="pricing" className="py-16 bg-background scroll-mt-20" data-testid="section-monthly-plans">
         <div className="max-w-7xl mx-auto px-6">
           <div className="text-center max-w-2xl mx-auto mb-10 space-y-3">
-            <p className="text-xs font-bold uppercase tracking-widest text-[#FF6A00]">Monthly Plans</p>
+            <p className="text-xs font-bold uppercase tracking-widest text-[#BD4F00] dark:text-[#FF8A3D]">Monthly Plans</p>
             <h2 className="text-3xl md:text-4xl font-bold">Choose the Plan That Fits Your Hiring Volume</h2>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 items-start max-w-5xl mx-auto">
@@ -551,7 +551,7 @@ export default function NewHireVerification() {
                 data-testid={`card-plan-${plan.id}`}
               >
                 {plan.badge && (
-                  <div className="text-center py-2 text-xs font-bold uppercase tracking-widest text-white bg-[#FF6A00]">
+                  <div className="text-center py-2 text-xs font-bold uppercase tracking-widest text-white bg-[#BD4F00]">
                     {plan.badge}
                   </div>
                 )}
@@ -601,7 +601,7 @@ export default function NewHireVerification() {
       <section className="py-16 bg-muted/30" data-testid="section-pay-as-you-go">
         <div className="max-w-3xl mx-auto px-6">
           <div className="text-center mb-8 space-y-3">
-            <p className="text-xs font-bold uppercase tracking-widest text-[#FF6A00]">Pay-As-You-Go</p>
+            <p className="text-xs font-bold uppercase tracking-widest text-[#BD4F00] dark:text-[#FF8A3D]">Pay-As-You-Go</p>
             <h2 className="text-3xl font-bold">Pay-As-You-Go Services</h2>
           </div>
           <div className="rounded-md border border-border/50 divide-y divide-border/50 overflow-hidden bg-card">
@@ -632,7 +632,7 @@ export default function NewHireVerification() {
       <section className="py-16 bg-background" data-testid="section-how-it-works">
         <div className="max-w-7xl mx-auto px-6">
           <div className="text-center max-w-2xl mx-auto mb-10 space-y-3">
-            <p className="text-xs font-bold uppercase tracking-widest text-[#FF6A00]">Getting Started</p>
+            <p className="text-xs font-bold uppercase tracking-widest text-[#BD4F00] dark:text-[#FF8A3D]">Getting Started</p>
             <h2 className="text-3xl md:text-4xl font-bold">How It Works</h2>
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -653,7 +653,7 @@ export default function NewHireVerification() {
       <section className="py-16 bg-muted/30" data-testid="section-industries-served">
         <div className="max-w-7xl mx-auto px-6">
           <div className="text-center max-w-2xl mx-auto mb-10 space-y-3">
-            <p className="text-xs font-bold uppercase tracking-widest text-[#FF6A00]">Industries</p>
+            <p className="text-xs font-bold uppercase tracking-widest text-[#BD4F00] dark:text-[#FF8A3D]">Industries</p>
             <h2 className="text-3xl md:text-4xl font-bold">Built for Employers That Hire Regularly</h2>
           </div>
           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 max-w-4xl mx-auto">
@@ -720,7 +720,7 @@ export default function NewHireVerification() {
       <section className="py-16 bg-muted/30" data-testid="section-compliance-privacy">
         <div className="max-w-4xl mx-auto px-6">
           <div className="text-center max-w-2xl mx-auto mb-10 space-y-3">
-            <p className="text-xs font-bold uppercase tracking-widest text-[#FF6A00]">Compliance</p>
+            <p className="text-xs font-bold uppercase tracking-widest text-[#BD4F00] dark:text-[#FF8A3D]">Compliance</p>
             <h2 className="text-3xl md:text-4xl font-bold">Consistent, Private and Employer-Directed</h2>
           </div>
           <div className="bg-card border border-border/50 rounded-xl p-6 md:p-8 space-y-3">
@@ -741,7 +741,7 @@ export default function NewHireVerification() {
       <section id="consultation" className="py-16 bg-background scroll-mt-20" data-testid="section-consultation-form">
         <div className="max-w-2xl mx-auto px-6">
           <div className="text-center mb-8 space-y-3">
-            <p className="text-xs font-bold uppercase tracking-widest text-[#FF6A00]">Get Started</p>
+            <p className="text-xs font-bold uppercase tracking-widest text-[#BD4F00] dark:text-[#FF8A3D]">Get Started</p>
             <h2 className="text-3xl font-bold">Request an Employer Consultation</h2>
           </div>
 
@@ -1068,7 +1068,7 @@ export default function NewHireVerification() {
       <section className="py-16 bg-muted/30" data-testid="section-employer-faq">
         <div className="max-w-3xl mx-auto px-6">
           <div className="text-center mb-10 space-y-3">
-            <p className="text-xs font-bold uppercase tracking-widest text-[#FF6A00]">Common Questions</p>
+            <p className="text-xs font-bold uppercase tracking-widest text-[#BD4F00] dark:text-[#FF8A3D]">Common Questions</p>
             <h2 className="text-3xl md:text-4xl font-bold">Frequently Asked Questions</h2>
           </div>
           <div className="divide-y divide-border/50 border border-border/50 rounded-xl overflow-hidden bg-card">

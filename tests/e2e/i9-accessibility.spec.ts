@@ -47,27 +47,25 @@ const BREAKPOINTS: { width: number; height: number; label: string }[] = [
   { width: 1440, height: 900, label: "1440px (desktop)" },
 ];
 
-// Every axe-core rule below is enforced, with ONE deliberate, documented
-// exception: `color-contrast`. Running the full scan found the site's
-// `text-[#FF6A00]` brand-orange accent (used as an "eyebrow" label color in
-// dozens of sections across every page of the site, not just this one) sits
-// at ~2.87:1 contrast against its background — a real WCAG 1.4.3 violation,
-// not a scanner false positive. It predates this phase's work and is a
-// sitewide brand-color decision, not something scoped to the I-9 feature —
-// changing it unilaterally here would silently reskin the whole site's
-// accent color from a single-page test file. It's called out explicitly in
-// docs/I9_PORTAL_DELIVERABLES.md as a known, pre-existing gap rather than
-// hidden by excluding the rule silently. Every other rule (including
-// `button-name`, which this pass found and fixed — see the Select/Label
-// pairing fix in NewHireVerification.tsx) still fails the test on any
-// violation.
+// Every axe-core rule is enforced, including `color-contrast` — the
+// sitewide `text-[#FF6A00]` brand-orange accent used as an "eyebrow" label
+// color was found at ~2.87:1 (a real WCAG 1.4.3 violation, not a scanner
+// false positive) and fixed sitewide by darkening it for text use only
+// (#C75300 light / #FF8A3D dark, both verified ≥4.5:1 against their
+// respective backgrounds) — see the sitewide sed pass touching every
+// `text-xs font-bold uppercase tracking-widest text-[#FF6A00]` eyebrow
+// label plus the handful of other real-text usages (phone CTA, star
+// ratings, dashboard "Current stage" label). Decorative icons that sit
+// beside already-legible text keep the original brand orange, since they
+// aren't the sole conveyor of information and WCAG 1.4.11 doesn't require
+// them to individually clear 3:1.
 async function runAxe(page: Page) {
-  return new AxeBuilder({ page }).withTags(["wcag2a", "wcag2aa", "wcag21a", "wcag21aa"]).disableRules(["color-contrast"]).analyze();
+  return new AxeBuilder({ page }).withTags(["wcag2a", "wcag2aa", "wcag21a", "wcag21aa"]).analyze();
 }
 
 test.describe("I-9 public pages — accessibility (axe-core)", () => {
   for (const { path, label } of PUBLIC_PAGES) {
-    test(`${label} has no automatically-detectable WCAG 2.1 A/AA violations (excluding the known sitewide color-contrast gap)`, async ({ page }) => {
+    test(`${label} has no automatically-detectable WCAG 2.1 A/AA violations`, async ({ page }) => {
       await page.goto(BASE_URL + path, { waitUntil: "networkidle" });
       const results = await runAxe(page);
       if (results.violations.length > 0) {

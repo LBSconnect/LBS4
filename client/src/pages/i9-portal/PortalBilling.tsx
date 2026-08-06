@@ -12,7 +12,7 @@ import {
 } from "@/lib/i9Portal";
 import { PortalGuard, PortalShell, PortalCard, ErrorBanner, ServiceGateBanner, useUnauthRedirect, NAVY } from "./_shared";
 
-function PlanCatalog({ companyId }: { companyId: string }) {
+export function PlanCatalog({ companyId }: { companyId: string }) {
   const onUnauth = useUnauthRedirect();
   const [plans, setPlans] = useState<I9ServicePlan[]>([]);
   const [addOns, setAddOns] = useState<I9AddOn[]>([]);

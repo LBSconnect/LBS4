@@ -232,7 +232,20 @@ export const i9ClientUsers = pgTable("i9_client_users", {
   role: varchar("role", { length: 40 }).notNull(), // one of I9_ROLES
   assignedHiringSiteIds: jsonb("assigned_hiring_site_ids").default([]), // for client_limited_user scoping
   isActive: boolean("is_active").notNull().default(true),
-  mfaEnabled: boolean("mfa_enabled").notNull().default(false), // always false until an MFA provider is configured — see deliverables
+  mfaEnabled: boolean("mfa_enabled").notNull().default(false),
+  // Both encrypted at rest via the same AES-256-GCM column encryption used
+  // for protected employee data (encryptToColumn/decryptFromColumn in
+  // i9Security.ts) — an MFA secret is as sensitive as a password.
+  // mfaSecretEncrypted is the active, in-use secret (set once enrollment is
+  // confirmed); mfaPendingSecretEncrypted holds a secret mid-enrollment,
+  // before the user has proven they can generate a valid code with it.
+  mfaSecretEncrypted: text("mfa_secret_encrypted"),
+  mfaPendingSecretEncrypted: text("mfa_pending_secret_encrypted"),
+  // The 30-second time-step of the last code this user successfully
+  // redeemed — rejecting a repeat of that same step (or anything earlier)
+  // closes the narrow window where a valid TOTP code could otherwise be
+  // replayed for a second login/disable within its own validity period.
+  mfaLastUsedStep: integer("mfa_last_used_step"),
   lastLoginAt: timestamp("last_login_at"),
   createdAt: timestamp("created_at").defaultNow(),
   // Password reset — only a HASH of the token is stored (never the raw token,
@@ -311,6 +324,10 @@ export const i9AddOns = pgTable("i9_add_ons", {
   priceUnit: varchar("price_unit", { length: 50 }).notNull().default("flat"), // flat | per_case | per_employee | per_form
   stripeProductId: varchar("stripe_product_id", { length: 100 }),
   stripePriceId: varchar("stripe_price_id", { length: 100 }),
+  // Only set for priceUnit != "flat" — a Stripe Billing Meter backs the
+  // metered recurring price above, aggregating usage events reported via
+  // event_name `i9-addon-usage-${slug}` (see i9StripeSync.ts / i9Routes.ts).
+  stripeMeterId: varchar("stripe_meter_id", { length: 100 }),
   isActive: boolean("is_active").notNull().default(true),
 });
 export type I9AddOn = typeof i9AddOns.$inferSelect;
@@ -335,6 +352,21 @@ export const i9Subscriptions = pgTable("i9_subscriptions", {
   createdAt: timestamp("created_at").defaultNow(),
 });
 export type I9Subscription = typeof i9Subscriptions.$inferSelect;
+
+// Add-ons attached to a subscription for metered/per-unit billing. LBS staff
+// attach an add-on once (creating the Stripe subscription item), then record
+// usage as they actually perform the service — the exact moment "1 unit" is
+// consumed (e.g. per case vs. per employee) is a staff judgment call, not
+// something inferred automatically from case-workflow events, so there is no
+// silent auto-billing trigger anywhere in the case workflow.
+export const i9SubscriptionAddOns = pgTable("i9_subscription_add_ons", {
+  id: uuidPk(),
+  subscriptionId: varchar("subscription_id", { length: 100 }).notNull(),
+  addOnId: varchar("add_on_id", { length: 100 }).notNull(),
+  stripeSubscriptionItemId: varchar("stripe_subscription_item_id", { length: 100 }),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+export type I9SubscriptionAddOn = typeof i9SubscriptionAddOns.$inferSelect;
 
 // ─────────────────────────────────────────────────────────────────────────────
 // 7. ClientAgreement — the LBS commercial agreement (separate from the

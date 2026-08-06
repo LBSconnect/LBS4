@@ -94,7 +94,7 @@ export default function Resources() {
                   </div>
                   <h3 className="font-semibold text-lg">{item.title}</h3>
                   <p className="text-sm text-muted-foreground">{item.description}</p>
-                  <div className="flex items-center gap-1.5 text-sm font-semibold text-[#FF6A00]">
+                  <div className="flex items-center gap-1.5 text-sm font-semibold text-[#BD4F00] dark:text-[#FF8A3D]">
                     {item.external ? "Visit site" : "Learn more"}
                     {item.external ? (
                       <ExternalLink className="w-3.5 h-3.5" />

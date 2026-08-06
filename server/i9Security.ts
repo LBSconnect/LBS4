@@ -164,6 +164,125 @@ export function verifyDocumentToken(token: string, documentId: string): { valid:
   return { valid: true };
 }
 
+// ─── MFA: TOTP (RFC 6238, on top of HOTP / RFC 4226) ────────────────────────
+// Self-hosted, no third-party auth provider or dependency — the entire
+// primitive is HMAC-SHA1 over a 30-second time counter, which Node's crypto
+// module already does natively (the same building block used elsewhere in
+// this file for signed tokens). Compatible with any standard authenticator
+// app (Google Authenticator, Authy, 1Password, etc.), which all implement
+// the same RFC. Enrollment shows the secret as a manually-typed code rather
+// than a scannable QR image — every authenticator app supports manual entry
+// as a first-class alternative to scanning, and generating a QR code from
+// scratch (Reed-Solomon error correction, module placement) is a large,
+// easy-to-get-subtly-wrong algorithm that doesn't belong hand-rolled here;
+// a real QR image can be layered on top of this later with a small
+// rendering-only dependency if wanted, without touching anything below.
+
+const BASE32_ALPHABET = "ABCDEFGHIJKLMNOPQRSTUVWXYZ234567";
+
+function base32Encode(buf: Buffer): string {
+  let bits = "";
+  for (let i = 0; i < buf.length; i++) bits += buf[i].toString(2).padStart(8, "0");
+  let out = "";
+  for (let i = 0; i + 5 <= bits.length; i += 5) out += BASE32_ALPHABET[parseInt(bits.slice(i, i + 5), 2)];
+  const remainder = bits.length % 5;
+  if (remainder > 0) {
+    const lastChunk = bits.slice(bits.length - remainder).padEnd(5, "0");
+    out += BASE32_ALPHABET[parseInt(lastChunk, 2)];
+  }
+  return out;
+}
+
+function base32Decode(encoded: string): Buffer {
+  const clean = encoded.toUpperCase().replace(/[^A-Z2-7]/g, "");
+  let bits = "";
+  for (const char of clean) {
+    const val = BASE32_ALPHABET.indexOf(char);
+    if (val === -1) continue;
+    bits += val.toString(2).padStart(5, "0");
+  }
+  const bytes: number[] = [];
+  for (let i = 0; i + 8 <= bits.length; i += 8) bytes.push(parseInt(bits.slice(i, i + 8), 2));
+  return Buffer.from(bytes);
+}
+
+/** A fresh 20-byte (160-bit) secret, base32-encoded — the standard secret
+ *  length authenticator apps expect. */
+export function generateTotpSecret(): string {
+  return base32Encode(randomBytes(20));
+}
+
+/** otpauth:// provisioning URI — authenticator apps that DO support
+ *  scanning (most, when shown as a QR code by whatever renders this URI)
+ *  will pick this up; apps that don't can still use the raw secret shown
+ *  alongside it for manual entry. */
+export function totpProvisioningUri(secret: string, accountLabel: string, issuer = "LBS I-9 Portal"): string {
+  const label = encodeURIComponent(`${issuer}:${accountLabel}`);
+  return `otpauth://totp/${label}?secret=${secret}&issuer=${encodeURIComponent(issuer)}&algorithm=SHA1&digits=6&period=30`;
+}
+
+function hotp(secretBuf: Buffer, counter: number): string {
+  const counterBuf = Buffer.alloc(8);
+  counterBuf.writeUInt32BE(Math.floor(counter / 2 ** 32), 0);
+  counterBuf.writeUInt32BE(counter % 2 ** 32, 4);
+  const hmac = createHmac("sha1", secretBuf).update(counterBuf).digest();
+  const offset = hmac[hmac.length - 1] & 0x0f;
+  const binCode =
+    ((hmac[offset] & 0x7f) << 24) |
+    ((hmac[offset + 1] & 0xff) << 16) |
+    ((hmac[offset + 2] & 0xff) << 8) |
+    (hmac[offset + 3] & 0xff);
+  return String(binCode % 1_000_000).padStart(6, "0");
+}
+
+/** Accepts the current 30-second time step and one step of drift in either
+ *  direction, so a slightly-off device clock (or the seconds ticking over
+ *  mid-entry) doesn't spuriously reject a correct code. */
+export function verifyTotpCode(secret: string, code: string, windowSteps = 1): boolean {
+  return matchTotpCodeStep(secret, code, windowSteps) !== null;
+}
+
+/** Same matching logic as verifyTotpCode, but returns the actual 30-second
+ *  time-step the code matched (or null) so callers can enforce single-use —
+ *  rejecting a step at or before one already redeemed for this user closes
+ *  the replay window a bare boolean check can't. */
+export function matchTotpCodeStep(secret: string, code: string, windowSteps = 1): number | null {
+  if (!/^\d{6}$/.test(code)) return null;
+  const secretBuf = base32Decode(secret);
+  if (secretBuf.length === 0) return null;
+  const currentStep = Math.floor(Date.now() / 1000 / 30);
+  for (let drift = -windowSteps; drift <= windowSteps; drift++) {
+    const step = currentStep + drift;
+    const expected = hotp(secretBuf, step);
+    if (expected.length === code.length && timingSafeEqual(Buffer.from(expected), Buffer.from(code))) return step;
+  }
+  return null;
+}
+
+// ─── MFA login-challenge tokens ─────────────────────────────────────────────
+// Issued once a password check passes for an MFA-enabled account, proving
+// "this request already cleared the password step" without establishing a
+// real session — the actual session is only created after the TOTP code
+// also verifies (see POST /auth/mfa/verify in i9Routes.ts).
+
+export function signMfaChallengeToken(userId: string, expiresAtMs: number): string {
+  const payload = `${userId}.${expiresAtMs}`;
+  const sig = createHmac("sha256", SESSION_SECRET).update(payload).digest("base64url");
+  return `${Buffer.from(payload).toString("base64url")}.${sig}`;
+}
+
+export function verifyMfaChallengeToken(token: string): { valid: boolean; userId?: string } {
+  const [payloadB64, sig] = token.split(".");
+  if (!payloadB64 || !sig) return { valid: false };
+  const payload = Buffer.from(payloadB64, "base64url").toString("utf8");
+  const expectedSig = createHmac("sha256", SESSION_SECRET).update(payload).digest("base64url");
+  if (sig.length !== expectedSig.length || !timingSafeEqual(Buffer.from(sig), Buffer.from(expectedSig))) return { valid: false };
+  const [userId, expStr] = payload.split(".");
+  const exp = Number(expStr);
+  if (!exp || Date.now() > exp) return { valid: false };
+  return { valid: true, userId };
+}
+
 // ─── CSRF (double-submit cookie) ────────────────────────────────────────────
 
 export function generateCsrfToken(): string {

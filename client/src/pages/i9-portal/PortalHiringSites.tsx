@@ -84,7 +84,7 @@ function NewSiteForm({ companyId, onCreated }: { companyId: string; onCreated: (
   );
 }
 
-function HiringSitesList({ companyId }: { companyId: string }) {
+export function HiringSitesList({ companyId }: { companyId: string }) {
   const onUnauth = useUnauthRedirect();
   const [sites, setSites] = useState<I9HiringSite[]>([]);
   const [loading, setLoading] = useState(true);

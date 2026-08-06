@@ -41,7 +41,7 @@ function OnboardingProgress({ status }: { status: I9ClientCompany["status"] }) {
             <span className={current ? "font-semibold" : done ? "text-muted-foreground" : "text-gray-400"} style={current ? { color: NAVY } : undefined}>
               {COMPANY_STATUS_LABELS[step]}
             </span>
-            {current && <span className="text-xs text-[#FF6A00] font-medium ml-1">Current stage</span>}
+            {current && <span className="text-xs text-[#BD4F00] dark:text-[#FF8A3D] font-medium ml-1">Current stage</span>}
           </div>
         );
       })}
@@ -92,7 +92,18 @@ function ClientDashboard({ companyId }: { companyId: string }) {
   return (
     <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
       <div className="lg:col-span-2 space-y-5">
-        <PortalCard title={`${company.legalBusinessName} — Onboarding Status`}>
+        <PortalCard
+          title={`${company.legalBusinessName} — Onboarding Status`}
+          action={
+            company.status !== "active" && company.status !== "suspended" && company.status !== "offboarding" && company.status !== "terminated" ? (
+              <Link href={PORTAL_ROUTES.onboarding}>
+                <Button size="sm" className="text-white gap-1.5" style={{ backgroundColor: NAVY }}>
+                  Continue Onboarding <ArrowRight className="w-3.5 h-3.5" />
+                </Button>
+              </Link>
+            ) : undefined
+          }
+        >
           <OnboardingProgress status={company.status} />
           {company.status !== "active" && (
             <p className="text-xs text-muted-foreground">

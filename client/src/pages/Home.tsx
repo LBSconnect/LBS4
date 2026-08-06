@@ -310,7 +310,7 @@ export default function Home() {
         <div className="max-w-7xl mx-auto px-6">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 items-center bg-muted/30 rounded-2xl p-8 md:p-12">
             <div className="space-y-5">
-              <p className="text-xs font-bold uppercase tracking-widest text-[#FF6A00]">Solutions for Your Business</p>
+              <p className="text-xs font-bold uppercase tracking-widest text-[#BD4F00] dark:text-[#FF8A3D]">Solutions for Your Business</p>
               <h2 className="text-3xl md:text-4xl font-bold" data-testid="text-business-solutions-heading">
                 Services That Help Your Business Grow.
               </h2>
@@ -347,7 +347,7 @@ export default function Home() {
       <section className="py-14 bg-muted/30" data-testid="section-testimonials">
         <div className="max-w-7xl mx-auto px-6">
           <div className="text-center max-w-2xl mx-auto mb-10 space-y-3">
-            <p className="text-xs font-bold uppercase tracking-widest text-[#FF6A00]">What Our Clients Say</p>
+            <p className="text-xs font-bold uppercase tracking-widest text-[#BD4F00] dark:text-[#FF8A3D]">What Our Clients Say</p>
             <h2 className="text-3xl md:text-4xl font-bold">Real Results, Real People</h2>
             <p className="text-muted-foreground text-lg">
               Join hundreds of Houston professionals who passed their exams at LBS.
@@ -468,7 +468,7 @@ export default function Home() {
       <section className="py-14 bg-muted/30" data-testid="section-faq">
         <div className="max-w-7xl mx-auto px-6">
           <div className="text-center max-w-2xl mx-auto mb-10 space-y-3">
-            <p className="text-xs font-bold uppercase tracking-widest text-[#FF6A00]">Common Questions</p>
+            <p className="text-xs font-bold uppercase tracking-widest text-[#BD4F00] dark:text-[#FF8A3D]">Common Questions</p>
             <h2 className="text-3xl md:text-4xl font-bold">Frequently Asked Questions</h2>
             <p className="text-muted-foreground text-lg">Everything you need to know before you arrive.</p>
           </div>
@@ -496,7 +496,7 @@ export default function Home() {
           <div className="text-center mt-8">
             <p className="text-sm text-muted-foreground">
               Still have questions?{" "}
-              <a href="tel:2818365357" className="text-[#FF6A00] font-semibold hover:underline">
+              <a href="tel:2818365357" className="text-[#BD4F00] dark:text-[#FF8A3D] font-semibold hover:underline">
                 Call us at 281-836-5357
               </a>
             </p>

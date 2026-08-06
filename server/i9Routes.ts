@@ -24,6 +24,7 @@ import {
   FORBIDDEN_SENSITIVE_FIELD_NAMES,
   type I9Role,
   type I9ClientCompany,
+  type I9NotificationEvent,
 } from "@shared/i9Schema";
 import * as store from "./i9Storage";
 import {
@@ -36,7 +37,22 @@ import {
   destroyI9Session,
   type I9AuthedRequest,
 } from "./i9Auth";
-import { verifyPassword, signDocumentToken, verifyDocumentToken, isProtectedDataEncryptionConfigured, generatePasswordResetToken, hashPasswordResetToken } from "./i9Security";
+import {
+  verifyPassword,
+  signDocumentToken,
+  verifyDocumentToken,
+  isProtectedDataEncryptionConfigured,
+  generatePasswordResetToken,
+  hashPasswordResetToken,
+  generateTotpSecret,
+  totpProvisioningUri,
+  verifyTotpCode,
+  matchTotpCodeStep,
+  signMfaChallengeToken,
+  verifyMfaChallengeToken,
+  encryptToColumn,
+  decryptFromColumn,
+} from "./i9Security";
 import { informationalCaseCreationTarget } from "./i9BusinessDays";
 import { sendI9NotificationEmail, sendI9InternalNotificationEmail, sendI9PasswordResetEmail } from "./i9EmailService";
 import { sendEmployerConsultationNotification } from "./emailService";
@@ -256,6 +272,80 @@ export function registerI9Routes(app: Express): void {
     res.json({ subscription: sub });
   });
 
+  // ── Metered add-ons ──────────────────────────────────────────────────────
+  // Attaching and recording usage are both LBS-staff-only, deliberately —
+  // this is administrative billing action tied to a real service LBS staff
+  // performed, not a client self-service purchase flow.
+
+  app.get("/api/i9/companies/:id/add-ons", requireI9Auth, requireI9TenantMatch((req) => pstr(req.params.id)), async (req: I9AuthedRequest, res: Response) => {
+    const subscription = await store.getLatestI9SubscriptionForCompany(pstr(req.params.id));
+    const attached = subscription ? await store.listI9SubscriptionAddOns(subscription.id) : [];
+    res.json({ subscription, attached });
+  });
+
+  app.post("/api/i9/companies/:id/add-ons/:addOnId/attach", requireI9Auth, requireI9Csrf, requireI9Role("lbs_program_admin", "lbs_intake_billing"), async (req: I9AuthedRequest, res: Response) => {
+    if (!process.env.STRIPE_SECRET_KEY) return secureConfigRequired(res, ["STRIPE_SECRET_KEY"]);
+    try {
+      const addOn = await store.getI9AddOn(pstr(req.params.addOnId));
+      if (!addOn) return res.status(404).json({ error: "Add-on not found" });
+      if (addOn.priceUnit === "flat") return res.status(400).json({ error: "This add-on is flat-priced and isn't attached to a subscription for metered billing." });
+      if (!addOn.stripePriceId) return res.status(503).json({ error: "This add-on's Stripe price hasn't synced yet. Try again shortly." });
+
+      const subscription = await store.getLatestI9SubscriptionForCompany(pstr(req.params.id));
+      if (!subscription || subscription.status !== "active" || !subscription.stripeSubscriptionId) {
+        return res.status(400).json({ error: "This company needs an active subscription before an add-on can be attached." });
+      }
+      const already = await store.getI9SubscriptionAddOn(subscription.id, addOn.id);
+      if (already) return res.status(409).json({ error: "This add-on is already attached to the subscription." });
+
+      const stripe = await getUncachableStripeClient();
+      const item = await stripe.subscriptionItems.create({ subscription: subscription.stripeSubscriptionId, price: addOn.stripePriceId });
+      const row = await store.attachI9SubscriptionAddOn(subscription.id, addOn.id, item.id);
+      await store.logI9Audit({ actorUserId: req.i9User!.id, actorRole: req.i9User!.role, action: "billing.addon_attached", entityType: "SubscriptionAddOn", entityId: row.id, clientCompanyId: pstr(req.params.id), details: { addOnId: addOn.id, addOnName: addOn.name }, ipAddress: req.ip });
+      res.json({ success: true, subscriptionAddOn: row });
+    } catch (err: any) {
+      console.error("i9 add-on attach error:", err.message);
+      res.status(500).json({ error: "Failed to attach add-on" });
+    }
+  });
+
+  app.post("/api/i9/companies/:id/add-ons/:addOnId/usage", requireI9Auth, requireI9Csrf, requireI9Role("lbs_program_admin", "lbs_case_processor", "lbs_intake_billing"), async (req: I9AuthedRequest, res: Response) => {
+    if (!process.env.STRIPE_SECRET_KEY) return secureConfigRequired(res, ["STRIPE_SECRET_KEY"]);
+    try {
+      const schema = z.object({ quantity: z.number().int().min(1).max(1000), note: z.string().max(500).optional() });
+      const parsed = schema.safeParse(req.body);
+      if (!parsed.success) return res.status(400).json({ error: "A positive integer quantity is required" });
+
+      const addOn = await store.getI9AddOn(pstr(req.params.addOnId));
+      if (!addOn) return res.status(404).json({ error: "Add-on not found" });
+      const subscription = await store.getLatestI9SubscriptionForCompany(pstr(req.params.id));
+      if (!subscription) return res.status(400).json({ error: "This company has no subscription on file." });
+      const attached = await store.getI9SubscriptionAddOn(subscription.id, addOn.id);
+      if (!attached) return res.status(400).json({ error: "This add-on isn't attached to the company's subscription yet." });
+      if (!subscription.stripeCustomerId) return res.status(400).json({ error: "This subscription has no Stripe customer on file." });
+
+      const stripe = await getUncachableStripeClient();
+      await stripe.billing.meterEvents.create({
+        event_name: `i9-addon-usage-${addOn.slug}`,
+        payload: { stripe_customer_id: subscription.stripeCustomerId, value: String(parsed.data.quantity) },
+      });
+      await store.logI9Audit({
+        actorUserId: req.i9User!.id,
+        actorRole: req.i9User!.role,
+        action: "billing.addon_usage_recorded",
+        entityType: "SubscriptionAddOn",
+        entityId: attached.id,
+        clientCompanyId: pstr(req.params.id),
+        details: { addOnId: addOn.id, addOnName: addOn.name, quantity: parsed.data.quantity, note: parsed.data.note },
+        ipAddress: req.ip,
+      });
+      res.json({ success: true });
+    } catch (err: any) {
+      console.error("i9 add-on usage error:", err.message);
+      res.status(500).json({ error: "Failed to record usage" });
+    }
+  });
+
   // ═══════════════════════════════════════════════════════════════════════
   // AUTH
   // ═══════════════════════════════════════════════════════════════════════
@@ -306,6 +396,15 @@ export function registerI9Routes(app: Express): void {
         return res.status(401).json({ error: "Invalid email or password." });
       }
 
+      if (user.mfaEnabled) {
+        // Password is correct, but no session is established yet — only a
+        // short-lived challenge token proving this much, redeemable at
+        // /auth/mfa/verify with a valid TOTP code.
+        const mfaToken = signMfaChallengeToken(user.id, Date.now() + 5 * 60 * 1000);
+        await store.logI9Audit({ actorUserId: user.id, actorRole: user.role, action: "auth.password_verified_awaiting_mfa", clientCompanyId: user.clientCompanyId ?? undefined, ipAddress: req.ip });
+        return res.json({ success: true, mfaRequired: true, mfaToken });
+      }
+
       await establishI9Session(req, res, user.id, user.role as I9Role, user.clientCompanyId);
       await store.touchI9ClientUserLogin(user.id);
       await store.logI9Audit({ actorUserId: user.id, actorRole: user.role, action: "auth.login", clientCompanyId: user.clientCompanyId ?? undefined, ipAddress: req.ip });
@@ -313,6 +412,89 @@ export function registerI9Routes(app: Express): void {
     } catch (err: any) {
       console.error("i9 login error:", err.message);
       res.status(500).json({ error: "Login failed" });
+    }
+  });
+
+  app.post("/api/i9/auth/mfa/verify", i9RateLimit("i9-mfa-verify", 10, 15 * 60 * 1000), async (req: Request, res: Response) => {
+    if (!process.env.DATABASE_URL) return secureConfigRequired(res, ["DATABASE_URL"]);
+    try {
+      const { mfaToken, code } = req.body as { mfaToken?: string; code?: string };
+      if (!mfaToken || !code) return res.status(400).json({ error: "mfaToken and code are required" });
+      const challenge = verifyMfaChallengeToken(mfaToken);
+      if (!challenge.valid || !challenge.userId) return res.status(401).json({ error: "This login attempt has expired. Please sign in again." });
+
+      const user = await store.getI9ClientUserById(challenge.userId);
+      if (!user || !user.isActive || !user.mfaEnabled || !user.mfaSecretEncrypted) {
+        return res.status(401).json({ error: "This login attempt has expired. Please sign in again." });
+      }
+      const secret = decryptFromColumn(user.mfaSecretEncrypted);
+      const matchedStep = matchTotpCodeStep(secret, code);
+      if (matchedStep === null || (user.mfaLastUsedStep != null && matchedStep <= user.mfaLastUsedStep)) {
+        await store.logI9Audit({ actorUserId: user.id, actorRole: user.role, action: "auth.mfa_failed", clientCompanyId: user.clientCompanyId ?? undefined, ipAddress: req.ip });
+        return res.status(401).json({ error: "Invalid authentication code." });
+      }
+      await store.setI9ClientUserMfaLastUsedStep(user.id, matchedStep);
+
+      await establishI9Session(req, res, user.id, user.role as I9Role, user.clientCompanyId);
+      await store.touchI9ClientUserLogin(user.id);
+      await store.logI9Audit({ actorUserId: user.id, actorRole: user.role, action: "auth.login", clientCompanyId: user.clientCompanyId ?? undefined, details: { mfa: true }, ipAddress: req.ip });
+      res.json({ success: true, user: { id: user.id, email: user.email, fullName: user.fullName, role: user.role, clientCompanyId: user.clientCompanyId } });
+    } catch (err: any) {
+      console.error("i9 mfa verify error:", err.message);
+      res.status(500).json({ error: "Verification failed" });
+    }
+  });
+
+  // ── MFA enrollment/management (authenticated) ────────────────────────────
+
+  app.post("/api/i9/auth/mfa/enroll/start", requireI9Auth, requireI9Csrf, async (req: I9AuthedRequest, res: Response) => {
+    if (!isProtectedDataEncryptionConfigured()) return secureConfigRequired(res, ["PROTECTED_DATA_ENCRYPTION_KEY"]);
+    try {
+      const secret = generateTotpSecret();
+      await store.setI9ClientUserMfaPendingSecret(req.i9User!.id, encryptToColumn(secret));
+      res.json({ success: true, secret, otpauthUrl: totpProvisioningUri(secret, req.i9User!.email) });
+    } catch (err: any) {
+      console.error("i9 mfa enroll/start error:", err.message);
+      res.status(500).json({ error: "Failed to start MFA enrollment" });
+    }
+  });
+
+  app.post("/api/i9/auth/mfa/enroll/confirm", requireI9Auth, requireI9Csrf, async (req: I9AuthedRequest, res: Response) => {
+    try {
+      const { code } = req.body as { code?: string };
+      if (!code) return res.status(400).json({ error: "code is required" });
+      const user = await store.getI9ClientUserById(req.i9User!.id);
+      if (!user?.mfaPendingSecretEncrypted) return res.status(400).json({ error: "No MFA enrollment is in progress. Start enrollment first." });
+      const pendingSecret = decryptFromColumn(user.mfaPendingSecretEncrypted);
+      const matchedStep = matchTotpCodeStep(pendingSecret, code);
+      if (matchedStep === null) return res.status(400).json({ error: "That code didn't match. Check your authenticator app and try again." });
+
+      await store.confirmI9ClientUserMfaEnrollment(user.id, user.mfaPendingSecretEncrypted);
+      // Marks the confirming code as already-used, so it can't also be
+      // replayed for a subsequent login attempt within its validity window.
+      await store.setI9ClientUserMfaLastUsedStep(user.id, matchedStep);
+      await store.logI9Audit({ actorUserId: user.id, actorRole: user.role, action: "auth.mfa_enrolled", clientCompanyId: user.clientCompanyId ?? undefined, ipAddress: req.ip });
+      res.json({ success: true });
+    } catch (err: any) {
+      console.error("i9 mfa enroll/confirm error:", err.message);
+      res.status(500).json({ error: "Failed to confirm MFA enrollment" });
+    }
+  });
+
+  app.post("/api/i9/auth/mfa/disable", requireI9Auth, requireI9Csrf, async (req: I9AuthedRequest, res: Response) => {
+    try {
+      const { code } = req.body as { code?: string };
+      const user = await store.getI9ClientUserById(req.i9User!.id);
+      if (!user?.mfaEnabled || !user.mfaSecretEncrypted) return res.status(400).json({ error: "MFA is not enabled on this account." });
+      if (!code || !verifyTotpCode(decryptFromColumn(user.mfaSecretEncrypted), code)) {
+        return res.status(400).json({ error: "A valid current authentication code is required to disable MFA." });
+      }
+      await store.disableI9ClientUserMfa(user.id);
+      await store.logI9Audit({ actorUserId: user.id, actorRole: user.role, action: "auth.mfa_disabled", clientCompanyId: user.clientCompanyId ?? undefined, ipAddress: req.ip });
+      res.json({ success: true });
+    } catch (err: any) {
+      console.error("i9 mfa disable error:", err.message);
+      res.status(500).json({ error: "Failed to disable MFA" });
     }
   });
 
@@ -370,6 +552,11 @@ export function registerI9Routes(app: Express): void {
 
   app.get("/api/i9/auth/me", requireI9Auth, (req: I9AuthedRequest, res: Response) => {
     res.json({ user: req.i9User });
+  });
+
+  app.get("/api/i9/auth/mfa/status", requireI9Auth, async (req: I9AuthedRequest, res: Response) => {
+    const user = await store.getI9ClientUserById(req.i9User!.id);
+    res.json({ mfaEnabled: !!user?.mfaEnabled });
   });
 
   /** One-time bootstrap for the first Program Administrator account. Refuses
@@ -705,7 +892,7 @@ export function registerI9Routes(app: Express): void {
       // need to act on or be aware of — never includes employee data, just
       // a generic pointer back to the secure portal (per the brief: every
       // notification stays PII-free and directs the reader to log in).
-      const NOTIFY_EVENT_FOR_STATUS: Record<string, string> = {
+      const NOTIFY_EVENT_FOR_STATUS: Record<string, I9NotificationEvent> = {
         deficient_client_action_required: "deficiency_requires_client_action",
         employment_authorized: "case_result_available",
         needs_more_time: "case_result_available",
@@ -722,6 +909,19 @@ export function registerI9Routes(app: Express): void {
           relatedEntityId: request.id,
           inPortalMessage: `An update is available for request ${request.internalRequestNumber}. Log in to the secure portal to view it.`,
         });
+        // Email is a nudge on top of the in-portal notification above, not a
+        // replacement for it — same generic, PII-free template every other
+        // I-9 email uses. A missing/failed email never blocks the status
+        // change itself; the in-portal notification always lands regardless.
+        const company = await store.getI9ClientCompany(request.clientCompanyId);
+        if (company?.authorizedSignerEmail) {
+          await sendI9NotificationEmail({
+            to: company.authorizedSignerEmail,
+            recipientName: company.authorizedSignerName || "there",
+            companyName: company.legalBusinessName,
+            event: notifyEvent,
+          }).catch((err) => console.error("i9 status-change notification email failed:", err?.message));
+        }
       }
       res.json({ success: true, status });
     } catch {

@@ -38,16 +38,17 @@ Every hard compliance boundary from the original brief was treated as non-negoti
 
 ---
 
-## 3. API Routes (47)
+## 3. API Routes (64)
 
 Grouped by area (see `server/i9Routes.ts`):
 
-**Auth (5):** `POST /auth/register-client`, `POST /auth/login`, `POST /auth/logout`, `GET /auth/me`, `POST /auth/bootstrap-admin`
+**Auth (11):** `POST /auth/register-client`, `POST /auth/login`, `POST /auth/logout`, `GET /auth/me`, `POST /auth/bootstrap-admin`, `POST /auth/request-password-reset`, `POST /auth/reset-password`, `POST /auth/mfa/verify`, `POST /auth/mfa/enroll/start`, `POST /auth/mfa/enroll/confirm`, `POST /auth/mfa/disable`, `GET /auth/mfa/status`
 **Companies & business intake (6):** `GET/POST /companies`, `GET /companies/:id`, `PATCH /companies/:id/business-intake`, `POST /companies/:id/status`, `GET /companies/me`, `GET /companies/:id/users`, `POST /admin/users`
 **Hiring sites (2):** `GET/POST /companies/:id/hiring-sites`
 **Agreements (3):** `POST .../agreement/generate`, `GET .../agreement`, `POST .../agreement/record-signed-copy`
 **E-Verify enrollment (1):** `POST /companies/:id/everify-enrollment`
 **Billing (2):** `POST /companies/:id/checkout`, `GET /companies/:id/subscription`
+**Metered add-ons (3):** `GET /companies/:id/add-ons`, `POST .../add-ons/:addOnId/attach`, `POST .../add-ons/:addOnId/usage`
 **Usage (2):** `GET /usage/pending-approval`, `POST /usage/:id/approve`
 **New-hire request workflow (9):** `GET/POST /new-hire-requests`, `GET/PATCH /new-hire-requests/:id`, `POST .../submit`, `POST .../assign`, `POST .../status`, `POST .../case-result`, `GET .../activity`, `GET .../deadlines`, `GET .../work-packet`
 **Protected employee data (2):** `POST .../protected-data`, `POST .../protected-data/reveal`
@@ -65,9 +66,11 @@ Grouped by area (see `server/i9Routes.ts`):
 
 ## 4. Database Changes
 
-21 new tables added in `shared/i9Schema.ts` (all Drizzle ORM, migrated into the real `lbs_test` database and verified this session):
+22 tables in `shared/i9Schema.ts` (all Drizzle ORM, migrated into the real `lbs_test` database and verified this session):
 
-`i9EmployerLeads`, `i9ClientCompanies`, `i9ClientUsers`, `i9HiringSites`, `i9ServicePlans`, `i9AddOns`, `i9Subscriptions`, `i9ClientAgreements`, `i9AuthorizedRepDesignations`, `i9ClientEnrollments`, `i9NewHireRequests`, `i9ProtectedEmployeeData`, `i9CaseActivity`, `i9CaseDeadlines`, `i9SecureDocuments`, `i9Appointments`, `i9UsageRecords`, `i9InvoiceReferences`, `i9Notifications`, `i9AuditEvents`, `i9RetentionActions`, `i9SecurityIncidents`.
+`i9EmployerLeads`, `i9ClientCompanies`, `i9ClientUsers`, `i9HiringSites`, `i9ServicePlans`, `i9AddOns`, `i9Subscriptions`, `i9SubscriptionAddOns`, `i9ClientAgreements`, `i9AuthorizedRepDesignations`, `i9ClientEnrollments`, `i9NewHireRequests`, `i9ProtectedEmployeeData`, `i9CaseActivity`, `i9CaseDeadlines`, `i9SecureDocuments`, `i9Appointments`, `i9UsageRecords`, `i9InvoiceReferences`, `i9Notifications`, `i9AuditEvents`, `i9RetentionActions`, `i9SecurityIncidents`.
+
+`i9ClientUsers` also gained password-reset (`passwordResetTokenHash`/`passwordResetExpiresAt`) and MFA (`mfaSecretEncrypted`/`mfaPendingSecretEncrypted`/`mfaLastUsedStep`) columns; `i9AddOns` gained `stripeMeterId` for metered add-ons.
 
 No existing tables were altered. No destructive migrations. `i9ProtectedEmployeeData` stores only ciphertext columns (see §7) plus non-sensitive metadata (timestamps, entering user).
 
@@ -152,7 +155,7 @@ Real Stripe test-mode integration, not mocked:
 1. `syncI9StripeProducts()` runs at server boot (when `DATABASE_URL` + `STRIPE_SECRET_KEY` are set) and idempotently creates/reuses Stripe Products/Prices for each `i9ServicePlans`/`i9AddOns` row, persisting the resulting IDs back to the DB.
 2. `POST /companies/:id/checkout` builds a Stripe Checkout Session with mixed recurring (monthly plan) + one-time (setup fee, if unpaid) line items, and a `metadata.i9SubscriptionId` used to correlate the eventual webhook back to a specific pending subscription row — no employee/case data in metadata.
 3. `webhookHandlers.ts`'s existing `handleCheckoutCompleted` gained one new branch: when `session.metadata.i9SubscriptionId` is present, it calls `activateI9Subscription()` and logs an audit event, then returns — verified via `Stripe.webhooks.generateTestHeaderString()`-signed synthetic events against the real handler, and via `git stash` regression isolation to confirm the pre-existing 6 failing `booking-payment.spec.ts` tests are an unrelated sandbox limitation (no outbound reach to `checkout.stripe.com` from headless Chromium here), not a regression from this change.
-4. Documented simplification: add-ons are billed as a single flat one-time price regardless of `priceUnit` — true metered/per-unit billing is not implemented and should be scoped as a follow-up if usage-based add-on pricing becomes a real requirement.
+4. **Metered/per-unit add-on billing** (added in a follow-up round, real Stripe Billing Meters — not simulated): add-ons with `priceUnit` of `per_case`/`per_employee`/`per_form` get a genuine Stripe Billing Meter (`stripe.billing.meters.create`) plus a recurring metered Price referencing it (`recurring: { usage_type: "metered", meter: meterId }`), synced at boot the same way plans/flat add-ons are. `priceUnit: "flat"` add-ons keep the original one-time price behavior unchanged. `POST /companies/:id/add-ons/:addOnId/attach` (LBS staff only) creates the Stripe subscription item once a company has an active subscription; `POST /companies/:id/add-ons/:addOnId/usage` (LBS staff only) reports a quantity via `stripe.billing.meterEvents.create`, keyed by the company's Stripe customer ID. Deliberately staff-triggered, not automatic: the exact moment "1 unit" of a given add-on is consumed is a billing judgment call, not something inferred from case-status transitions — nothing in the new-hire-request workflow reports usage on its own. Verified end-to-end against real Stripe test mode: meter created and confirmed `active` via the Billing Meters API, price confirmed to carry the correct `recurring.meter`/`usage_type`, a real subscription item created on a real (invoice-collection) test subscription, and a usage event accepted by Stripe.
 
 ---
 
@@ -184,6 +187,8 @@ No event anywhere in the authenticated portal (dashboard, request detail, protec
 6. **UX: saving protected data wiped its own success message** — a full blocking reload unmounted the child component that displayed the confirmation. Fixed with a "silent" reload mode.
 7. **Logic: appointment confirm button unreachable for LBS staff** — initially gated by an internal-role check inside a component only rendered for users with a `clientCompanyId`, which LBS staff never have. Caught before shipping; moved confirm UI to the admin company detail page.
 8. **Test-only findings** (not app bugs, documented for completeness): a `waitForURL` glob matching a pre-navigation URL, two `getByText` ambiguity failures, an over-strict `getByLabel({exact:true})` — all fixed in the test files, not the app.
+9. **Metered-billing sync reused a stale non-metered price** — the first version of `i9StripeSync.ts`'s metered branch trusted `addOn.stripePriceId` as "already synced" even when that ID was a leftover flat one-time price from before metered billing existed, so the resulting subscription item silently pointed at the wrong (non-recurring) price. Caught by directly inspecting the created Stripe price's `recurring` field rather than trusting a 200 response. Fixed by only trusting the stored price ID when a meter ID was also already recorded.
+10. **MFA login-challenge token allowed a code to be replayed** — a valid TOTP code, once used to complete login, could be resubmitted with the same `mfaToken` and still succeed for as long as the code remained in its ~90-second validity window. Caught via a deliberate immediate-replay test. Fixed with a `mfaLastUsedStep` column: any code matching a time-step at or before one already redeemed for that user is rejected, independent of the `mfaToken`'s own 5-minute expiry.
 
 ---
 
@@ -194,14 +199,16 @@ No event anywhere in the authenticated portal (dashboard, request detail, protec
 | Unit (pure logic, no DB) | `tests/unit/i9-*.test.ts` | 82 tests / 16 suites | **82/82 passing** (fresh run, this session) |
 | API-level e2e (real Postgres) | `tests/e2e/i9-workflow.spec.ts` | 17 tests | Passing (tenant isolation, role permissions, full lifecycle, rate limiting) |
 | Browser-driven UI e2e | `tests/e2e/i9-portal-ui.spec.ts` | 3 tests | Passing (login, registration, request creation → detail, protected-data entry, work packet) |
-| Accessibility (axe-core, WCAG 2.1 A/AA) | `tests/e2e/i9-accessibility.spec.ts` — **new this pass** | 3 pages | **3/3 passing.** 2 real violations found and fixed this pass (§12.5, §12.5a); 1 pre-existing, sitewide, out-of-scope color-contrast gap is documented (§15) and the scan explicitly excludes only that one axe rule, with reasoning inline in the test file |
+| Accessibility (axe-core, WCAG 2.1 A/AA, **all rules enforced, none excluded**) | `tests/e2e/i9-accessibility.spec.ts` | 3 pages | **3/3 passing.** Every violation found (link contrast, 8 unlabeled Selects, 2 orange-badge/text contrast patterns, an opacity-modifier disclaimer) was fixed, not excluded — see §12 and §15 |
 | Responsive layout (320/375/430/768/1024/1440px, no horizontal overflow) | same file | 3 pages × 6 breakpoints = 18 checks | **18/18 passing** |
 | Mobile CTA reachability | same file | 1 check | **1/1 passing** |
 | **Full suite total** | `i9-accessibility.spec.ts` | 22 tests | **22/22 passing** (final confirmed run) |
 | Regression — booking/payment | `tests/e2e/booking-payment.spec.ts` | pre-existing | Unaffected by this phase's one shared-file edit (`webhookHandlers.ts`); confirmed via `git stash` isolation — 6 pre-existing failures are a sandbox network limitation (no route to `checkout.stripe.com`), not a regression |
-| Regression — general QA / cards / business hours | `qa-full-audit.spec.ts`, `card-workflows.spec.ts`, `business-hours.spec.ts` | pre-existing | Unaffected |
+| Regression — general QA / cards / business hours | `qa-full-audit.spec.ts`, `card-workflows.spec.ts`, `business-hours.spec.ts` | pre-existing | Unaffected; 2 additional pre-existing, unrelated test bugs found during a full-suite run were root-caused and fixed (stale "5 PM last slot" assumption, stale display-text locator) |
 
 All DB-backed tests run against a real local PostgreSQL 16 instance (`lbs_test` database), not mocks. Stripe tests run against real Stripe test-mode API calls with properly-signed synthetic webhook events, not stubs.
+
+**Not covered by automated tests (documented gap):** password reset, MFA (TOTP enrollment/login/disable/replay-protection), and metered add-on billing (attach/usage-report) were all added in a follow-up round and verified manually end-to-end against the real DB and real Stripe test mode (register → duplicate-409 → reset → old-password-rejected/new-password-accepted → token-replay-rejected for password reset; enroll → confirm → login-requires-MFA → wrong-code-rejected → correct-code-accepted → session-works → code-replay-rejected for MFA; real Billing Meter created → correct `recurring.meter`/`usage_type` on the price → real subscription item attached → usage event accepted for billing) — but no permanent Playwright spec was written for any of the three. Worth adding in a follow-up if these become high-traffic paths.
 
 ---
 
@@ -223,29 +230,51 @@ All DB-backed tests run against a real local PostgreSQL 16 instance (`lbs_test` 
 
 ## 15. Known Gaps / Follow-Up Work (Honest Accounting)
 
-- **Onboarding "wizard"**: built as a sequence of separate portal pages (business intake → hiring sites → agreement → billing) rather than a single guided, saved-progress wizard flow. Functionally complete, UX could be tightened in a follow-up.
-- **Add-on billing**: flat one-time price regardless of `priceUnit` — no true metered/per-unit billing (§10.4).
-- **MFA and malware scanning**: no provider configured; both are correctly gated off rather than faked (§14).
-- **Notification email delivery**: in-portal notifications are complete; outbound email for `deficiency_requires_client_action` and case-result events is not yet wired (only `client_activated` and `new_hire_request_submitted` send email today). Low-risk gap since in-portal notification already delivers the (non-sensitive) alert.
-- **Retention dashboard**: export/delete backend routes existed from an earlier pass; the admin UI for them was built in this pass (`RetentionSection` in `PortalAdminTools.tsx`).
+Resolved in a follow-up round after initial delivery (all verified end-to-end against the real DB/Stripe, not just written):
+
+- **Password reset / account recovery** — the portal had no way to regain access to an existing account. Added `POST /auth/request-password-reset` + `POST /auth/reset-password`, single-use HMAC-hashed tokens (never the raw token stored), a 1-hour expiry, and `PortalForgotPassword.tsx`/`PortalResetPassword.tsx`. **Requires a production DB migration before it works there** — see §17.
+- **Onboarding "wizard"** — built: `PortalOnboardingWizard.tsx` consolidates business intake, plan selection, and hiring sites into one guided flow with a stepper. Completion of each step is derived from real data (not a separate wizard-state column), so leaving and resuming later — from any device — picks up exactly where the data left off. The three original standalone pages remain reachable from the nav for editing a single section later; the wizard reuses their exact form components rather than duplicating logic.
+- **Metered/per-unit add-on billing** — built with real Stripe Billing Meters; see §10.4.
+- **Notification email for deficiency/case-result events** — built: `POST .../new-hire-requests/:id/status` now also emails the company's authorized signer (same generic, PII-free template as every other I-9 email) for the same event set that already notified in-portal. A failed/missing email never blocks the status change itself.
+- **MFA** — built: self-hosted TOTP (RFC 6238) on Node's built-in `crypto`, no third-party auth provider. Secrets are AES-256-GCM-encrypted at rest (same scheme as protected employee data), enrollment requires proving one valid code before it's trusted, disabling requires a current valid code, and login redeem-codes are single-use (a repeat of the same 30-second time-step is rejected — found and fixed during testing, see §12). `PortalSecuritySettings.tsx` / `PortalLogin.tsx`'s inline code-entry step.
+- **Sitewide brand-color contrast** — fixed: every `text-[#FF6A00]` usage on real text (not decorative icons) was audited and replaced with darker, contrast-verified variants (`#BD4F00` light / `#FF8A3D` dark — both carry real margin above the 4.5:1 threshold against the site's actual background tokens, not just pure white) across 13 files sitewide, plus 2 `bg-[#FF6A00]` badges with white text that had the same underlying problem. `i9-accessibility.spec.ts` no longer excludes the `color-contrast` rule.
+
+Still open:
+
+- **Malware scanning** for uploaded documents: no provider configured; correctly gated off (fails closed) rather than faked.
 - **E-signature**: intentionally not built — agreement "signing" is upload-of-an-already-executed-document, per the brief's explicit prohibition on faking e-signature capture without a real provider configured.
-- **Sitewide brand-color contrast (found, not fixed)**: the automated axe-core pass found the site's `text-[#FF6A00]` orange "eyebrow" label color renders at ~2.87:1 contrast against its background (WCAG 1.4.3 requires 4.5:1 for text this size) — a real, pre-existing violation, not introduced by this phase. It's used as a sitewide brand accent across dozens of sections on every page, not just the I-9 pages, so fixing it here would mean unilaterally reskinning the site's accent color from a single-page accessibility pass. Flagged for a deliberate design decision (darken the accent for text use, or reserve `#FF6A00` for large/bold UI elements only) rather than fixed silently. The test suite (`i9-accessibility.spec.ts`) explicitly excludes only this one axe rule, with the reasoning documented inline.
+- **MFA replay window is per-user, not per-code-globally**: the anti-replay check (`mfaLastUsedStep`) only rejects a step at or before one already redeemed by that same user — correct for its purpose (closing the "same code reused seconds later" window) but not a general-purpose nonce registry. Adequate for this threat model.
 
 ---
 
 ## 16. Files Changed
 
-31 files touched across the full I-9 portal build (backend + frontend + tests), plus this pass's additions:
-`tests/e2e/i9-accessibility.spec.ts` (new), `client/src/pages/i9-portal/PortalAdminTools.tsx` (retention UI), `client/src/pages/employer/NewHireVerification.tsx` (analytics events + contrast fix), `client/src/pages/i9-portal/PortalRegister.tsx` (conversion event), `client/src/pages/i9-portal/PortalNewHireRequestDetail.tsx` (deficiency/case-result note templates), `package.json` (`@axe-core/playwright` dev dependency), this document.
-
-Full list available via `git diff --stat 3ae966b..HEAD`.
+Full list available via `git diff --stat 3ae966b..HEAD`. Notable additions from the password-reset/wizard/MFA/metered-billing follow-up round: `server/i9StripeSync.ts` (metered pricing), `server/i9Security.ts` (TOTP + reset-token primitives), `client/src/pages/i9-portal/PortalOnboardingWizard.tsx`, `PortalForgotPassword.tsx`, `PortalResetPassword.tsx`, `PortalSecuritySettings.tsx` (all new), plus targeted edits across `i9Routes.ts`, `i9Storage.ts`, `i9Schema.ts`, `i9EmailService.ts`, and the sitewide color-contrast sweep (13 files).
 
 ---
 
 ## 17. Deployment / Rollback Instructions
 
 **Deployment:**
-1. Provision a Postgres 16+ database; run Drizzle migrations (`npm run db:push` or equivalent for this repo's migration tooling) to create the 21 new `i9_*` tables — no changes to existing tables, so this is additive-only and safe to run against production data.
+1. Provision a Postgres 16+ database; run Drizzle migrations (`npm run db:push` or equivalent for this repo's migration tooling) to create the 22 `i9_*` tables — no changes to existing tables, so this is additive-only and safe to run against production data. **Important:** `drizzle.config.ts` only tracks `shared/schema.ts`, not `shared/i9Schema.ts` — the `i9_*` tables have always been created out-of-band from the standard `db:push` flow. Before this deploy goes live, apply directly:
+   ```sql
+   ALTER TABLE i9_client_users
+     ADD COLUMN IF NOT EXISTS password_reset_token_hash text,
+     ADD COLUMN IF NOT EXISTS password_reset_expires_at timestamp,
+     ADD COLUMN IF NOT EXISTS mfa_secret_encrypted text,
+     ADD COLUMN IF NOT EXISTS mfa_pending_secret_encrypted text,
+     ADD COLUMN IF NOT EXISTS mfa_last_used_step integer;
+   ALTER TABLE i9_add_ons
+     ADD COLUMN IF NOT EXISTS stripe_meter_id varchar(100);
+   CREATE TABLE IF NOT EXISTS i9_subscription_add_ons (
+     id varchar(100) PRIMARY KEY DEFAULT gen_random_uuid()::text,
+     subscription_id varchar(100) NOT NULL,
+     add_on_id varchar(100) NOT NULL,
+     stripe_subscription_item_id varchar(100),
+     created_at timestamp DEFAULT now()
+   );
+   ```
+   Without this, password reset and MFA return 500s and metered add-on attach/usage fail — every other portal feature is unaffected.
 2. Set the environment variables in §14 (`DATABASE_URL`, `PROTECTED_DATA_ENCRYPTION_KEY`, `SESSION_SECRET`, `I9_ADMIN_BOOTSTRAP_SECRET`; Stripe/reCAPTCHA/GA keys are already required sitewide).
 3. Deploy the build (`npm run build`) as normal — no new build steps.
 4. Use the bootstrap-admin endpoint once, with `I9_ADMIN_BOOTSTRAP_SECRET`, to create the first `lbs_program_admin` account, then rotate/remove that secret.
