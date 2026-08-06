@@ -394,6 +394,34 @@ export function registerI9Routes(app: Express): void {
     }
   });
 
+  /** Edit a request while it's still a draft — e.g. to finish filling in
+   *  attestations before submitting. Once submitted, LBS may already be
+   *  acting on the case, so further changes go through status-transition
+   *  notes / case-result recording instead of a silent edit. */
+  app.patch("/api/i9/new-hire-requests/:id", requireI9Auth, requireI9Csrf, async (req: I9AuthedRequest, res: Response) => {
+    try {
+      const forbidden = rejectForbiddenFields(req.body);
+      if (forbidden) return res.status(400).json({ error: forbidden });
+
+      const request = await store.getI9NewHireRequest(pstr(req.params.id));
+      if (!request) return res.status(404).json({ error: "Not found" });
+      const isInternal = req.i9User!.role.startsWith("lbs_");
+      if (!isInternal && request.clientCompanyId !== req.i9User!.clientCompanyId) return res.status(403).json({ error: "Access denied" });
+      if (request.status !== "draft") return res.status(400).json({ error: "Only a request that is still in draft status can be edited." });
+
+      const parsed = insertI9NewHireRequestSchema.partial().safeParse(req.body);
+      if (!parsed.success) return res.status(400).json({ error: "Invalid data", details: parsed.error.flatten() });
+
+      await store.updateI9NewHireRequest(pstr(req.params.id), parsed.data);
+      await store.logI9Audit({ actorUserId: req.i9User!.id, actorRole: req.i9User!.role, action: "new_hire_request.edit_draft", entityType: "NewHireRequest", entityId: request.id, clientCompanyId: request.clientCompanyId, ipAddress: req.ip });
+      const updated = await store.getI9NewHireRequest(pstr(req.params.id));
+      res.json({ success: true, request: updated });
+    } catch (err: any) {
+      console.error("update new-hire request error:", err.message);
+      res.status(500).json({ error: "Failed to update request" });
+    }
+  });
+
   app.get("/api/i9/new-hire-requests", requireI9Auth, async (req: I9AuthedRequest, res: Response) => {
     const role = req.i9User!.role;
     if (role === "lbs_case_processor") return res.json({ requests: await store.listI9NewHireRequestsAssignedTo(req.i9User!.id) });

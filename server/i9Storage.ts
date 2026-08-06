@@ -634,6 +634,16 @@ export async function createI9NewHireRequest(
   return row as I9NewHireRequest;
 }
 
+/** Only ever called while a request is still `draft` (enforced in the route,
+ *  not here, since the route also owns the tenant/role check) — once
+ *  submitted, case metadata is amended through status-transition notes and
+ *  case-result recording instead, so there's a durable trail of what changed
+ *  and when rather than silent edits to a request LBS may already be acting on. */
+export async function updateI9NewHireRequest(id: string, patch: Partial<InsertI9NewHireRequest>): Promise<void> {
+  const database = getDb();
+  await database.update(i9NewHireRequests).set({ ...patch, updatedAt: new Date() } as any).where(eq(i9NewHireRequests.id, id));
+}
+
 export async function getI9NewHireRequest(id: string): Promise<I9NewHireRequest | null> {
   const database = getDb();
   const rows = await database.select().from(i9NewHireRequests).where(eq(i9NewHireRequests.id, id));
