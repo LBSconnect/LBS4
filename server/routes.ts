@@ -18,7 +18,7 @@ const bookAppointmentSchema = z.object({
   serviceSlug: z.string().optional(),
   serviceId: z.string().optional(),
   priceId: z.string().optional(),
-  priceAmount: z.number().optional(),
+  priceAmount: z.number().nonnegative("Price amount cannot be negative").optional(),
   appointmentDate: z.string().refine((val) => {
     const date = new Date(val);
     return !isNaN(date.getTime());
@@ -748,7 +748,8 @@ export async function registerRoutes(
         res.status(500).json({ success: false, error: 'Email sending failed — check server logs for details' });
       }
     } catch (error: any) {
-      res.status(500).json({ success: false, error: error.message });
+      console.error('Test email error:', error.message);
+      res.status(500).json({ success: false, error: 'Email sending failed — check server logs for details' });
     }
   });
 
