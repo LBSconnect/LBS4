@@ -32,6 +32,17 @@ import NewHireVerification from "@/pages/employer/NewHireVerification";
 import EmployerServiceAgreement from "@/pages/employer/ServiceAgreement";
 import EmployerClientIntake from "@/pages/employer/ClientIntake";
 import EmployerPricingSheet from "@/pages/employer/PricingSheet";
+import PortalLogin from "@/pages/i9-portal/PortalLogin";
+import PortalRegister from "@/pages/i9-portal/PortalRegister";
+import PortalDashboard from "@/pages/i9-portal/PortalDashboard";
+import PortalBusinessIntake from "@/pages/i9-portal/PortalBusinessIntake";
+import PortalHiringSites from "@/pages/i9-portal/PortalHiringSites";
+import PortalNewHireRequests from "@/pages/i9-portal/PortalNewHireRequests";
+import PortalNewHireRequestNew from "@/pages/i9-portal/PortalNewHireRequestNew";
+import PortalNewHireRequestDetail from "@/pages/i9-portal/PortalNewHireRequestDetail";
+import PortalAdminCompanies from "@/pages/i9-portal/PortalAdminCompanies";
+import PortalAdminCompanyDetail from "@/pages/i9-portal/PortalAdminCompanyDetail";
+import { PORTAL_ROUTES } from "@/lib/i9Portal";
 import CorporateLanding from "@/pages/corporate/Landing";
 import CorporatePrograms from "@/pages/corporate/Programs";
 import CorporateEnroll from "@/pages/corporate/Enroll";
@@ -78,6 +89,16 @@ function Router() {
         <Route path="/employer-services/new-hire-verification/agreement" component={EmployerServiceAgreement} />
         <Route path="/employer-services/new-hire-verification/intake" component={EmployerClientIntake} />
         <Route path="/employer-services/new-hire-verification/pricing-sheet" component={EmployerPricingSheet} />
+        <Route path={PORTAL_ROUTES.login} component={PortalLogin} />
+        <Route path={PORTAL_ROUTES.register} component={PortalRegister} />
+        <Route path={PORTAL_ROUTES.dashboard} component={PortalDashboard} />
+        <Route path={PORTAL_ROUTES.businessIntake} component={PortalBusinessIntake} />
+        <Route path={PORTAL_ROUTES.hiringSites} component={PortalHiringSites} />
+        <Route path={PORTAL_ROUTES.newRequest} component={PortalNewHireRequestNew} />
+        <Route path={PORTAL_ROUTES.requests} component={PortalNewHireRequests} />
+        <Route path={`${PORTAL_ROUTES.requests}/:id`} component={PortalNewHireRequestDetail} />
+        <Route path={PORTAL_ROUTES.adminCompanies} component={PortalAdminCompanies} />
+        <Route path={`${PORTAL_ROUTES.adminCompanies}/:id`} component={PortalAdminCompanyDetail} />
         <Route path="/resources" component={Resources} />
         <Route path="/about" component={About} />
         <Route path="/contact" component={Contact} />

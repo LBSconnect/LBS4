@@ -36,6 +36,23 @@ export type I9Role = (typeof I9_ROLES)[number];
 export const LBS_INTERNAL_ROLES: I9Role[] = ["lbs_program_admin", "lbs_case_processor", "lbs_intake_billing"];
 export const CLIENT_ROLES: I9Role[] = ["client_authorized_signer", "client_limited_user"];
 
+/** Catches an SSN typed into a free-text field (client notes, late-reason
+ *  explanations, lead messages) — the FORBIDDEN_SENSITIVE_FIELD_NAMES check
+ *  below only rejects a *field name* like `ssn`, which does nothing to stop
+ *  someone typing "employee SSN is 123-45-6789" into a `message` or
+ *  `clientNotes` textarea. Matches the standard XXX-XX-XXXX format with
+ *  optional separators, plus a bare 9-digit run — deliberately simple and
+ *  over-inclusive (a phone+extension or an order number could false-positive)
+ *  because the cost of a false positive (re-word one sentence) is far lower
+ *  than the cost of a false negative (an SSN persisted in a notes field). */
+const SSN_LIKE_PATTERN = /\b\d{3}[-\s]?\d{2}[-\s]?\d{4}\b/;
+export function containsLikelySensitivePattern(text: string): boolean {
+  return SSN_LIKE_PATTERN.test(text);
+}
+const sensitiveFreeTextRefinement = (val: string | undefined) => !val || !containsLikelySensitivePattern(val);
+const SENSITIVE_FREE_TEXT_MESSAGE =
+  "This looks like it may contain a Social Security number or similar identifier. Remove it — do not enter employee SSNs or document numbers in free-text fields.";
+
 // ─────────────────────────────────────────────────────────────────────────────
 // 1. EmployerLead — public lead capture, business-level fields only
 // ─────────────────────────────────────────────────────────────────────────────
@@ -77,7 +94,7 @@ export const insertI9EmployerLeadSchema = z.object({
   federalContractorStatus: z.enum(["yes", "no", "not_sure"]),
   desiredService: z.string().min(1).max(100),
   preferredConsultationMethod: z.enum(["Phone", "Email", "Video Call", "In-Person"]),
-  message: z.string().max(4000).optional().or(z.literal("")),
+  message: z.string().max(4000).refine(sensitiveFreeTextRefinement, SENSITIVE_FREE_TEXT_MESSAGE).optional().or(z.literal("")),
   consentToContact: z.boolean().refine((v) => v === true, { message: "Consent is required" }),
   captchaToken: z.string().optional(),
 });
@@ -441,14 +458,14 @@ export const insertI9NewHireRequestSchema = z.object({
   firstDayOfEmploymentForPay: z.string().min(1).max(20),
   formI9Section1CompletedDate: z.string().max(20).optional(),
   formI9Section2CompletedDate: z.string().max(20).optional(),
-  section2LateReason: z.string().max(2000).optional(),
+  section2LateReason: z.string().max(2000).refine(sensitiveFreeTextRefinement, SENSITIVE_FREE_TEXT_MESSAGE).optional(),
   attestJobOfferAccepted: z.boolean(),
   attestNotPreScreening: z.boolean(),
   attestEmployeeChoseDocuments: z.boolean(),
   attestListBHasPhoto: z.boolean().nullable().optional(),
   attestInformationAccurate: z.boolean(),
   attestParticipatingHiringSite: z.boolean(),
-  clientNotes: z.string().max(4000).optional(),
+  clientNotes: z.string().max(4000).refine(sensitiveFreeTextRefinement, SENSITIVE_FREE_TEXT_MESSAGE).optional(),
 });
 export type InsertI9NewHireRequest = z.infer<typeof insertI9NewHireRequestSchema>;
 export type I9NewHireRequest = typeof i9NewHireRequests.$inferSelect;
