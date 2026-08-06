@@ -46,7 +46,6 @@ import {
   hashPasswordResetToken,
   generateTotpSecret,
   totpProvisioningUri,
-  verifyTotpCode,
   matchTotpCodeStep,
   signMfaChallengeToken,
   verifyMfaChallengeToken,
@@ -486,9 +485,19 @@ export function registerI9Routes(app: Express): void {
       const { code } = req.body as { code?: string };
       const user = await store.getI9ClientUserById(req.i9User!.id);
       if (!user?.mfaEnabled || !user.mfaSecretEncrypted) return res.status(400).json({ error: "MFA is not enabled on this account." });
-      if (!code || !verifyTotpCode(decryptFromColumn(user.mfaSecretEncrypted), code)) {
+      // Anti-replay: this used to accept any code verifyTotpCode() considers
+      // currently valid (a bare boolean check with no memory of what's
+      // already been redeemed), unlike login and enrollment, which both use
+      // matchTotpCodeStep + mfaLastUsedStep. That meant a TOTP code already
+      // spent to log in (or observed/intercepted at that moment) stayed
+      // usable to disable MFA for the rest of its ~90s window. Matching the
+      // same anti-replay check the rest of the MFA flow uses here too.
+      if (!code) return res.status(400).json({ error: "A valid current authentication code is required to disable MFA." });
+      const matchedStep = matchTotpCodeStep(decryptFromColumn(user.mfaSecretEncrypted), code);
+      if (matchedStep === null || (user.mfaLastUsedStep != null && matchedStep <= user.mfaLastUsedStep)) {
         return res.status(400).json({ error: "A valid current authentication code is required to disable MFA." });
       }
+      await store.setI9ClientUserMfaLastUsedStep(user.id, matchedStep);
       await store.disableI9ClientUserMfa(user.id);
       await store.logI9Audit({ actorUserId: user.id, actorRole: user.role, action: "auth.mfa_disabled", clientCompanyId: user.clientCompanyId ?? undefined, ipAddress: req.ip });
       res.json({ success: true });
@@ -963,10 +972,25 @@ export function registerI9Routes(app: Express): void {
   });
 
   app.get("/api/i9/new-hire-requests/:id/activity", requireI9Auth, async (req: I9AuthedRequest, res: Response) => {
+    // Tenant check: this endpoint was previously missing the same ownership
+    // check every sibling new-hire-request route enforces, so any
+    // authenticated client user — not just internal LBS staff or that
+    // request's own company — could read another company's case activity
+    // log (including free-text case notes) just by knowing/guessing the
+    // request's UUID. Mirrors the GET /new-hire-requests/:id check above.
+    const request = await store.getI9NewHireRequest(pstr(req.params.id));
+    if (!request) return res.status(404).json({ error: "Not found" });
+    const isInternal = req.i9User!.role.startsWith("lbs_");
+    if (!isInternal && request.clientCompanyId !== req.i9User!.clientCompanyId) return res.status(403).json({ error: "Access denied" });
     res.json({ activity: await store.listI9CaseActivity(pstr(req.params.id)) });
   });
 
   app.get("/api/i9/new-hire-requests/:id/deadlines", requireI9Auth, async (req: I9AuthedRequest, res: Response) => {
+    // Same tenant-isolation gap and fix as /activity above.
+    const request = await store.getI9NewHireRequest(pstr(req.params.id));
+    if (!request) return res.status(404).json({ error: "Not found" });
+    const isInternal = req.i9User!.role.startsWith("lbs_");
+    if (!isInternal && request.clientCompanyId !== req.i9User!.clientCompanyId) return res.status(403).json({ error: "Access denied" });
     res.json({ deadlines: await store.listI9CaseDeadlines(pstr(req.params.id)) });
   });
 

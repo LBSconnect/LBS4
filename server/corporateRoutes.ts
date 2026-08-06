@@ -69,9 +69,20 @@ function requireAdminToken(req: Request, res: Response, next: NextFunction) {
   // Accept raw secret directly (for admin dashboard bootstrap)
   if (token === ADMIN_SECRET) return next();
 
-  // Or accept a signed JWT
+  // Or accept a signed JWT — but only one actually minted for an admin.
+  // Previously this just checked the signature was valid for ANY JWT signed
+  // with JWT_SECRET, without checking *which* role it was issued for. Since
+  // /api/corporate/portal/login (self-service, no admin approval needed
+  // beyond normal enrollment) signs tokens with the exact same JWT_SECRET
+  // for role "corporate-portal", every logged-in customer's own portal token
+  // also satisfied this check — full read/write access to every admin route
+  // (all accounts, approve/reject, force-activate, audit log, exports, etc.)
+  // for anyone who could self-enroll and log into the customer portal.
   try {
-    jwt.verify(token, JWT_SECRET);
+    const payload = jwt.verify(token, JWT_SECRET) as { role?: string };
+    if (payload.role !== "corporate-admin") {
+      return res.status(401).json({ error: "Invalid token role" });
+    }
     return next();
   } catch {
     return res.status(401).json({ error: "Invalid or expired token" });
