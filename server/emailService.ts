@@ -12,13 +12,8 @@ const LBS_PHONE = '281-836-5357';
 // address today. Escape all such values before embedding them in HTML so a
 // malicious submission can only ever render as inert text, never break the
 // layout or inject markup into the email LBS staff (or the customer) opens.
+// Exported: tests/unit/email-html-escaping.test.ts exercises this directly.
 export function escapeHtml(value: unknown): string {
-// All form-submitted values below are interpolated into HTML email bodies.
-// Escape them so a submitted value like `<img src=x onerror=...>` or
-// `<a href="http://phish">` can never inject markup/links into staff or
-// customer-facing notification emails. Never call this on our own static
-// template strings (BUSINESS_NAME, LBS_PHONE, pre-built HTML fragments, etc).
-function escapeHtml(value: unknown): string {
   if (value === null || value === undefined) return '';
   return String(value)
     .replace(/&/g, '&amp;')
