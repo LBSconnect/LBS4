@@ -194,6 +194,7 @@ export async function runI9Migrations(): Promise<void> {
       price_unit VARCHAR(50) NOT NULL DEFAULT 'flat',
       stripe_product_id VARCHAR(100),
       stripe_price_id VARCHAR(100),
+      stripe_meter_id VARCHAR(100),
       is_active BOOLEAN NOT NULL DEFAULT true
     );
 
@@ -428,6 +429,13 @@ export async function runI9Migrations(): Promise<void> {
       reviewed_by_user_id VARCHAR(100),
       created_at TIMESTAMP DEFAULT NOW()
     );
+  `);
+
+  // Add columns if not present (safe on existing deployments where the
+  // table above was already created before this column was introduced).
+  await pg.query(`
+    ALTER TABLE i9_add_ons
+    ADD COLUMN IF NOT EXISTS stripe_meter_id VARCHAR(100);
   `);
 }
 

@@ -22,6 +22,7 @@ import {
   I9_CLIENT_COMPANY_STATUSES,
   I9_SECURE_DOCUMENT_TYPES,
   FORBIDDEN_SENSITIVE_FIELD_NAMES,
+  passwordSchema,
   type I9Role,
   type I9ClientCompany,
   type I9NotificationEvent,
@@ -354,7 +355,7 @@ export function registerI9Routes(app: Express): void {
     companyLegalName: z.string().min(1).max(200),
     contactName: z.string().min(1).max(200),
     email: z.string().email().max(200),
-    password: z.string().min(12),
+    password: passwordSchema,
   });
 
   app.post("/api/i9/auth/register-client", i9RateLimit("i9-register", 10, 60 * 60 * 1000), async (req: Request, res: Response) => {
@@ -530,9 +531,11 @@ export function registerI9Routes(app: Express): void {
   app.post("/api/i9/auth/reset-password", i9RateLimit("i9-reset-password", 10, 60 * 60 * 1000), async (req: Request, res: Response) => {
     if (!process.env.DATABASE_URL) return secureConfigRequired(res, ["DATABASE_URL"]);
     try {
-      const schema = z.object({ token: z.string().min(1), newPassword: z.string().min(12) });
+      const schema = z.object({ token: z.string().min(1), newPassword: passwordSchema });
       const parsed = schema.safeParse(req.body);
-      if (!parsed.success) return res.status(400).json({ error: "A valid token and a password of at least 12 characters are required" });
+      if (!parsed.success) {
+        return res.status(400).json({ error: parsed.error.issues[0]?.message || "A valid token and a strong password are required" });
+      }
 
       const user = await store.getI9ClientUserByResetTokenHash(hashPasswordResetToken(parsed.data.token));
       if (!user || !user.isActive) return res.status(400).json({ error: "This reset link is invalid or has expired. Please request a new one." });
@@ -569,6 +572,12 @@ export function registerI9Routes(app: Express): void {
     const { secret, email, password, fullName } = req.body as { secret?: string; email?: string; password?: string; fullName?: string };
     if (secret !== bootstrapSecret) return res.status(401).json({ error: "Invalid bootstrap secret" });
     if (!email || !password || !fullName) return res.status(400).json({ error: "email, password, and fullName are required" });
+    const emailCheck = z.string().email().safeParse(email);
+    if (!emailCheck.success) return res.status(400).json({ error: "A valid email is required" });
+    const passwordCheck = passwordSchema.safeParse(password);
+    if (!passwordCheck.success) {
+      return res.status(400).json({ error: passwordCheck.error.issues[0]?.message || "Password does not meet strength requirements" });
+    }
     const existing = await store.getI9ClientUserByEmail(email);
     if (existing) return res.status(409).json({ error: "An account with this email already exists." });
     const user = await store.createI9ClientUser({ email: email.toLowerCase(), password, fullName, role: "lbs_program_admin" });
@@ -585,7 +594,7 @@ export function registerI9Routes(app: Express): void {
       const schema = z.object({
         clientCompanyId: z.string().optional(),
         email: z.string().email(),
-        password: z.string().min(12),
+        password: passwordSchema,
         fullName: z.string().min(1).max(200),
         role: z.enum(I9_ROLES),
         assignedHiringSiteIds: z.array(z.string()).optional(),

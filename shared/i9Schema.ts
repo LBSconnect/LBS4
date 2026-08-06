@@ -53,6 +53,27 @@ const sensitiveFreeTextRefinement = (val: string | undefined) => !val || !contai
 const SENSITIVE_FREE_TEXT_MESSAGE =
   "This looks like it may contain a Social Security number or similar identifier. Remove it — do not enter employee SSNs or document numbers in free-text fields.";
 
+/** Password strength for every I-9 portal account (client registration, LBS-staff
+ *  admin user creation, password reset, and the admin-bootstrap route). The
+ *  12-character minimum alone previously let straight-through passwords like
+ *  "aaaaaaaaaaaa" or "111111111111" through — this portal holds business
+ *  billing/contact data and gates access to case-management workflows, so it
+ *  gets the same floor most account-security guidance recommends: a length
+ *  minimum plus a basic character-variety + no-trivial-repetition check
+ *  (deliberately not a full entropy/zxcvbn scorer — that's a bigger dependency
+ *  than this gap needs). */
+const PASSWORD_MIN_LENGTH = 12;
+function isStrongPassword(password: string): boolean {
+  if (password.length < PASSWORD_MIN_LENGTH) return false;
+  if (/^(.)\1*$/.test(password)) return false; // e.g. "aaaaaaaaaaaa"
+  if (/^\d+$/.test(password)) return false; // e.g. "111111111111"
+  const classes = [/[a-z]/, /[A-Z]/, /\d/, /[^a-zA-Z0-9]/].filter((re) => re.test(password)).length;
+  return classes >= 2;
+}
+const PASSWORD_STRENGTH_MESSAGE =
+  `Password must be at least ${PASSWORD_MIN_LENGTH} characters and include at least two of: lowercase letters, uppercase letters, numbers, symbols. Repeated-character or all-digit passwords aren't allowed.`;
+export const passwordSchema = z.string().min(PASSWORD_MIN_LENGTH, PASSWORD_STRENGTH_MESSAGE).refine(isStrongPassword, PASSWORD_STRENGTH_MESSAGE);
+
 // ─────────────────────────────────────────────────────────────────────────────
 // 1. EmployerLead — public lead capture, business-level fields only
 // ─────────────────────────────────────────────────────────────────────────────
