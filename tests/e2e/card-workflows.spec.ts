@@ -69,7 +69,9 @@ test('Card 3 - View all services workflow (full unfiltered list, matching top-na
   // Camp") — see the card-testing-row-* markup in Services.tsx. Assert via
   // the stable data-testid (keyed off the service id) rather than display
   // text, so this doesn't drift again if the label copy changes.
-  const bootcamp = await page.locator('[data-testid="card-testing-row-life-insurance-boot-camp"]').count();
+  // Note: the service's `id` ("life-insurance-bootcamp") differs from its
+  // `slug` ("life-insurance-boot-camp") — the data-testid is keyed off `id`.
+  const bootcamp = await page.locator('[data-testid="card-testing-row-life-insurance-bootcamp"]').count();
   console.log('Bootcamp cards shown (should be 1, in the testing row):', bootcamp);
   expect(bootcamp).toBeGreaterThan(0);
 
