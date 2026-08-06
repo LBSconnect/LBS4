@@ -235,6 +235,11 @@ export const i9ClientUsers = pgTable("i9_client_users", {
   mfaEnabled: boolean("mfa_enabled").notNull().default(false), // always false until an MFA provider is configured — see deliverables
   lastLoginAt: timestamp("last_login_at"),
   createdAt: timestamp("created_at").defaultNow(),
+  // Password reset — only a HASH of the token is stored (never the raw token,
+  // which exists solely in the emailed link and briefly in memory), and it's
+  // single-use: cleared the moment it's redeemed or a new one is requested.
+  passwordResetTokenHash: text("password_reset_token_hash"),
+  passwordResetExpiresAt: timestamp("password_reset_expires_at"),
 });
 
 export const insertI9ClientUserSchema = z.object({

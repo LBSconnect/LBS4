@@ -98,6 +98,28 @@ export async function sendI9NotificationEmail(data: {
   return sendEmail({ to: data.to, subject: `${label} — ${BUSINESS_NAME}`, html: emailWrapper(content) });
 }
 
+/** Password-reset email. Like every other function in this file, it never
+ *  carries employee/case data — just a name and a single-use, time-limited
+ *  link. The link itself is a signed lookup, not a password, so it's safe to
+ *  put in an email. */
+export async function sendI9PasswordResetEmail(data: {
+  to: string;
+  recipientName: string;
+  resetUrl: string;
+}): Promise<boolean> {
+  const content = `
+    <h2 style="margin:0 0 6px;color:#0d1b35;font-size:22px;font-weight:700;">Reset your password</h2>
+    <p style="margin:0 0 24px;color:#64748b;font-size:14px;">Hi ${data.recipientName}, we received a request to reset the password on your LBS employer portal account. This link expires in 1 hour and can only be used once.</p>
+    <div style="text-align:center;margin:28px 0;">
+      <a href="${data.resetUrl}" style="display:inline-block;background:linear-gradient(90deg,#FF6A00,#FF2D55);color:#ffffff;font-weight:700;font-size:14px;padding:14px 32px;border-radius:999px;text-decoration:none;">
+        Reset Password
+      </a>
+    </div>
+    <p style="margin:0;color:#94a3b8;font-size:12px;text-align:center;">If you didn't request this, you can safely ignore this email — your password will not be changed.</p>
+  `;
+  return sendEmail({ to: data.to, subject: `Reset your password — ${BUSINESS_NAME}`, html: emailWrapper(content) });
+}
+
 /** Internal (LBS-staff-facing) copy of the same generic pattern, for events
  *  LBS itself needs to act on (e.g. everify_enrollment_ready_for_lbs_action). */
 export async function sendI9InternalNotificationEmail(data: {

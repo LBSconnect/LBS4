@@ -36,9 +36,9 @@ import {
   destroyI9Session,
   type I9AuthedRequest,
 } from "./i9Auth";
-import { verifyPassword, signDocumentToken, verifyDocumentToken, isProtectedDataEncryptionConfigured } from "./i9Security";
+import { verifyPassword, signDocumentToken, verifyDocumentToken, isProtectedDataEncryptionConfigured, generatePasswordResetToken, hashPasswordResetToken } from "./i9Security";
 import { informationalCaseCreationTarget } from "./i9BusinessDays";
-import { sendI9NotificationEmail, sendI9InternalNotificationEmail } from "./i9EmailService";
+import { sendI9NotificationEmail, sendI9InternalNotificationEmail, sendI9PasswordResetEmail } from "./i9EmailService";
 import { sendEmployerConsultationNotification } from "./emailService";
 import { syncI9StripeProducts } from "./i9StripeSync";
 import { getUncachableStripeClient } from "./stripeClient";
@@ -313,6 +313,54 @@ export function registerI9Routes(app: Express): void {
     } catch (err: any) {
       console.error("i9 login error:", err.message);
       res.status(500).json({ error: "Login failed" });
+    }
+  });
+
+  /** Always returns the same generic success response whether or not the
+   *  email matches an account — an attacker probing this endpoint can't use
+   *  the response to learn which emails have accounts. If a match is found,
+   *  a single-use, 1-hour reset link is emailed; nothing else happens. */
+  app.post("/api/i9/auth/request-password-reset", i9RateLimit("i9-request-reset", 8, 60 * 60 * 1000), async (req: Request, res: Response) => {
+    if (!process.env.DATABASE_URL) return secureConfigRequired(res, ["DATABASE_URL"]);
+    try {
+      const { email } = req.body as { email?: string };
+      const parsed = z.string().email().max(200).safeParse(email);
+      if (!parsed.success) return res.status(400).json({ error: "A valid email is required" });
+
+      const user = await store.getI9ClientUserByEmail(parsed.data);
+      if (user && user.isActive) {
+        const token = generatePasswordResetToken();
+        const expiresAt = new Date(Date.now() + 60 * 60 * 1000); // 1 hour
+        await store.setI9PasswordResetToken(user.id, hashPasswordResetToken(token), expiresAt);
+        const resetUrl = `${process.env.PUBLIC_SITE_URL || "https://www.lbs4.com"}/employer-services/new-hire-verification/portal/reset-password?token=${token}`;
+        await sendI9PasswordResetEmail({ to: user.email, recipientName: user.fullName, resetUrl });
+        await store.logI9Audit({ actorUserId: user.id, actorRole: user.role, action: "auth.password_reset_requested", clientCompanyId: user.clientCompanyId ?? undefined, ipAddress: req.ip });
+      }
+      res.json({ success: true, message: "If an account exists with that email, a reset link has been sent." });
+    } catch (err: any) {
+      console.error("i9 request-password-reset error:", err.message);
+      // Still respond generically even on an internal error, for the same
+      // account-enumeration reason as above.
+      res.json({ success: true, message: "If an account exists with that email, a reset link has been sent." });
+    }
+  });
+
+  app.post("/api/i9/auth/reset-password", i9RateLimit("i9-reset-password", 10, 60 * 60 * 1000), async (req: Request, res: Response) => {
+    if (!process.env.DATABASE_URL) return secureConfigRequired(res, ["DATABASE_URL"]);
+    try {
+      const schema = z.object({ token: z.string().min(1), newPassword: z.string().min(12) });
+      const parsed = schema.safeParse(req.body);
+      if (!parsed.success) return res.status(400).json({ error: "A valid token and a password of at least 12 characters are required" });
+
+      const user = await store.getI9ClientUserByResetTokenHash(hashPasswordResetToken(parsed.data.token));
+      if (!user || !user.isActive) return res.status(400).json({ error: "This reset link is invalid or has expired. Please request a new one." });
+
+      await store.resetI9ClientUserPassword(user.id, parsed.data.newPassword);
+      await store.logI9Audit({ actorUserId: user.id, actorRole: user.role, action: "auth.password_reset_completed", clientCompanyId: user.clientCompanyId ?? undefined, ipAddress: req.ip });
+      res.json({ success: true });
+    } catch (err: any) {
+      console.error("i9 reset-password error:", err.message);
+      res.status(500).json({ error: "Password reset failed" });
     }
   });
 

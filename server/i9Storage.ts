@@ -628,6 +628,39 @@ export async function listI9ClientUsersForCompany(clientCompanyId: string): Prom
   return database.select().from(i9ClientUsers).where(eq(i9ClientUsers.clientCompanyId, clientCompanyId));
 }
 
+/** Sets a fresh, single-use password reset token for a user (only a hash is
+ *  ever persisted — see i9Security.ts). Overwrites any prior token, so
+ *  requesting a new reset link silently invalidates an earlier unused one. */
+export async function setI9PasswordResetToken(userId: string, tokenHash: string, expiresAt: Date): Promise<void> {
+  const database = getDb();
+  await database
+    .update(i9ClientUsers)
+    .set({ passwordResetTokenHash: tokenHash, passwordResetExpiresAt: expiresAt } as any)
+    .where(eq(i9ClientUsers.id, userId));
+}
+
+/** Looks up a user by a reset-token hash, but only returns them if the token
+ *  hasn't expired — an expired-but-still-present token hash is treated the
+ *  same as no match, so callers never need to separately check the date. */
+export async function getI9ClientUserByResetTokenHash(tokenHash: string): Promise<I9ClientUser | null> {
+  const database = getDb();
+  const rows = await database.select().from(i9ClientUsers).where(eq(i9ClientUsers.passwordResetTokenHash, tokenHash));
+  const user = rows[0];
+  if (!user || !user.passwordResetExpiresAt) return null;
+  if (new Date(user.passwordResetExpiresAt).getTime() < Date.now()) return null;
+  return user;
+}
+
+/** Sets a new password and atomically invalidates the reset token that was
+ *  used to authorize it, so the same emailed link can't be replayed. */
+export async function resetI9ClientUserPassword(userId: string, newPassword: string): Promise<void> {
+  const database = getDb();
+  await database
+    .update(i9ClientUsers)
+    .set({ passwordHash: hashPassword(newPassword), passwordResetTokenHash: null, passwordResetExpiresAt: null } as any)
+    .where(eq(i9ClientUsers.id, userId));
+}
+
 export async function touchI9ClientUserLogin(id: string): Promise<void> {
   const database = getDb();
   await database.update(i9ClientUsers).set({ lastLoginAt: new Date() } as any).where(eq(i9ClientUsers.id, id));
