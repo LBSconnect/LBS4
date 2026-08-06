@@ -39,6 +39,8 @@ import PortalBusinessIntake from "@/pages/i9-portal/PortalBusinessIntake";
 import PortalHiringSites from "@/pages/i9-portal/PortalHiringSites";
 import PortalBilling from "@/pages/i9-portal/PortalBilling";
 import PortalAppointments from "@/pages/i9-portal/PortalAppointments";
+import PortalNotifications from "@/pages/i9-portal/PortalNotifications";
+import PortalAdminTools from "@/pages/i9-portal/PortalAdminTools";
 import PortalNewHireRequests from "@/pages/i9-portal/PortalNewHireRequests";
 import PortalNewHireRequestNew from "@/pages/i9-portal/PortalNewHireRequestNew";
 import PortalNewHireRequestDetail from "@/pages/i9-portal/PortalNewHireRequestDetail";
@@ -98,6 +100,8 @@ function Router() {
         <Route path={PORTAL_ROUTES.hiringSites} component={PortalHiringSites} />
         <Route path={PORTAL_ROUTES.billing} component={PortalBilling} />
         <Route path={PORTAL_ROUTES.appointments} component={PortalAppointments} />
+        <Route path={PORTAL_ROUTES.notifications} component={PortalNotifications} />
+        <Route path={PORTAL_ROUTES.adminTools} component={PortalAdminTools} />
         <Route path={PORTAL_ROUTES.newRequest} component={PortalNewHireRequestNew} />
         <Route path={PORTAL_ROUTES.requests} component={PortalNewHireRequests} />
         <Route path={`${PORTAL_ROUTES.requests}/:id`} component={PortalNewHireRequestDetail} />

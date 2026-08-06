@@ -10,7 +10,7 @@
 
 import { Pool } from "pg";
 import { drizzle } from "drizzle-orm/node-postgres";
-import { eq, and, desc, sql as dsql } from "drizzle-orm";
+import { eq, and, or, desc, sql as dsql } from "drizzle-orm";
 import {
   i9EmployerLeads,
   i9ClientCompanies,
@@ -1020,9 +1020,24 @@ export async function createI9Notification(data: {
   const [row] = await database.insert(i9Notifications).values(data as any).returning();
   return row;
 }
-export async function listI9NotificationsForUser(userId: string) {
+/** Notifications are created scoped to either a specific recipientUserId
+ *  (rare — used when a notification is genuinely about one person) or a
+ *  clientCompanyId (the common case — "your company's request was
+ *  submitted" is relevant to every user at that company, not one). A user
+ *  needs both matched: their own direct notifications, plus everything
+ *  addressed to their company. LBS internal staff (no clientCompanyId) only
+ *  ever see notifications addressed to them directly. */
+export async function listI9NotificationsForUser(userId: string, clientCompanyId?: string | null) {
   const database = getDb();
-  return database.select().from(i9Notifications).where(eq(i9Notifications.recipientUserId, userId)).orderBy(desc(i9Notifications.createdAt));
+  const condition = clientCompanyId
+    ? or(eq(i9Notifications.recipientUserId, userId), eq(i9Notifications.clientCompanyId, clientCompanyId))
+    : eq(i9Notifications.recipientUserId, userId);
+  return database.select().from(i9Notifications).where(condition).orderBy(desc(i9Notifications.createdAt));
+}
+
+export async function markI9NotificationRead(id: string): Promise<void> {
+  const database = getDb();
+  await database.update(i9Notifications).set({ readAt: new Date() } as any).where(eq(i9Notifications.id, id));
 }
 
 // ─────────────────────────────────────────────────────────────────────────────

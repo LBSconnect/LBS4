@@ -20,6 +20,8 @@ export const PORTAL_ROUTES = {
   hiringSites: `${PORTAL_BASE}/hiring-sites`,
   billing: `${PORTAL_BASE}/billing`,
   appointments: `${PORTAL_BASE}/appointments`,
+  notifications: `${PORTAL_BASE}/notifications`,
+  adminTools: `${PORTAL_BASE}/admin/tools`,
   requests: `${PORTAL_BASE}/requests`,
   newRequest: `${PORTAL_BASE}/requests/new`,
   requestDetail: (id: string) => `${PORTAL_BASE}/requests/${id}`,
@@ -324,6 +326,58 @@ export interface I9Subscription {
 }
 export function formatCents(cents: number): string {
   return `$${(cents / 100).toFixed(2)}`;
+}
+
+export interface I9Notification {
+  id: string;
+  clientCompanyId: string | null;
+  recipientUserId: string | null;
+  event: string;
+  relatedEntityType: string | null;
+  relatedEntityId: string | null;
+  inPortalMessage: string;
+  emailSent: boolean;
+  readAt: string | null;
+  createdAt: string | null;
+}
+
+export interface I9UsageRecord {
+  id: string;
+  clientCompanyId: string;
+  monthYear: string;
+  casesIncluded: number;
+  casesUsed: number;
+  additionalCases: number;
+  additionalCaseChargeCents: number;
+  approvalStatus: "pending_review" | "approved" | "disputed";
+  approvedByUserId: string | null;
+  approvedAt: string | null;
+  createdAt: string | null;
+}
+
+export interface I9AuditEvent {
+  id: string;
+  actorUserId: string | null;
+  actorRole: string | null;
+  action: string;
+  entityType: string | null;
+  entityId: string | null;
+  clientCompanyId: string | null;
+  details: Record<string, unknown>;
+  ipAddress: string | null;
+  createdAt: string | null;
+}
+
+export interface I9SecurityIncident {
+  id: string;
+  category: string;
+  severity: "low" | "medium" | "high";
+  description: string;
+  relatedUserId: string | null;
+  ipAddress: string | null;
+  status: "open" | "reviewed" | "resolved";
+  reviewedByUserId: string | null;
+  createdAt: string | null;
 }
 
 export interface I9AuthorizedRepDesignation {

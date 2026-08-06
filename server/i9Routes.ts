@@ -438,6 +438,13 @@ export function registerI9Routes(app: Express): void {
       await store.updateI9ClientCompanyStatus(pstr(req.params.id), status);
       await store.logI9Audit({ actorUserId: req.i9User!.id, actorRole: req.i9User!.role, action: "company.status_change", entityType: "ClientCompany", entityId: pstr(req.params.id), clientCompanyId: pstr(req.params.id), details: { from: company.status, to: status }, ipAddress: req.ip });
 
+      await store.createI9Notification({
+        clientCompanyId: pstr(req.params.id),
+        event: "client_activated",
+        relatedEntityType: "ClientCompany",
+        relatedEntityId: pstr(req.params.id),
+        inPortalMessage: `Your account status changed to "${status.replace(/_/g, " ")}".`,
+      });
       if (status === "active" && company.authorizedSignerEmail) {
         await sendI9NotificationEmail({ to: company.authorizedSignerEmail, recipientName: company.authorizedSignerName || "there", companyName: company.legalBusinessName, event: "client_activated" });
       }
@@ -645,6 +652,29 @@ export function registerI9Routes(app: Express): void {
 
       await store.updateI9NewHireRequestStatus(pstr(req.params.id), status, req.i9User!.id, note);
       await store.logI9Audit({ actorUserId: req.i9User!.id, actorRole: req.i9User!.role, action: "new_hire_request.status_change", entityType: "NewHireRequest", entityId: pstr(req.params.id), clientCompanyId: request.clientCompanyId, details: { from: request.status, to: status }, ipAddress: req.ip });
+
+      // Client-visible notification for the transitions clients actually
+      // need to act on or be aware of — never includes employee data, just
+      // a generic pointer back to the secure portal (per the brief: every
+      // notification stays PII-free and directs the reader to log in).
+      const NOTIFY_EVENT_FOR_STATUS: Record<string, string> = {
+        deficient_client_action_required: "deficiency_requires_client_action",
+        employment_authorized: "case_result_available",
+        needs_more_time: "case_result_available",
+        mismatch_employee_decision_pending: "mismatch_notice_review_pending",
+        case_in_continuance: "case_result_available",
+        final_nonconfirmation: "case_result_available",
+      };
+      const notifyEvent = NOTIFY_EVENT_FOR_STATUS[status];
+      if (notifyEvent) {
+        await store.createI9Notification({
+          clientCompanyId: request.clientCompanyId,
+          event: notifyEvent,
+          relatedEntityType: "NewHireRequest",
+          relatedEntityId: request.id,
+          inPortalMessage: `An update is available for request ${request.internalRequestNumber}. Log in to the secure portal to view it.`,
+        });
+      }
       res.json({ success: true, status });
     } catch {
       res.status(500).json({ error: "Failed to update status" });
@@ -929,7 +959,12 @@ export function registerI9Routes(app: Express): void {
   // ═══════════════════════════════════════════════════════════════════════
 
   app.get("/api/i9/notifications", requireI9Auth, async (req: I9AuthedRequest, res: Response) => {
-    res.json({ notifications: await store.listI9NotificationsForUser(req.i9User!.id) });
+    res.json({ notifications: await store.listI9NotificationsForUser(req.i9User!.id, req.i9User!.clientCompanyId) });
+  });
+
+  app.patch("/api/i9/notifications/:id/read", requireI9Auth, requireI9Csrf, async (req: I9AuthedRequest, res: Response) => {
+    await store.markI9NotificationRead(pstr(req.params.id));
+    res.json({ success: true });
   });
 
   // ═══════════════════════════════════════════════════════════════════════
