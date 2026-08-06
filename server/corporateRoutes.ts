@@ -36,6 +36,7 @@ import {
 import { insertCorporateAccountSchema, insertCorporateAppointmentSchema } from "@shared/schema";
 import { getUncachableStripeClient } from "./stripeClient";
 import { z } from "zod";
+import { checkRateLimit } from "./i9Security";
 
 // IMPORTANT: unlike SESSION_SECRET (server/i9Auth.ts) or PROTECTED_DATA_ENCRYPTION_KEY
 // (server/i9Security.ts), this secret is not just used to *sign* things —
@@ -46,6 +47,22 @@ import { z } from "zod";
 // isAdminAuthConfigured() gates every admin/portal route closed (503) instead.
 const ADMIN_SECRET = process.env.ADMIN_SECRET;
 const JWT_SECRET = process.env.JWT_SECRET || ADMIN_SECRET;
+
+// ─── Rate limiting ──────────────────────────────────────────────────────────
+// Neither login endpoint below previously had any rate limiting — both are
+// credential checks (an admin secret, an account-code + email pair) reachable
+// by anyone, so an unlimited number of guesses was possible. Same sliding-
+// window limiter the I-9 portal uses (server/i9Security.ts), keyed by
+// IP+bucket.
+function corporateRateLimit(bucket: string, limit: number, windowMs: number) {
+  return (req: Request, res: Response, next: NextFunction) => {
+    const { allowed } = checkRateLimit(`${bucket}:${req.ip}`, limit, windowMs);
+    if (!allowed) {
+      return res.status(429).json({ error: "Too many requests. Please wait a few minutes and try again." });
+    }
+    next();
+  };
+}
 
 if (!ADMIN_SECRET) {
   console.warn(
@@ -116,7 +133,7 @@ export async function registerCorporateRoutes(app: Express): Promise<void> {
 
   // ── Admin Auth ──────────────────────────────────────────────────────────────
 
-  app.post("/api/admin/corporate/login", (req: Request, res: Response) => {
+  app.post("/api/admin/corporate/login", corporateRateLimit("corp-admin-login", 10, 15 * 60 * 1000), (req: Request, res: Response) => {
     if (!ADMIN_SECRET || !JWT_SECRET) return corporateAuthNotConfigured(res);
     const { secret } = req.body as { secret?: string };
     if (!secret || secret !== ADMIN_SECRET) {
@@ -609,7 +626,7 @@ export async function registerCorporateRoutes(app: Express): Promise<void> {
 
   // ── Customer Portal: Login ────────────────────────────────────────────────────
 
-  app.post("/api/corporate/portal/login", async (req: Request, res: Response) => {
+  app.post("/api/corporate/portal/login", corporateRateLimit("corp-portal-login", 10, 15 * 60 * 1000), async (req: Request, res: Response) => {
     if (!JWT_SECRET) return corporateAuthNotConfigured(res);
     try {
       const { accountCode, email } = req.body as { accountCode?: string; email?: string };

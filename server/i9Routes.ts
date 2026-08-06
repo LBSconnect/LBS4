@@ -68,6 +68,28 @@ function ensureUploadDir() {
   fs.mkdirSync(PRIVATE_UPLOAD_DIR, { recursive: true });
 }
 
+/** The upload route's `mimeType` field is client-declared metadata, not a
+ *  server-verified fact — a caller could send `application/pdf` alongside
+ *  bytes that are actually an HTML/script payload or an executable. This
+ *  checks the file's real magic bytes against the declared type so upload
+ *  validation isn't trusting the client's word for what the file is. Download
+ *  already forces `Content-Disposition: attachment` + `X-Content-Type-Options:
+ *  nosniff` (belt-and-suspenders against a browser executing served content),
+ *  but rejecting a mismatched file at upload time is the stronger control. */
+export function magicBytesMatchMimeType(buffer: Buffer, mimeType: string): boolean {
+  if (buffer.length < 4) return false;
+  switch (mimeType) {
+    case "application/pdf":
+      return buffer.subarray(0, 4).toString("latin1") === "%PDF";
+    case "image/png":
+      return buffer.subarray(0, 8).equals(Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]));
+    case "image/jpeg":
+      return buffer[0] === 0xff && buffer[1] === 0xd8 && buffer[2] === 0xff;
+    default:
+      return false;
+  }
+}
+
 /** Express 5's route-param/query types allow `string | string[] | ParsedQs |
  *  ParsedQs[]` (to support repeated params like `/:id+` and nested query
  *  objects like `?a[b]=c`), none of which these routes use — every `:id`/
@@ -546,7 +568,7 @@ export function registerI9Routes(app: Express): void {
     }
   });
 
-  app.post("/api/i9/auth/logout", requireI9Auth, (req: I9AuthedRequest, res: Response) => {
+  app.post("/api/i9/auth/logout", requireI9Auth, requireI9Csrf, (req: I9AuthedRequest, res: Response) => {
     destroyI9Session(req, res, () => res.json({ success: true }));
   });
 
@@ -963,10 +985,22 @@ export function registerI9Routes(app: Express): void {
   });
 
   app.get("/api/i9/new-hire-requests/:id/activity", requireI9Auth, async (req: I9AuthedRequest, res: Response) => {
+    // Same cross-tenant check every sibling new-hire-request route applies
+    // (see GET /:id above) — this was missing here, letting any authenticated
+    // client user read another company's case activity log by request ID.
+    const request = await store.getI9NewHireRequest(pstr(req.params.id));
+    if (!request) return res.status(404).json({ error: "Not found" });
+    const isInternal = req.i9User!.role.startsWith("lbs_");
+    if (!isInternal && request.clientCompanyId !== req.i9User!.clientCompanyId) return res.status(403).json({ error: "Access denied" });
     res.json({ activity: await store.listI9CaseActivity(pstr(req.params.id)) });
   });
 
   app.get("/api/i9/new-hire-requests/:id/deadlines", requireI9Auth, async (req: I9AuthedRequest, res: Response) => {
+    // Same cross-tenant check as above — was missing here too.
+    const request = await store.getI9NewHireRequest(pstr(req.params.id));
+    if (!request) return res.status(404).json({ error: "Not found" });
+    const isInternal = req.i9User!.role.startsWith("lbs_");
+    if (!isInternal && request.clientCompanyId !== req.i9User!.clientCompanyId) return res.status(403).json({ error: "Access denied" });
     res.json({ deadlines: await store.listI9CaseDeadlines(pstr(req.params.id)) });
   });
 
@@ -1077,6 +1111,9 @@ export function registerI9Routes(app: Express): void {
       const buffer = Buffer.from(parsed.data.base64Content, "base64");
       if (buffer.length > MAX_UPLOAD_BYTES) return res.status(413).json({ error: `File too large. Maximum size is ${MAX_UPLOAD_BYTES / 1024 / 1024}MB.` });
       if (buffer.length === 0) return res.status(400).json({ error: "Empty file" });
+      if (!magicBytesMatchMimeType(buffer, parsed.data.mimeType)) {
+        return res.status(400).json({ error: "File content does not match the declared file type." });
+      }
 
       ensureUploadDir();
       const id = crypto.randomUUID();

@@ -7,6 +7,22 @@ import { sendContactNotification, sendContactAcknowledgement, sendAppointmentCon
 import { registerCorporateRoutes } from "./corporateRoutes";
 import { registerI9Routes } from "./i9Routes";
 import { z } from "zod";
+import { checkRateLimit } from "./i9Security";
+
+// Public form/lead endpoints below had no rate limiting at all — reCAPTCHA
+// (where configured, via RECAPTCHA_SECRET_KEY) is the primary anti-spam
+// control, but it's opt-in per environment; this is unconditional
+// defense-in-depth against scripted spam/abuse of these forms, using the
+// same sliding-window limiter the I-9 portal uses (server/i9Security.ts).
+function publicFormRateLimit(bucket: string, limit: number, windowMs: number) {
+  return (req: any, res: any, next: any) => {
+    const { allowed } = checkRateLimit(`${bucket}:${req.ip}`, limit, windowMs);
+    if (!allowed) {
+      return res.status(429).json({ error: "Too many requests. Please wait a few minutes and try again." });
+    }
+    next();
+  };
+}
 
 // Validation schema for appointment booking
 const bookAppointmentSchema = z.object({
@@ -218,7 +234,7 @@ export async function registerRoutes(
     }
   });
 
-  app.post('/api/contact', async (req, res) => {
+  app.post('/api/contact', publicFormRateLimit('contact', 10, 15 * 60 * 1000), async (req, res) => {
     try {
       // Verify captcha if secret key is configured
       const captchaSecretKey = process.env.RECAPTCHA_SECRET_KEY;
@@ -281,7 +297,7 @@ export async function registerRoutes(
     onBehalfOfAnother: z.boolean(),
   });
 
-  app.post('/api/privacy-requests', async (req, res) => {
+  app.post('/api/privacy-requests', publicFormRateLimit('privacy-requests', 10, 15 * 60 * 1000), async (req, res) => {
     try {
       const parsed = privacyRequestSchema.safeParse(req.body);
       if (!parsed.success) {
@@ -330,7 +346,7 @@ export async function registerRoutes(
   // Employer-services lead form (New-Hire Verification & Form I-9 Support).
   // Intentionally collects only business-level contact/sizing info — never
   // employee Form I-9 data, SSNs, or identity documents. See NewHireVerification.tsx.
-  app.post('/api/employer-consultations', async (req, res) => {
+  app.post('/api/employer-consultations', publicFormRateLimit('employer-consultations', 10, 15 * 60 * 1000), async (req, res) => {
     try {
       const captchaSecretKey = process.env.RECAPTCHA_SECRET_KEY;
       const { captchaToken, ...formData } = req.body;
@@ -396,7 +412,7 @@ export async function registerRoutes(
 
   // Employer client intake (business-level onboarding info only — never employee
   // Form I-9 data, SSNs, or identity documents). See ClientIntake.tsx.
-  app.post('/api/employer-intake', async (req, res) => {
+  app.post('/api/employer-intake', publicFormRateLimit('employer-intake', 10, 15 * 60 * 1000), async (req, res) => {
     try {
       const captchaSecretKey = process.env.RECAPTCHA_SECRET_KEY;
       const { captchaToken, ...formData } = req.body;
@@ -651,6 +667,14 @@ export async function registerRoutes(
   });
 
   // Update appointment payment status (called after successful payment)
+  // Security note: this endpoint is unauthenticated by design (it's polled/called
+  // from the client-side checkout-success page using only the appointment's
+  // unguessable UUID) — so it must never take the caller's word for it that
+  // payment succeeded. It verifies the appointment's actual Stripe Checkout
+  // Session status server-side before marking anything paid. Real-time payment
+  // status is still authoritative from the signed webhook in webhookHandlers.ts;
+  // this route only lets the success page reflect that status a little sooner
+  // without waiting on webhook delivery, and is safe to call repeatedly.
   app.post('/api/appointments/:id/payment-complete', async (req, res) => {
     try {
       const { id } = req.params;
@@ -660,7 +684,21 @@ export async function registerRoutes(
         return res.status(404).json({ error: 'Appointment not found' });
       }
 
-      const updatedAppointment = await storage.updateAppointmentPayment(id, 'paid');
+      if (appointment.paymentStatus === 'paid') {
+        return res.json({ success: true, appointment });
+      }
+
+      if (!appointment.stripeSessionId) {
+        return res.status(400).json({ error: 'No payment session is associated with this appointment.' });
+      }
+
+      const stripe = await getUncachableStripeClient();
+      const session = await stripe.checkout.sessions.retrieve(appointment.stripeSessionId);
+      if (session.payment_status !== 'paid') {
+        return res.status(409).json({ error: 'Payment has not been completed for this appointment yet.' });
+      }
+
+      const updatedAppointment = await storage.updateAppointmentPayment(id, 'paid', session.id);
 
       res.json({
         success: true,
