@@ -7,6 +7,7 @@ import SEO from "@/components/SEO";
 import { UserPlus, ShieldCheck } from "lucide-react";
 import { i9Api, I9ApiError, PORTAL_ROUTES, type I9User } from "@/lib/i9Portal";
 import { useI9Session, NAVY } from "./_shared";
+import { trackEvent } from "@/components/Analytics";
 
 const MIN_PASSWORD_LENGTH = 12;
 
@@ -42,6 +43,10 @@ export default function PortalRegister() {
         method: "POST",
         body: JSON.stringify({ companyLegalName, contactName, email, password }),
       });
+      // Conversion event only — no PII (company/contact name, email) is ever
+      // passed as an event param, matching the site's no-employee/business-PII-
+      // in-analytics boundary.
+      trackEvent("employer_onboarding_registered");
       session.setUser(result.user);
       session.setStatus("authed");
       setLocation(PORTAL_ROUTES.dashboard);

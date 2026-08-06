@@ -10,7 +10,7 @@
 
 import { Pool } from "pg";
 import { drizzle } from "drizzle-orm/node-postgres";
-import { eq, and, desc, sql as dsql } from "drizzle-orm";
+import { eq, and, or, desc, sql as dsql } from "drizzle-orm";
 import {
   i9EmployerLeads,
   i9ClientCompanies,
@@ -547,9 +547,59 @@ export async function updateI9ClientCompany(id: string, patch: Partial<InsertI9C
   await database.update(i9ClientCompanies).set(values as any).where(eq(i9ClientCompanies.id, id));
 }
 
+/** Separate from updateI9ClientCompany because these fields are LBS-recorded
+ *  (never client-editable — a client cannot self-report their own E-Verify
+ *  company ID or MOU signature) and aren't part of insertI9ClientCompanySchema
+ *  at all. The MOU itself is executed by the client directly with DHS/SSA,
+ *  outside this website; this only records status/reference info after the
+ *  fact — see server/i9Routes.ts's everify-enrollment route. */
+export async function recordI9EverifyEnrollment(
+  id: string,
+  data: { everifyCompanyId?: string; mouSignerName?: string; mouSignedDate?: string; mouSecureReference?: string }
+): Promise<void> {
+  const database = getDb();
+  await database.update(i9ClientCompanies).set({ ...data, updatedAt: new Date() } as any).where(eq(i9ClientCompanies.id, id));
+}
+
 // ─────────────────────────────────────────────────────────────────────────────
 // ClientUser (auth)
 // ─────────────────────────────────────────────────────────────────────────────
+
+// ─────────────────────────────────────────────────────────────────────────────
+// ClientAgreement — the LBS commercial agreement (separate from the E-Verify
+// MOU, which is executed by the client directly with DHS/SSA — see
+// recordI9EverifyEnrollment above). No e-signature provider is configured
+// (see server/i9Routes.ts's agreement routes), so this only ever generates
+// document text for download/print and records a reference to an uploaded
+// signed copy — it never simulates or fakes a signature capture.
+// ─────────────────────────────────────────────────────────────────────────────
+
+export async function createI9ClientAgreement(clientCompanyId: string, documentVersion: string, generatedDocumentHtml: string) {
+  const database = getDb();
+  const [row] = await database
+    .insert(i9ClientAgreements)
+    .values({ clientCompanyId, documentVersion, generatedDocumentHtml, status: "generated" } as any)
+    .returning();
+  return row;
+}
+
+export async function getLatestI9ClientAgreement(clientCompanyId: string) {
+  const database = getDb();
+  const rows = await database
+    .select()
+    .from(i9ClientAgreements)
+    .where(eq(i9ClientAgreements.clientCompanyId, clientCompanyId))
+    .orderBy(desc(i9ClientAgreements.createdAt));
+  return rows[0] ?? null;
+}
+
+export async function recordI9AgreementSignedCopy(id: string, data: { secureDocumentId: string; signedByName: string }) {
+  const database = getDb();
+  await database
+    .update(i9ClientAgreements)
+    .set({ status: "signed", signedByName: data.signedByName, signedDocumentSecureDocumentId: data.secureDocumentId, signedAt: new Date() } as any)
+    .where(eq(i9ClientAgreements.id, id));
+}
 
 export async function createI9ClientUser(data: InsertI9ClientUser): Promise<I9ClientUser> {
   const database = getDb();
@@ -609,6 +659,63 @@ export async function listI9ServicePlans() {
 export async function listI9AddOns() {
   const database = getDb();
   return database.select().from(i9AddOns).where(eq(i9AddOns.isActive, true));
+}
+export async function getI9ServicePlan(id: string) {
+  const database = getDb();
+  const rows = await database.select().from(i9ServicePlans).where(eq(i9ServicePlans.id, id));
+  return rows[0] ?? null;
+}
+/** Used by server/i9StripeSync.ts to persist the Stripe product/price IDs it
+ *  creates back onto the catalog row — the catalog itself is seeded once
+ *  from static data (seedI9Catalog), but the Stripe-side IDs only exist
+ *  once STRIPE_SECRET_KEY is configured and the sync has actually run. */
+export async function setI9ServicePlanStripeIds(id: string, ids: { stripeProductId: string; stripeMonthlyPriceId?: string; stripeSetupPriceId?: string }) {
+  const database = getDb();
+  await database.update(i9ServicePlans).set(ids as any).where(eq(i9ServicePlans.id, id));
+}
+export async function setI9AddOnStripeIds(id: string, ids: { stripeProductId: string; stripePriceId: string }) {
+  const database = getDb();
+  await database.update(i9AddOns).set(ids as any).where(eq(i9AddOns.id, id));
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Subscription — Stripe-backed. Created `pending` when checkout starts,
+// flipped to `active` by the checkout.session.completed webhook (see
+// server/webhookHandlers.ts) — never by the client directly, since only
+// Stripe confirming payment should ever mark a subscription active.
+// ─────────────────────────────────────────────────────────────────────────────
+
+export async function createI9PendingSubscription(clientCompanyId: string, servicePlanId: string) {
+  const database = getDb();
+  const [row] = await database
+    .insert(i9Subscriptions)
+    .values({ clientCompanyId, servicePlanId, status: "pending" } as any)
+    .returning();
+  return row;
+}
+
+export async function activateI9Subscription(id: string, data: { stripeCustomerId: string; stripeSubscriptionId: string; setupFeePaid: boolean }) {
+  const database = getDb();
+  await database
+    .update(i9Subscriptions)
+    .set({ status: "active", stripeCustomerId: data.stripeCustomerId, stripeSubscriptionId: data.stripeSubscriptionId, setupFeePaid: data.setupFeePaid, currentPeriodStart: new Date() } as any)
+    .where(eq(i9Subscriptions.id, id));
+}
+
+export async function getI9Subscription(id: string) {
+  const database = getDb();
+  const rows = await database.select().from(i9Subscriptions).where(eq(i9Subscriptions.id, id));
+  return rows[0] ?? null;
+}
+
+export async function getLatestI9SubscriptionForCompany(clientCompanyId: string) {
+  const database = getDb();
+  const rows = await database
+    .select()
+    .from(i9Subscriptions)
+    .where(eq(i9Subscriptions.clientCompanyId, clientCompanyId))
+    .orderBy(desc(i9Subscriptions.createdAt));
+  return rows[0] ?? null;
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -913,9 +1020,24 @@ export async function createI9Notification(data: {
   const [row] = await database.insert(i9Notifications).values(data as any).returning();
   return row;
 }
-export async function listI9NotificationsForUser(userId: string) {
+/** Notifications are created scoped to either a specific recipientUserId
+ *  (rare — used when a notification is genuinely about one person) or a
+ *  clientCompanyId (the common case — "your company's request was
+ *  submitted" is relevant to every user at that company, not one). A user
+ *  needs both matched: their own direct notifications, plus everything
+ *  addressed to their company. LBS internal staff (no clientCompanyId) only
+ *  ever see notifications addressed to them directly. */
+export async function listI9NotificationsForUser(userId: string, clientCompanyId?: string | null) {
   const database = getDb();
-  return database.select().from(i9Notifications).where(eq(i9Notifications.recipientUserId, userId)).orderBy(desc(i9Notifications.createdAt));
+  const condition = clientCompanyId
+    ? or(eq(i9Notifications.recipientUserId, userId), eq(i9Notifications.clientCompanyId, clientCompanyId))
+    : eq(i9Notifications.recipientUserId, userId);
+  return database.select().from(i9Notifications).where(condition).orderBy(desc(i9Notifications.createdAt));
+}
+
+export async function markI9NotificationRead(id: string): Promise<void> {
+  const database = getDb();
+  await database.update(i9Notifications).set({ readAt: new Date() } as any).where(eq(i9Notifications.id, id));
 }
 
 // ─────────────────────────────────────────────────────────────────────────────

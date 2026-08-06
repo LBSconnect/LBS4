@@ -3,6 +3,7 @@ import { storage } from './storage';
 import { sendAppointmentConfirmation, sendAppointmentCalendarInvite, sendPaymentNotification } from './emailService';
 import { updateCorporateAccountStripe, getCorporateAccount, logAudit } from './corporateStorage';
 import { sendActivationEmail } from './corporateEmailService';
+import { activateI9Subscription, logI9Audit } from './i9Storage';
 import type Stripe from 'stripe';
 
 export class WebhookHandlers {
@@ -81,6 +82,29 @@ export class WebhookHandlers {
         if (activated) sendActivationEmail(activated).catch(console.error);
       } catch (error: any) {
         console.error('Error activating corporate account for session:', session.id, error.message);
+      }
+      return;
+    }
+
+    // New-Hire Verification / I-9 portal: activate the pending subscription
+    // created when checkout started (server/i9Routes.ts's checkout route).
+    const i9SubscriptionId = session.metadata?.i9SubscriptionId;
+    if (i9SubscriptionId) {
+      try {
+        await activateI9Subscription(i9SubscriptionId, {
+          stripeCustomerId: (session.customer as string) || '',
+          stripeSubscriptionId: (session.subscription as string) || '',
+          setupFeePaid: session.metadata?.i9SetupFeeIncluded === 'true',
+        });
+        await logI9Audit({
+          action: 'billing.subscription_activated',
+          entityType: 'Subscription',
+          entityId: i9SubscriptionId,
+          clientCompanyId: session.metadata?.i9ClientCompanyId,
+          details: { stripeCustomer: session.customer, stripeSubscription: session.subscription },
+        });
+      } catch (error: any) {
+        console.error('Error activating I-9 subscription for session:', session.id, error.message);
       }
       return;
     }

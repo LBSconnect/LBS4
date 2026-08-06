@@ -79,6 +79,7 @@ import {
   compliancePoints,
   employerFaqs,
 } from "@/lib/employerServices";
+import { PORTAL_ROUTES } from "@/lib/i9Portal";
 
 const MAPS_URL = "https://maps.google.com/?q=616+FM+1960+Rd+W+Ste+101+Houston+TX+77090";
 const RECAPTCHA_SITE_KEY = import.meta.env.VITE_RECAPTCHA_SITE_KEY || "";
@@ -103,6 +104,15 @@ const MANAGED_ICONS: Record<string, typeof ClipboardCheck> = {
   GraduationCap,
 };
 
+const YES_NO_NOT_SURE_OPTIONS = ["Yes", "No", "Not Sure"] as const;
+type YesNoNotSure = (typeof YES_NO_NOT_SURE_OPTIONS)[number];
+function toApiYesNoNotSure(v: YesNoNotSure | ""): "yes" | "no" | "not_sure" | "" {
+  if (v === "Yes") return "yes";
+  if (v === "No") return "no";
+  if (v === "Not Sure") return "not_sure";
+  return "";
+}
+
 const emptyForm = {
   contactName: "",
   companyName: "",
@@ -113,6 +123,9 @@ const emptyForm = {
   employeeCount: "",
   newHiresPerMonth: "",
   hiringLocations: "",
+  alreadyEnrolledInEverify: "" as YesNoNotSure | "",
+  usesAnotherEmployerAgent: "" as YesNoNotSure | "",
+  federalContractorStatus: "" as YesNoNotSure | "",
   desiredService: "" as (typeof DESIRED_SERVICE_OPTIONS)[number] | "",
   preferredConsultationMethod: "" as (typeof CONSULTATION_METHOD_OPTIONS)[number] | "",
   message: "",
@@ -170,7 +183,29 @@ export default function NewHireVerification() {
 
   const consultationMutation = useMutation({
     mutationFn: async (data: typeof formData & { captchaToken?: string }) => {
-      const res = await apiRequest("POST", "/api/employer-consultations", data);
+      // Maps this page's field names onto the I-9 lead schema (server/i9Schema.ts) —
+      // kept as a mapping step, rather than renaming the form's own state, to avoid
+      // an invasive rename across this file's ~900 lines for a same-page-only detail.
+      const payload = {
+        contactName: data.contactName,
+        companyName: data.companyName,
+        businessEmail: data.businessEmail,
+        businessPhone: data.businessPhone,
+        companyAddress: data.companyAddress,
+        industry: data.industry,
+        employeeCount: data.employeeCount,
+        monthlyHires: data.newHiresPerMonth,
+        hiringLocations: data.hiringLocations,
+        alreadyEnrolledInEverify: toApiYesNoNotSure(data.alreadyEnrolledInEverify),
+        usesAnotherEmployerAgent: toApiYesNoNotSure(data.usesAnotherEmployerAgent),
+        federalContractorStatus: toApiYesNoNotSure(data.federalContractorStatus),
+        desiredService: data.desiredService,
+        preferredConsultationMethod: data.preferredConsultationMethod,
+        message: data.message,
+        consentToContact: data.consent,
+        captchaToken: data.captchaToken,
+      };
+      const res = await apiRequest("POST", "/api/i9/leads", payload);
       return await res.json();
     },
     onSuccess: () => {
@@ -212,6 +247,14 @@ export default function NewHireVerification() {
       toast({
         title: "Missing information",
         description: "Please select a desired service and preferred consultation method.",
+        variant: "destructive",
+      });
+      return;
+    }
+    if (!formData.alreadyEnrolledInEverify || !formData.usesAnotherEmployerAgent || !formData.federalContractorStatus) {
+      toast({
+        title: "Missing information",
+        description: "Please answer the E-Verify enrollment, Employer Agent, and federal contractor questions.",
         variant: "destructive",
       });
       return;
@@ -378,6 +421,29 @@ export default function NewHireVerification() {
                   View Plans
                 </Button>
               </a>
+            </div>
+            <div className="flex flex-wrap items-center justify-center gap-4 pt-1">
+              <Link href={PORTAL_ROUTES.register}>
+                <Button
+                  variant="outline"
+                  className="border-white/30 text-white bg-white/5 backdrop-blur-sm rounded-full"
+                  data-testid="button-hero-start-onboarding"
+                  onClick={() => trackEvent("portal_start_onboarding_click", { location: "hero" })}
+                >
+                  Start Employer Onboarding
+                </Button>
+              </Link>
+              <Link href={PORTAL_ROUTES.login}>
+                <Button
+                  variant="ghost"
+                  className="text-white/80 hover:text-white hover:bg-white/10 rounded-full"
+                  data-testid="button-hero-client-portal-login"
+                  onClick={() => trackEvent("portal_login_click", { location: "hero" })}
+                >
+                  <ShieldCheck className="w-4 h-4 mr-2" />
+                  Client Portal Login
+                </Button>
+              </Link>
             </div>
             <p className="text-sm text-white/60 max-w-2xl mx-auto pt-2" data-testid="text-hero-trust-line">
               Serving small businesses, staffing companies, home-health agencies, transportation companies,
@@ -787,13 +853,13 @@ export default function NewHireVerification() {
                       />
                     </div>
                     <div className="space-y-2">
-                      <Label>Approx. Number of Employees *</Label>
+                      <Label htmlFor="select-employee-count">Approx. Number of Employees *</Label>
                       <Select
                         required
                         value={formData.employeeCount}
                         onValueChange={(v) => { handleFieldStart(); setFormData({ ...formData, employeeCount: v }); }}
                       >
-                        <SelectTrigger data-testid="select-employee-count">
+                        <SelectTrigger id="select-employee-count" data-testid="select-employee-count">
                           <SelectValue placeholder="Select a range" />
                         </SelectTrigger>
                         <SelectContent>
@@ -804,13 +870,13 @@ export default function NewHireVerification() {
                       </Select>
                     </div>
                     <div className="space-y-2">
-                      <Label>Approx. New Hires per Month *</Label>
+                      <Label htmlFor="select-new-hires-per-month">Approx. New Hires per Month *</Label>
                       <Select
                         required
                         value={formData.newHiresPerMonth}
                         onValueChange={(v) => { handleFieldStart(); setFormData({ ...formData, newHiresPerMonth: v }); }}
                       >
-                        <SelectTrigger data-testid="select-new-hires-per-month">
+                        <SelectTrigger id="select-new-hires-per-month" data-testid="select-new-hires-per-month">
                           <SelectValue placeholder="Select a range" />
                         </SelectTrigger>
                         <SelectContent>
@@ -821,13 +887,13 @@ export default function NewHireVerification() {
                       </Select>
                     </div>
                     <div className="space-y-2">
-                      <Label>Number of Hiring Locations *</Label>
+                      <Label htmlFor="select-hiring-locations">Number of Hiring Locations *</Label>
                       <Select
                         required
                         value={formData.hiringLocations}
                         onValueChange={(v) => { handleFieldStart(); setFormData({ ...formData, hiringLocations: v }); }}
                       >
-                        <SelectTrigger data-testid="select-hiring-locations">
+                        <SelectTrigger id="select-hiring-locations" data-testid="select-hiring-locations">
                           <SelectValue placeholder="Select a range" />
                         </SelectTrigger>
                         <SelectContent>
@@ -839,15 +905,69 @@ export default function NewHireVerification() {
                     </div>
                   </div>
 
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-5">
+                    <div className="space-y-2">
+                      <Label htmlFor="select-already-enrolled">Already Enrolled in E-Verify? *</Label>
+                      <Select
+                        required
+                        value={formData.alreadyEnrolledInEverify}
+                        onValueChange={(v) => { handleFieldStart(); setFormData({ ...formData, alreadyEnrolledInEverify: v as YesNoNotSure }); }}
+                      >
+                        <SelectTrigger id="select-already-enrolled" data-testid="select-already-enrolled">
+                          <SelectValue placeholder="Select one" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {YES_NO_NOT_SURE_OPTIONS.map((opt) => (
+                            <SelectItem key={opt} value={opt}>{opt}</SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="select-uses-another-agent">Using Another Employer Agent? *</Label>
+                      <Select
+                        required
+                        value={formData.usesAnotherEmployerAgent}
+                        onValueChange={(v) => { handleFieldStart(); setFormData({ ...formData, usesAnotherEmployerAgent: v as YesNoNotSure }); }}
+                      >
+                        <SelectTrigger id="select-uses-another-agent" data-testid="select-uses-another-agent">
+                          <SelectValue placeholder="Select one" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {YES_NO_NOT_SURE_OPTIONS.map((opt) => (
+                            <SelectItem key={opt} value={opt}>{opt}</SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="select-federal-contractor">Federal Contractor? *</Label>
+                      <Select
+                        required
+                        value={formData.federalContractorStatus}
+                        onValueChange={(v) => { handleFieldStart(); setFormData({ ...formData, federalContractorStatus: v as YesNoNotSure }); }}
+                      >
+                        <SelectTrigger id="select-federal-contractor" data-testid="select-federal-contractor">
+                          <SelectValue placeholder="Select one" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {YES_NO_NOT_SURE_OPTIONS.map((opt) => (
+                            <SelectItem key={opt} value={opt}>{opt}</SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </div>
+
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
                     <div className="space-y-2">
-                      <Label>Desired Service *</Label>
+                      <Label htmlFor="select-desired-service">Desired Service *</Label>
                       <Select
                         required
                         value={formData.desiredService}
                         onValueChange={(v) => { handleFieldStart(); setFormData({ ...formData, desiredService: v as typeof formData.desiredService }); }}
                       >
-                        <SelectTrigger data-testid="select-desired-service">
+                        <SelectTrigger id="select-desired-service" data-testid="select-desired-service">
                           <SelectValue placeholder="Select a service" />
                         </SelectTrigger>
                         <SelectContent>
@@ -858,13 +978,13 @@ export default function NewHireVerification() {
                       </Select>
                     </div>
                     <div className="space-y-2">
-                      <Label>Preferred Consultation Method *</Label>
+                      <Label htmlFor="select-consultation-method">Preferred Consultation Method *</Label>
                       <Select
                         required
                         value={formData.preferredConsultationMethod}
                         onValueChange={(v) => { handleFieldStart(); setFormData({ ...formData, preferredConsultationMethod: v as typeof formData.preferredConsultationMethod }); }}
                       >
-                        <SelectTrigger data-testid="select-consultation-method">
+                        <SelectTrigger id="select-consultation-method" data-testid="select-consultation-method">
                           <SelectValue placeholder="Select a method" />
                         </SelectTrigger>
                         <SelectContent>
@@ -933,11 +1053,11 @@ export default function NewHireVerification() {
 
           <p className="text-xs text-muted-foreground text-center mt-6">
             Have questions about employer onboarding requirements first? See the{" "}
-            <Link href={EMPLOYER_INTAKE_ROUTE} className="text-[#0D1B3D] dark:text-[#0077FF] hover:underline">
+            <Link href={EMPLOYER_INTAKE_ROUTE} className="text-[#0D1B3D] dark:text-[#0077FF] underline underline-offset-2 hover:opacity-80">
               employer onboarding checklist
             </Link>{" "}
             or the{" "}
-            <Link href={EMPLOYER_AGREEMENT_ROUTE} className="text-[#0D1B3D] dark:text-[#0077FF] hover:underline">
+            <Link href={EMPLOYER_AGREEMENT_ROUTE} className="text-[#0D1B3D] dark:text-[#0077FF] underline underline-offset-2 hover:opacity-80">
               draft service agreement
             </Link>.
           </p>
@@ -1001,6 +1121,29 @@ export default function NewHireVerification() {
                 Call 281-836-5357
               </Button>
             </a>
+          </div>
+          <div className="flex flex-wrap items-center justify-center gap-4 pt-1">
+            <Link href={PORTAL_ROUTES.register}>
+              <Button
+                variant="outline"
+                className="border-white/30 text-white bg-white/5 backdrop-blur-sm rounded-full"
+                data-testid="button-cta-start-onboarding"
+                onClick={() => trackEvent("portal_start_onboarding_click", { location: "closing_cta" })}
+              >
+                Start Employer Onboarding
+              </Button>
+            </Link>
+            <Link href={PORTAL_ROUTES.login}>
+              <Button
+                variant="ghost"
+                className="text-white/80 hover:text-white hover:bg-white/10 rounded-full"
+                data-testid="button-cta-client-portal-login"
+                onClick={() => trackEvent("portal_login_click", { location: "closing_cta" })}
+              >
+                <ShieldCheck className="w-4 h-4 mr-2" />
+                Client Portal Login
+              </Button>
+            </Link>
           </div>
         </div>
       </section>

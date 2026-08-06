@@ -97,18 +97,46 @@ export function createI9SessionMiddleware(): RequestHandler {
 
 /** Sets the session + a matching (non-httpOnly, JS-readable) CSRF cookie on
  *  successful login. The CSRF cookie's value must be echoed back in the
- *  X-CSRF-Token header on every mutating request — see requireI9Csrf. */
-export function establishI9Session(req: Request, res: Response, userId: string, role: I9Role, clientCompanyId: string | null) {
-  req.session.i9UserId = userId;
-  req.session.i9Role = role;
-  req.session.i9ClientCompanyId = clientCompanyId;
-  const csrf = generateCsrfToken();
-  req.session.i9CsrfToken = csrf;
-  res.cookie(CSRF_COOKIE_NAME, csrf, {
-    httpOnly: false,
-    secure: process.env.NODE_ENV === "production",
-    sameSite: "lax",
-    maxAge: SESSION_MAX_AGE_MS,
+ *  X-CSRF-Token header on every mutating request — see requireI9Csrf.
+ *
+ *  Regenerates the session (a fresh session ID) before writing the new
+ *  identity onto it — critical, not cosmetic: without this, a request that
+ *  carries an *existing* session cookie into /login or /register-client
+ *  (e.g. a stale tab, a shared/kiosk browser, or a session ID an attacker
+ *  fixed on the victim before they authenticated) has that session's
+ *  identity silently overwritten in place rather than replaced with a fresh
+ *  one — textbook session fixation. `req.session.regenerate` assigns a new
+ *  ID and clears the old session data first, so login/register-client always
+ *  produce a session no prior request could have influenced. Returns a
+ *  Promise so callers can await it before sending a response — regenerate
+ *  is async and any session field access before its callback fires would
+ *  hit the not-yet-existent new session. */
+export function establishI9Session(
+  req: Request,
+  res: Response,
+  userId: string,
+  role: I9Role,
+  clientCompanyId: string | null
+): Promise<void> {
+  return new Promise((resolve, reject) => {
+    req.session.regenerate((err) => {
+      if (err) return reject(err);
+      req.session.i9UserId = userId;
+      req.session.i9Role = role;
+      req.session.i9ClientCompanyId = clientCompanyId;
+      const csrf = generateCsrfToken();
+      req.session.i9CsrfToken = csrf;
+      req.session.save((saveErr) => {
+        if (saveErr) return reject(saveErr);
+        res.cookie(CSRF_COOKIE_NAME, csrf, {
+          httpOnly: false,
+          secure: process.env.NODE_ENV === "production",
+          sameSite: "lax",
+          maxAge: SESSION_MAX_AGE_MS,
+        });
+        resolve();
+      });
+    });
   });
 }
 

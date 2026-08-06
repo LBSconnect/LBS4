@@ -5,12 +5,12 @@
 // most worth getting exactly right — is written and tested once.
 // ─────────────────────────────────────────────────────────────────────────────
 
-import { useEffect, useState, useCallback, type ReactNode } from "react";
+import { useEffect, useState, useCallback, useId, isValidElement, cloneElement, type ReactNode, type ReactElement } from "react";
 import { Link, useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import SEO from "@/components/SEO";
-import { Loader2, LogOut, LayoutDashboard, Building2, MapPin, ClipboardList, Users, ShieldAlert } from "lucide-react";
+import { Loader2, LogOut, LayoutDashboard, Building2, MapPin, ClipboardList, Users, ShieldAlert, CreditCard, CalendarClock, Bell, Wrench } from "lucide-react";
 import {
   i9Api,
   isI9Unauthorized,
@@ -141,14 +141,19 @@ interface NavItem {
   label: string;
   icon: typeof LayoutDashboard;
   internalOnly?: boolean;
+  clientOnly?: boolean;
 }
 
 const NAV_ITEMS: NavItem[] = [
   { href: PORTAL_ROUTES.dashboard, label: "Dashboard", icon: LayoutDashboard },
   { href: PORTAL_ROUTES.businessIntake, label: "Business Intake", icon: Building2 },
   { href: PORTAL_ROUTES.hiringSites, label: "Hiring Sites", icon: MapPin },
+  { href: PORTAL_ROUTES.billing, label: "Billing", icon: CreditCard, clientOnly: true },
+  { href: PORTAL_ROUTES.appointments, label: "Appointments", icon: CalendarClock, clientOnly: true },
   { href: PORTAL_ROUTES.requests, label: "New-Hire Requests", icon: ClipboardList },
+  { href: PORTAL_ROUTES.notifications, label: "Notifications", icon: Bell },
   { href: PORTAL_ROUTES.adminCompanies, label: "Client Companies", icon: Users, internalOnly: true },
+  { href: PORTAL_ROUTES.adminTools, label: "Admin Tools", icon: Wrench, internalOnly: true },
 ];
 
 export function PortalShell({
@@ -165,7 +170,11 @@ export function PortalShell({
   children: ReactNode;
 }) {
   const [location] = useLocation();
-  const items = NAV_ITEMS.filter((item) => !item.internalOnly || isInternalRole(user.role));
+  const items = NAV_ITEMS.filter((item) => {
+    if (item.internalOnly && !isInternalRole(user.role)) return false;
+    if (item.clientOnly && isInternalRole(user.role)) return false;
+    return true;
+  });
 
   return (
     <div className="min-h-screen bg-[#f8f9fb]">
@@ -229,15 +238,30 @@ export function PortalCard({ title, action, children }: { title?: string; action
   );
 }
 
+/** Wraps a single form control (Input/Textarea/select) with a properly
+ *  associated <Label>. Every usage of this component across the portal was
+ *  originally missing the htmlFor/id link entirely — the label text and the
+ *  control just happened to sit next to each other visually, with no actual
+ *  <label for="..."> or aria-labelledby relationship. That's an accessibility
+ *  bug (WCAG 4.1.2 Name, Role, Value / 1.3.1 Info and Relationships): a
+ *  screen reader can't announce the field's name, and clicking the label
+ *  text doesn't focus the control. Caught via Playwright's getByLabel()
+ *  failing to find fields that were visibly correct — same query assistive
+ *  tech relies on. Fixed once, here, for every form that uses Field. */
 export function Field({ label, required, hint, children }: { label: string; required?: boolean; hint?: string; children: ReactNode }) {
+  const id = useId();
+  const hintId = hint ? `${id}-hint` : undefined;
+  const control = isValidElement(children)
+    ? cloneElement(children as ReactElement<{ id?: string; "aria-describedby"?: string }>, { id, "aria-describedby": hintId })
+    : children;
   return (
     <div className="space-y-1.5">
-      <Label className="text-sm font-medium">
+      <Label htmlFor={id} className="text-sm font-medium">
         {label}
         {required && <span className="text-red-500 ml-0.5">*</span>}
       </Label>
-      {children}
-      {hint && <p className="text-xs text-muted-foreground">{hint}</p>}
+      {control}
+      {hint && <p id={hintId} className="text-xs text-muted-foreground">{hint}</p>}
     </div>
   );
 }

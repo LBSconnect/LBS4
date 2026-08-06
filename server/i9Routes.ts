@@ -23,6 +23,7 @@ import {
   I9_SECURE_DOCUMENT_TYPES,
   FORBIDDEN_SENSITIVE_FIELD_NAMES,
   type I9Role,
+  type I9ClientCompany,
 } from "@shared/i9Schema";
 import * as store from "./i9Storage";
 import {
@@ -39,6 +40,8 @@ import { verifyPassword, signDocumentToken, verifyDocumentToken, isProtectedData
 import { informationalCaseCreationTarget } from "./i9BusinessDays";
 import { sendI9NotificationEmail, sendI9InternalNotificationEmail } from "./i9EmailService";
 import { sendEmployerConsultationNotification } from "./emailService";
+import { syncI9StripeProducts } from "./i9StripeSync";
+import { getUncachableStripeClient } from "./stripeClient";
 
 const PRIVATE_UPLOAD_DIR = path.join(process.cwd(), "server", "private-uploads", "i9");
 const MAX_UPLOAD_BYTES = 8 * 1024 * 1024; // 8MB
@@ -79,6 +82,39 @@ function rejectForbiddenFields(body: unknown): string | null {
   return null;
 }
 
+/** Generates the LBS <-> Client commercial-services agreement as plain HTML
+ *  for download/print — never a live e-signature flow (none is configured;
+ *  see deliverables doc). This is filled-in *text*, not a signature: the
+ *  actual signature is captured on a physically- or externally-signed copy,
+ *  uploaded separately and linked via recordI9AgreementSignedCopy. Contains
+ *  no employee data — company-level fields only. Business document; legal
+ *  review is recommended before this text is used with a real client. */
+function renderI9AgreementHtml(company: I9ClientCompany): string {
+  const today = new Date().toISOString().slice(0, 10);
+  const esc = (v: string | null | undefined) => (v ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c] as string));
+  return `<!doctype html>
+<html><head><meta charset="utf-8"><title>LBS Employer-Support Services Agreement (Draft)</title></head>
+<body style="font-family: Georgia, serif; max-width: 720px; margin: 2rem auto; line-height: 1.6; color: #1a1a1a;">
+  <p style="text-align:center; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em; color: #b45309; border: 1px solid #f59e0b; background: #fffbeb; padding: 0.75rem;">
+    Draft generated ${today} — business document, legal review recommended before use. Not a substitute for legal advice.
+  </p>
+  <h1 style="font-size: 1.5rem;">Employer-Support Services Agreement</h1>
+  <p>This Agreement is entered into between <strong>Linton Business Solutions LLC</strong> ("LBS"), 616 FM 1960 Road West, Suite 101, Houston, Texas 77090, and <strong>${esc(company.legalBusinessName)}</strong>${company.dba ? ` (d/b/a ${esc(company.dba)})` : ""} ("Client").</p>
+  <h2 style="font-size: 1.1rem;">1. Services</h2>
+  <p>LBS will provide administrative Form I-9 and E-Verify case-management support services to Client as an E-Verify Employer Agent, per the plan and add-on services selected by Client through LBS's client portal. LBS is not the U.S. Department of Homeland Security, U.S. Citizenship and Immigration Services, or E-Verify, and does not provide immigration legal advice, determine immigration status, or make employment decisions on Client's behalf.</p>
+  <h2 style="font-size: 1.1rem;">2. Client Responsibilities</h2>
+  <p>Client remains responsible for its own Form I-9 and E-Verify compliance obligations, for the accuracy of information it submits, and for all employment decisions. LBS's services are administrative support only.</p>
+  <h2 style="font-size: 1.1rem;">3. E-Verify Memorandum of Understanding</h2>
+  <p>Client acknowledges that any E-Verify Memorandum of Understanding is executed directly between Client and the federal government outside of LBS's website, and that this Agreement does not itself constitute or replace that MOU.</p>
+  <h2 style="font-size: 1.1rem;">4. Fees</h2>
+  <p>Client agrees to pay the fees associated with its selected plan and any requested add-on services, as published by LBS and agreed to at the time of purchase.</p>
+  <h2 style="font-size: 1.1rem;">5. Term and Termination</h2>
+  <p>This Agreement remains in effect until terminated by either party in accordance with LBS's standard offboarding process.</p>
+  <p style="margin-top: 3rem;">Authorized Signer: ${esc(company.authorizedSignerName)}${company.authorizedSignerTitle ? `, ${esc(company.authorizedSignerTitle)}` : ""}<br/>
+  Date: ______________________</p>
+</body></html>`;
+}
+
 /** Response helper: a consistent "this needs infra we don't have configured
  *  yet" gate, instead of collecting sensitive data insecurely. */
 function secureConfigRequired(res: Response, missing: string[]) {
@@ -95,6 +131,9 @@ export function registerI9Routes(app: Express): void {
     try {
       await store.runI9Migrations();
       if (process.env.DATABASE_URL) await store.seedI9Catalog();
+      if (process.env.DATABASE_URL && process.env.STRIPE_SECRET_KEY) {
+        await syncI9StripeProducts().catch((err) => console.error("[i9-portal] Stripe catalog sync failed:", err.message));
+      }
     } catch (err) {
       console.error("[i9-portal] Migrations/seed failed:", err);
     }
@@ -163,6 +202,61 @@ export function registerI9Routes(app: Express): void {
   });
 
   // ═══════════════════════════════════════════════════════════════════════
+  // BILLING — plan checkout via the existing Stripe integration. Never puts
+  // sensitive employee data in metadata/invoice descriptions — only
+  // company/plan identifiers.
+  // ═══════════════════════════════════════════════════════════════════════
+
+  app.post("/api/i9/companies/:id/checkout", requireI9Auth, requireI9Csrf, requireI9TenantMatch((req) => pstr(req.params.id)), async (req: I9AuthedRequest, res: Response) => {
+    if (!process.env.STRIPE_SECRET_KEY) return secureConfigRequired(res, ["STRIPE_SECRET_KEY"]);
+    try {
+      const { servicePlanId } = req.body as { servicePlanId?: string };
+      if (!servicePlanId) return res.status(400).json({ error: "servicePlanId is required" });
+
+      const company = await store.getI9ClientCompany(pstr(req.params.id));
+      if (!company) return res.status(404).json({ error: "Company not found" });
+      const plan = await store.getI9ServicePlan(servicePlanId);
+      if (!plan || !plan.isActive) return res.status(404).json({ error: "Plan not found" });
+      if (!plan.stripeMonthlyPriceId) {
+        return secureConfigRequired(res, ["Stripe catalog sync has not run for this plan yet"]);
+      }
+
+      const existingSub = await store.getLatestI9SubscriptionForCompany(pstr(req.params.id));
+      const setupFeeAlreadyPaid = existingSub?.setupFeePaid === true;
+
+      const pending = await store.createI9PendingSubscription(pstr(req.params.id), servicePlanId);
+
+      const lineItems: { price: string; quantity: number }[] = [{ price: plan.stripeMonthlyPriceId, quantity: 1 }];
+      if (plan.stripeSetupPriceId && !setupFeeAlreadyPaid) {
+        lineItems.push({ price: plan.stripeSetupPriceId, quantity: 1 });
+      }
+
+      const stripe = await getUncachableStripeClient();
+      const baseUrl = process.env.BASE_URL || "https://www.lbs4.com";
+      const session = await stripe.checkout.sessions.create({
+        mode: "subscription",
+        customer_email: company.billingContactEmail || company.authorizedSignerEmail || undefined,
+        line_items: lineItems,
+        // Company/plan identifiers only — never employee or case data.
+        metadata: { app: "lbs4", i9SubscriptionId: pending.id, i9ClientCompanyId: company.id, i9ServicePlanId: plan.id, i9SetupFeeIncluded: String(!setupFeeAlreadyPaid) },
+        success_url: `${baseUrl}/employer-services/new-hire-verification/portal?checkout=success`,
+        cancel_url: `${baseUrl}/employer-services/new-hire-verification/portal/billing?checkout=cancelled`,
+      });
+
+      await store.logI9Audit({ actorUserId: req.i9User!.id, actorRole: req.i9User!.role, action: "billing.checkout_created", entityType: "ClientCompany", entityId: company.id, clientCompanyId: company.id, details: { servicePlanId, sessionId: session.id }, ipAddress: req.ip });
+      res.json({ success: true, checkoutUrl: session.url });
+    } catch (err: any) {
+      console.error("i9 checkout error:", err.message);
+      res.status(500).json({ error: "Failed to start checkout" });
+    }
+  });
+
+  app.get("/api/i9/companies/:id/subscription", requireI9Auth, requireI9TenantMatch((req) => pstr(req.params.id)), async (req: I9AuthedRequest, res: Response) => {
+    const sub = await store.getLatestI9SubscriptionForCompany(pstr(req.params.id));
+    res.json({ subscription: sub });
+  });
+
+  // ═══════════════════════════════════════════════════════════════════════
   // AUTH
   // ═══════════════════════════════════════════════════════════════════════
 
@@ -191,7 +285,7 @@ export function registerI9Routes(app: Express): void {
         role: "client_authorized_signer",
       });
 
-      establishI9Session(req, res, user.id, "client_authorized_signer", company.id);
+      await establishI9Session(req, res, user.id, "client_authorized_signer", company.id);
       await store.logI9Audit({ actorUserId: user.id, actorRole: "client_authorized_signer", action: "user.register", entityType: "ClientCompany", entityId: company.id, clientCompanyId: company.id, ipAddress: req.ip });
       res.json({ success: true, user: { id: user.id, email: user.email, fullName: user.fullName, role: user.role }, companyId: company.id });
     } catch (err: any) {
@@ -212,7 +306,7 @@ export function registerI9Routes(app: Express): void {
         return res.status(401).json({ error: "Invalid email or password." });
       }
 
-      establishI9Session(req, res, user.id, user.role as I9Role, user.clientCompanyId);
+      await establishI9Session(req, res, user.id, user.role as I9Role, user.clientCompanyId);
       await store.touchI9ClientUserLogin(user.id);
       await store.logI9Audit({ actorUserId: user.id, actorRole: user.role, action: "auth.login", clientCompanyId: user.clientCompanyId ?? undefined, ipAddress: req.ip });
       res.json({ success: true, user: { id: user.id, email: user.email, fullName: user.fullName, role: user.role, clientCompanyId: user.clientCompanyId } });
@@ -344,12 +438,86 @@ export function registerI9Routes(app: Express): void {
       await store.updateI9ClientCompanyStatus(pstr(req.params.id), status);
       await store.logI9Audit({ actorUserId: req.i9User!.id, actorRole: req.i9User!.role, action: "company.status_change", entityType: "ClientCompany", entityId: pstr(req.params.id), clientCompanyId: pstr(req.params.id), details: { from: company.status, to: status }, ipAddress: req.ip });
 
+      await store.createI9Notification({
+        clientCompanyId: pstr(req.params.id),
+        event: "client_activated",
+        relatedEntityType: "ClientCompany",
+        relatedEntityId: pstr(req.params.id),
+        inPortalMessage: `Your account status changed to "${status.replace(/_/g, " ")}".`,
+      });
       if (status === "active" && company.authorizedSignerEmail) {
         await sendI9NotificationEmail({ to: company.authorizedSignerEmail, recipientName: company.authorizedSignerName || "there", companyName: company.legalBusinessName, event: "client_activated" });
       }
       res.json({ success: true, status });
     } catch {
       res.status(500).json({ error: "Failed to update status" });
+    }
+  });
+
+  // ═══════════════════════════════════════════════════════════════════════
+  // CLIENT AGREEMENT — no e-signature provider is configured (see
+  // deliverables doc). This generates document text for download/print and
+  // records a reference to a signed copy uploaded separately via
+  // /api/i9/documents/upload — it never simulates or fakes a signature
+  // capture. The E-Verify MOU is a completely separate document, executed
+  // by the client directly with DHS/SSA outside this website — see the
+  // everify-enrollment route below, which only records status afterward.
+  // ═══════════════════════════════════════════════════════════════════════
+
+  app.post("/api/i9/companies/:id/agreement/generate", requireI9Auth, requireI9Csrf, requireI9Role("lbs_program_admin", "lbs_intake_billing"), async (req: I9AuthedRequest, res: Response) => {
+    try {
+      const company = await store.getI9ClientCompany(pstr(req.params.id));
+      if (!company) return res.status(404).json({ error: "Company not found" });
+      const html = renderI9AgreementHtml(company);
+      const agreement = await store.createI9ClientAgreement(pstr(req.params.id), "0.1-draft", html);
+      await store.logI9Audit({ actorUserId: req.i9User!.id, actorRole: req.i9User!.role, action: "agreement.generate", entityType: "ClientCompany", entityId: pstr(req.params.id), clientCompanyId: pstr(req.params.id), ipAddress: req.ip });
+      res.json({ success: true, agreement });
+    } catch (err: any) {
+      console.error("agreement generate error:", err.message);
+      res.status(500).json({ error: "Failed to generate agreement" });
+    }
+  });
+
+  app.get("/api/i9/companies/:id/agreement", requireI9Auth, requireI9TenantMatch((req) => pstr(req.params.id)), async (req: I9AuthedRequest, res: Response) => {
+    const agreement = await store.getLatestI9ClientAgreement(pstr(req.params.id));
+    res.json({ agreement });
+  });
+
+  app.post("/api/i9/companies/:id/agreement/record-signed-copy", requireI9Auth, requireI9Csrf, requireI9Role("lbs_program_admin", "lbs_intake_billing"), async (req: I9AuthedRequest, res: Response) => {
+    try {
+      const { secureDocumentId, signedByName } = req.body as { secureDocumentId?: string; signedByName?: string };
+      if (!secureDocumentId || !signedByName) return res.status(400).json({ error: "secureDocumentId and signedByName are required" });
+      const doc = await store.getI9SecureDocument(secureDocumentId);
+      if (!doc || doc.clientCompanyId !== pstr(req.params.id)) return res.status(404).json({ error: "Secure document not found for this company" });
+      const agreement = await store.getLatestI9ClientAgreement(pstr(req.params.id));
+      if (!agreement) return res.status(404).json({ error: "No agreement has been generated for this company yet" });
+      await store.recordI9AgreementSignedCopy(agreement.id, { secureDocumentId, signedByName });
+      await store.logI9Audit({ actorUserId: req.i9User!.id, actorRole: req.i9User!.role, action: "agreement.record_signed_copy", entityType: "ClientCompany", entityId: pstr(req.params.id), clientCompanyId: pstr(req.params.id), ipAddress: req.ip });
+      res.json({ success: true });
+    } catch (err: any) {
+      console.error("agreement record-signed-copy error:", err.message);
+      res.status(500).json({ error: "Failed to record signed copy" });
+    }
+  });
+
+  app.post("/api/i9/companies/:id/everify-enrollment", requireI9Auth, requireI9Csrf, requireI9Role("lbs_program_admin", "lbs_intake_billing"), async (req: I9AuthedRequest, res: Response) => {
+    try {
+      const schema = z.object({
+        everifyCompanyId: z.string().max(100).optional(),
+        mouSignerName: z.string().max(200).optional(),
+        mouSignedDate: z.string().max(20).optional(),
+        mouSecureReference: z.string().max(300).optional(),
+      });
+      const parsed = schema.safeParse(req.body);
+      if (!parsed.success) return res.status(400).json({ error: "Invalid data", details: parsed.error.flatten() });
+      const company = await store.getI9ClientCompany(pstr(req.params.id));
+      if (!company) return res.status(404).json({ error: "Company not found" });
+      await store.recordI9EverifyEnrollment(pstr(req.params.id), parsed.data);
+      await store.logI9Audit({ actorUserId: req.i9User!.id, actorRole: req.i9User!.role, action: "company.everify_enrollment_recorded", entityType: "ClientCompany", entityId: pstr(req.params.id), clientCompanyId: pstr(req.params.id), ipAddress: req.ip });
+      res.json({ success: true });
+    } catch (err: any) {
+      console.error("everify-enrollment error:", err.message);
+      res.status(500).json({ error: "Failed to record E-Verify enrollment" });
     }
   });
 
@@ -484,6 +652,29 @@ export function registerI9Routes(app: Express): void {
 
       await store.updateI9NewHireRequestStatus(pstr(req.params.id), status, req.i9User!.id, note);
       await store.logI9Audit({ actorUserId: req.i9User!.id, actorRole: req.i9User!.role, action: "new_hire_request.status_change", entityType: "NewHireRequest", entityId: pstr(req.params.id), clientCompanyId: request.clientCompanyId, details: { from: request.status, to: status }, ipAddress: req.ip });
+
+      // Client-visible notification for the transitions clients actually
+      // need to act on or be aware of — never includes employee data, just
+      // a generic pointer back to the secure portal (per the brief: every
+      // notification stays PII-free and directs the reader to log in).
+      const NOTIFY_EVENT_FOR_STATUS: Record<string, string> = {
+        deficient_client_action_required: "deficiency_requires_client_action",
+        employment_authorized: "case_result_available",
+        needs_more_time: "case_result_available",
+        mismatch_employee_decision_pending: "mismatch_notice_review_pending",
+        case_in_continuance: "case_result_available",
+        final_nonconfirmation: "case_result_available",
+      };
+      const notifyEvent = NOTIFY_EVENT_FOR_STATUS[status];
+      if (notifyEvent) {
+        await store.createI9Notification({
+          clientCompanyId: request.clientCompanyId,
+          event: notifyEvent,
+          relatedEntityType: "NewHireRequest",
+          relatedEntityId: request.id,
+          inPortalMessage: `An update is available for request ${request.internalRequestNumber}. Log in to the secure portal to view it.`,
+        });
+      }
       res.json({ success: true, status });
     } catch {
       res.status(500).json({ error: "Failed to update status" });
@@ -768,7 +959,12 @@ export function registerI9Routes(app: Express): void {
   // ═══════════════════════════════════════════════════════════════════════
 
   app.get("/api/i9/notifications", requireI9Auth, async (req: I9AuthedRequest, res: Response) => {
-    res.json({ notifications: await store.listI9NotificationsForUser(req.i9User!.id) });
+    res.json({ notifications: await store.listI9NotificationsForUser(req.i9User!.id, req.i9User!.clientCompanyId) });
+  });
+
+  app.patch("/api/i9/notifications/:id/read", requireI9Auth, requireI9Csrf, async (req: I9AuthedRequest, res: Response) => {
+    await store.markI9NotificationRead(pstr(req.params.id));
+    res.json({ success: true });
   });
 
   // ═══════════════════════════════════════════════════════════════════════
