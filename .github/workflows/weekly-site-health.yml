@@ -1,0 +1,300 @@
+name: Weekly Site Health Audit & Repair
+
+# Runs every Friday at 12:00 AM America/Chicago (00:00 CT), correctly across
+# both CST (UTC-6) and CDT (UTC-5).
+#
+# GitHub Actions `schedule.cron` only understands UTC and has NO timezone
+# support, so a fixed UTC cron expression would silently run at the wrong
+# local hour for half the year as Daylight Saving shifts Chicago's offset.
+# Instead of guessing which single UTC time is "currently" correct, this
+# workflow fires at BOTH UTC times that could correspond to 00:00 America/
+# Chicago (05:00 UTC during CDT, 06:00 UTC during CST) every Friday, and the
+# `guard` job below checks the real America/Chicago wall-clock time at
+# trigger time and only lets the audit proceed on the firing that's actually
+# correct "right now" — so exactly one real run happens per week, never two,
+# and never at the wrong local hour. This is one workflow with two triggers
+# funneling into a single guarded job, not two competing schedulers.
+on:
+  schedule:
+    - cron: "0 5 * * 5" # candidate: 00:00 CDT Friday (UTC-5, roughly Mar-Nov)
+    - cron: "0 6 * * 5" # candidate: 00:00 CST Friday (UTC-6, roughly Nov-Mar)
+  workflow_dispatch: {} # manual trigger, e.g. to test the workflow itself
+
+permissions:
+  contents: write
+  pull-requests: write
+  issues: write
+
+concurrency:
+  group: weekly-site-health
+  cancel-in-progress: false
+
+env:
+  TZ: America/Chicago
+  PRODUCTION_URL: https://www.lbs4.com
+
+jobs:
+  guard:
+    name: Confirm it's actually Friday 00:00 America/Chicago
+    runs-on: ubuntu-latest
+    outputs:
+      proceed: ${{ steps.check.outputs.proceed }}
+      run_date: ${{ steps.check.outputs.run_date }}
+    steps:
+      - id: check
+        run: |
+          HOUR=$(TZ=America/Chicago date +%H)
+          DOW=$(TZ=America/Chicago date +%u)   # 5 = Friday
+          RUN_DATE=$(TZ=America/Chicago date +%F)
+          echo "run_date=$RUN_DATE" >> "$GITHUB_OUTPUT"
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            echo "Manual trigger — proceeding regardless of clock."
+            echo "proceed=true" >> "$GITHUB_OUTPUT"
+          elif [ "$DOW" = "5" ] && [ "$HOUR" = "00" ]; then
+            echo "It is 00:xx Friday America/Chicago — this is the correct firing."
+            echo "proceed=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "Not 00:xx Friday America/Chicago right now (it's $HOUR on weekday $DOW) — skipping, the other cron trigger will be the real one this week."
+            echo "proceed=false" >> "$GITHUB_OUTPUT"
+          fi
+
+  audit:
+    name: Audit, test, and safely repair
+    needs: guard
+    if: needs.guard.outputs.proceed == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: lbs_test_user
+          POSTGRES_PASSWORD: lbs_test_pass
+          POSTGRES_DB: lbs_test
+        ports: ["5432:5432"]
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    steps:
+      - name: Checkout main
+        uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 0
+
+      - name: Record baseline commit (for rollback reference)
+        run: echo "BASELINE_SHA=$(git rev-parse HEAD)" >> "$GITHUB_ENV"
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "npm"
+
+      - name: Install dependencies (clean)
+        run: npm ci
+
+      - name: Install Playwright browser (Chromium only)
+        run: npx playwright install --with-deps chromium
+
+      - name: Load previous week's baseline report (if any)
+        id: baseline
+        run: |
+          LATEST=$(ls -1d reports/site-health/*/ 2>/dev/null | sort | tail -n 1 || true)
+          echo "previous_report_dir=$LATEST" >> "$GITHUB_OUTPUT"
+
+      # ── Deterministic checks — no LLM involved, must be green to proceed ──
+
+      - name: Type check
+        id: typecheck
+        run: npm run check
+
+      - name: Lint (skips gracefully if repo has no lint script configured yet)
+        id: lint
+        run: |
+          if npm run | grep -q '"lint"'; then npm run lint; else echo "No lint script configured in package.json — documenting as a gap, not failing the run."; fi
+
+      - name: Format check (skips gracefully if repo has no format script configured yet)
+        run: |
+          if npm run | grep -q '"format:check"'; then npm run format:check; else echo "No format:check script configured — documenting as a gap."; fi
+
+      - name: Unit tests
+        id: unit
+        run: npm run test:unit
+
+      - name: Production build
+        id: build
+        run: npm run build
+
+      - name: Dependency / security audit
+        id: audit_deps
+        continue-on-error: true # advisory — triaged in the report, doesn't block by itself
+        run: npm audit --omit=dev --json > reports/npm-audit.json || true
+
+      - name: Set up local test environment for e2e
+        run: |
+          cat >> "$GITHUB_ENV" <<EOF
+          DATABASE_URL=postgresql://lbs_test_user:lbs_test_pass@localhost:5432/lbs_test
+          SESSION_SECRET=ci-weekly-session-secret-not-for-prod
+          PROTECTED_DATA_ENCRYPTION_KEY=${{ secrets.CI_PROTECTED_DATA_ENCRYPTION_KEY }}
+          I9_ADMIN_BOOTSTRAP_SECRET=ci-weekly-bootstrap-secret-not-for-prod
+          STRIPE_SECRET_KEY=${{ secrets.STRIPE_TEST_SECRET_KEY }}
+          NODE_ENV=test
+          EOF
+
+      - name: Start app against local test DB
+        run: |
+          npm run dev &
+          echo $! > server.pid
+          npx wait-on http://localhost:5000 --timeout 60000
+
+      - name: Full end-to-end + accessibility suite
+        id: e2e
+        run: npx playwright test
+        continue-on-error: true # report captures failures; gating happens below
+
+      - name: Stop local server
+        if: always()
+        run: kill "$(cat server.pid)" 2>/dev/null || true
+
+      - name: Crawl live production (read-only) for broken links / redirects / status codes
+        id: crawl
+        continue-on-error: true
+        run: |
+          node script/weekly-crawl.mjs "$PRODUCTION_URL" > reports/crawl-report.json
+
+      # ── LLM-driven low-risk auto-repair ──
+      # Deterministic tooling can FIND a broken link, a missing alt tag, or a
+      # failing test, but actually deciding on and writing a safe code fix
+      # needs a reasoning agent. This step is a no-op (skipped, documented)
+      # unless an ANTHROPIC_API_KEY (or CLAUDE_CODE_OAUTH_TOKEN) secret is
+      # configured — see the "manual setup required" section of the weekly
+      # report. It is intentionally restricted to a low-risk file allowlist.
+      - name: Autonomous low-risk repair (Claude Code)
+        id: repair
+        if: env.CLAUDE_CODE_OAUTH_TOKEN != '' || env.ANTHROPIC_API_KEY != ''
+        env:
+          CLAUDE_CODE_OAUTH_TOKEN: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+        uses: anthropics/claude-code-action@v1
+        with:
+          prompt: |
+            You are the weekly autonomous site-health repair agent for this
+            repository. A full audit already ran (build/lint/type/unit/e2e/
+            a11y/security/crawl results are in reports/npm-audit.json,
+            reports/crawl-report.json, and the Playwright report).
+
+            Read those results. Fix ONLY defects that are unambiguously
+            low-risk:
+              - broken internal links / dead image paths
+              - missing/incorrect alt text
+              - missing or duplicate SEO metadata (title/description/canonical)
+              - minor accessibility violations (contrast, missing labels,
+                heading order) that don't require a visual redesign
+              - safe, well-understood dependency patch/minor version bumps
+                with no breaking changes noted in their changelog
+              - broken non-critical links in footer/nav
+              - flaky-but-fixable test assertions (not test deletions)
+
+            NEVER touch: authentication, authorization, sessions, payments,
+            Stripe/webhook logic, database schema/migrations, pricing, legal
+            or policy copy, environment variable names/values, or anything
+            under server/i9Security.ts, server/i9Auth.ts, server/webhookHandlers.ts,
+            server/stripeClient.ts. If a defect you find falls into any of
+            those areas, or you're not fully confident it's low-risk, WRITE
+            IT INTO reports/site-health/${{ needs.guard.outputs.run_date }}/report.md
+            under "Requires manual review" instead of touching it.
+
+            For every fix: write or update a failing test first, apply the
+            smallest safe change, confirm the test now passes, run
+            `npm run check` and `npm run build` to confirm nothing else broke.
+
+            Commit your changes with clear messages as you go. Do not push
+            or open a PR yourself — the workflow does that next.
+          claude_args: "--max-turns 40"
+
+      - name: Re-run full regression after any auto-repair
+        if: steps.repair.outcome == 'success'
+        run: |
+          npm run check
+          npm run build
+          npm run test:unit
+
+      - name: Generate dated report
+        run: |
+          mkdir -p "reports/site-health/${{ needs.guard.outputs.run_date }}"
+          node script/generate-weekly-report.mjs \
+            --date "${{ needs.guard.outputs.run_date }}" \
+            --baseline-sha "$BASELINE_SHA" \
+            --production-url "$PRODUCTION_URL" \
+            --out "reports/site-health/${{ needs.guard.outputs.run_date }}/report.md"
+
+      - name: Classify risk of this run's changes
+        id: risk
+        run: |
+          # Low risk ONLY if every changed file matches the safe allowlist AND
+          # every gating check above passed. Anything touching auth/payment/
+          # schema/legal/env paths, or any failed gating check, is medium+.
+          node script/classify-change-risk.mjs --out risk.json
+          cat risk.json
+          echo "level=$(node -e "console.log(require('./risk.json').level)")" >> "$GITHUB_OUTPUT"
+
+      - name: Create dated branch and commit
+        if: steps.risk.outputs.level != 'none'
+        run: |
+          BRANCH="weekly-site-health/${{ needs.guard.outputs.run_date }}"
+          git checkout -b "$BRANCH"
+          git add -A
+          git commit -m "Weekly site health audit ${{ needs.guard.outputs.run_date }}: automated low-risk repairs" -m "Co-Authored-By: Weekly Site Health Agent <noreply@anthropic.com>"
+          git push -u origin "$BRANCH"
+          echo "BRANCH=$BRANCH" >> "$GITHUB_ENV"
+
+      - name: Open pull request with full report
+        if: steps.risk.outputs.level != 'none'
+        id: pr
+        uses: peter-evans/create-pull-request@v6
+        with:
+          branch: ${{ env.BRANCH }}
+          base: main
+          title: "Weekly site health audit — ${{ needs.guard.outputs.run_date }}"
+          body-path: reports/site-health/${{ needs.guard.outputs.run_date }}/report.md
+          labels: weekly-site-health,automated
+
+      - name: Auto-merge (low risk only, all gates green, no restricted areas touched)
+        if: steps.risk.outputs.level == 'low' && steps.typecheck.outcome == 'success' && steps.unit.outcome == 'success' && steps.build.outcome == 'success'
+        run: gh pr merge "${{ steps.pr.outputs.pull-request-number }}" --squash --auto
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Post-merge production smoke test
+        if: steps.risk.outputs.level == 'low'
+        run: node script/production-smoke-test.mjs "$PRODUCTION_URL"
+
+      - name: Notify — P0/P1 found, workflow failure, or PR needing review
+        if: failure() || steps.risk.outputs.level == 'medium' || steps.risk.outputs.level == 'high'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const runDate = "${{ needs.guard.outputs.run_date }}";
+            const url = `${context.serverUrl}/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId}`;
+            await github.rest.issues.create({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              title: `Weekly site health (${runDate}): needs attention`,
+              body: `The weekly site-health workflow found something that needs a human look.\n\nRun: ${url}\nReport: reports/site-health/${runDate}/report.md (once merged) or the PR opened by this run.\n\nThis issue was opened automatically — see WEEKLY_SITE_HEALTH.md in the repo root for how to configure push/email/Slack notifications in addition to this GitHub issue.`,
+              labels: ["weekly-site-health", "needs-review"],
+            });
+
+      - name: Upload artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: weekly-site-health-${{ needs.guard.outputs.run_date }}
+          retention-days: 90
+          path: |
+            reports/
+            playwright-report/
+            test-results/
