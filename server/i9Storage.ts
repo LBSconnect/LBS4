@@ -154,9 +154,23 @@ export async function runI9Migrations(): Promise<void> {
       assigned_hiring_site_ids JSONB DEFAULT '[]',
       is_active BOOLEAN NOT NULL DEFAULT true,
       mfa_enabled BOOLEAN NOT NULL DEFAULT false,
+      mfa_secret_encrypted TEXT,
+      mfa_pending_secret_encrypted TEXT,
+      mfa_last_used_step INTEGER,
       last_login_at TIMESTAMP,
-      created_at TIMESTAMP DEFAULT NOW()
+      created_at TIMESTAMP DEFAULT NOW(),
+      password_reset_token_hash TEXT,
+      password_reset_expires_at TIMESTAMP
     );
+    -- Backfill for databases created before the MFA / password-reset columns
+    -- above were added to this CREATE TABLE (shared/i9Schema.ts always
+    -- selects the full column list, so a missing column here breaks every
+    -- query against this table — registration, login, MFA, password reset).
+    ALTER TABLE i9_client_users ADD COLUMN IF NOT EXISTS mfa_secret_encrypted TEXT;
+    ALTER TABLE i9_client_users ADD COLUMN IF NOT EXISTS mfa_pending_secret_encrypted TEXT;
+    ALTER TABLE i9_client_users ADD COLUMN IF NOT EXISTS mfa_last_used_step INTEGER;
+    ALTER TABLE i9_client_users ADD COLUMN IF NOT EXISTS password_reset_token_hash TEXT;
+    ALTER TABLE i9_client_users ADD COLUMN IF NOT EXISTS password_reset_expires_at TIMESTAMP;
 
     CREATE TABLE IF NOT EXISTS i9_hiring_sites (
       id VARCHAR PRIMARY KEY DEFAULT gen_random_uuid()::text,
@@ -197,6 +211,8 @@ export async function runI9Migrations(): Promise<void> {
       stripe_meter_id VARCHAR(100),
       is_active BOOLEAN NOT NULL DEFAULT true
     );
+    -- Backfill for databases created before stripe_meter_id was added above.
+    ALTER TABLE i9_add_ons ADD COLUMN IF NOT EXISTS stripe_meter_id VARCHAR(100);
 
     CREATE TABLE IF NOT EXISTS i9_subscriptions (
       id VARCHAR PRIMARY KEY DEFAULT gen_random_uuid()::text,
@@ -211,6 +227,17 @@ export async function runI9Migrations(): Promise<void> {
       discount_approved_by_user_id VARCHAR(100),
       discount_percent INTEGER,
       cancelled_at TIMESTAMP,
+      created_at TIMESTAMP DEFAULT NOW()
+    );
+
+    -- Metered add-ons attached to a subscription (see /api/i9/companies/:id/add-ons
+    -- attach + usage routes in i9Routes.ts). Was previously missing entirely,
+    -- which broke every add-on attach/usage/list call with a missing-relation error.
+    CREATE TABLE IF NOT EXISTS i9_subscription_add_ons (
+      id VARCHAR PRIMARY KEY DEFAULT gen_random_uuid()::text,
+      subscription_id VARCHAR(100) NOT NULL,
+      add_on_id VARCHAR(100) NOT NULL,
+      stripe_subscription_item_id VARCHAR(100),
       created_at TIMESTAMP DEFAULT NOW()
     );
 
@@ -436,6 +463,21 @@ export async function runI9Migrations(): Promise<void> {
   await pg.query(`
     ALTER TABLE i9_add_ons
     ADD COLUMN IF NOT EXISTS stripe_meter_id VARCHAR(100);
+  // Auth-critical drift fix: the CREATE TABLE above never grew MFA/password-reset
+  // columns as those features were added to the Drizzle schema (shared/i9Schema.ts)
+  // — drizzle-kit push doesn't cover this table (drizzle.config.ts points at
+  // shared/schema.ts only), so this raw-SQL migration is the only thing that
+  // creates/maintains i9_client_users. Without these columns, every write that
+  // goes through the Drizzle query builder (register, bootstrap-admin, login's
+  // RETURNING clause, password reset, MFA enroll/verify/disable) fails outright
+  // on any database that hasn't already had them added by hand. ADD COLUMN IF
+  // NOT EXISTS keeps this idempotent for databases that already have them.
+  await pg.query(`
+    ALTER TABLE i9_client_users ADD COLUMN IF NOT EXISTS mfa_secret_encrypted TEXT;
+    ALTER TABLE i9_client_users ADD COLUMN IF NOT EXISTS mfa_pending_secret_encrypted TEXT;
+    ALTER TABLE i9_client_users ADD COLUMN IF NOT EXISTS mfa_last_used_step INTEGER;
+    ALTER TABLE i9_client_users ADD COLUMN IF NOT EXISTS password_reset_token_hash TEXT;
+    ALTER TABLE i9_client_users ADD COLUMN IF NOT EXISTS password_reset_expires_at TIMESTAMP;
   `);
 }
 

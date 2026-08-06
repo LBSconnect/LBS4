@@ -36,13 +36,54 @@ import {
 import { insertCorporateAccountSchema, insertCorporateAppointmentSchema } from "@shared/schema";
 import { getUncachableStripeClient } from "./stripeClient";
 import { z } from "zod";
+import { checkRateLimit } from "./i9Security";
 
-const ADMIN_SECRET = process.env.ADMIN_SECRET || "changeme-dev-only";
+// IMPORTANT: unlike SESSION_SECRET (server/i9Auth.ts) or PROTECTED_DATA_ENCRYPTION_KEY
+// (server/i9Security.ts), this secret is not just used to *sign* things —
+// requireAdminToken below also accepts it directly, in the clear, as a bearer
+// token. A hardcoded fallback here would be a well-known, guessable admin
+// credential for any deployment that forgets to set ADMIN_SECRET. So, unlike
+// those modules, we deliberately do NOT fall back to a "changeme" default —
+// isAdminAuthConfigured() gates every admin/portal route closed (503) instead.
+const ADMIN_SECRET = process.env.ADMIN_SECRET;
 const JWT_SECRET = process.env.JWT_SECRET || ADMIN_SECRET;
+
+// ─── Rate limiting ──────────────────────────────────────────────────────────
+// Neither login endpoint below previously had any rate limiting — both are
+// credential checks (an admin secret, an account-code + email pair) reachable
+// by anyone, so an unlimited number of guesses was possible. Same sliding-
+// window limiter the I-9 portal uses (server/i9Security.ts), keyed by
+// IP+bucket.
+function corporateRateLimit(bucket: string, limit: number, windowMs: number) {
+  return (req: Request, res: Response, next: NextFunction) => {
+    const { allowed } = checkRateLimit(`${bucket}:${req.ip}`, limit, windowMs);
+    if (!allowed) {
+      return res.status(429).json({ error: "Too many requests. Please wait a few minutes and try again." });
+    }
+    next();
+  };
+}
+
+if (!ADMIN_SECRET) {
+  console.warn(
+    "[corporate] ADMIN_SECRET is not set — the corporate admin dashboard and portal login " +
+    "are disabled (503) until it is configured. Set ADMIN_SECRET (and optionally a separate " +
+    "JWT_SECRET) before deploying the Corporate Notary Division admin/portal features."
+  );
+}
+
+function corporateAuthNotConfigured(res: Response) {
+  return res.status(503).json({
+    error: "Admin authentication is not configured",
+    detail: "Set ADMIN_SECRET (and optionally JWT_SECRET) before using the corporate admin dashboard or portal.",
+  });
+}
 
 // ─── Auth Middleware ──────────────────────────────────────────────────────────
 
 function requirePortalToken(req: Request, res: Response, next: NextFunction) {
+  if (!JWT_SECRET) return corporateAuthNotConfigured(res);
+
   const auth = req.headers.authorization;
   if (!auth) return res.status(401).json({ error: "Missing Authorization header" });
 
@@ -61,6 +102,8 @@ function requirePortalToken(req: Request, res: Response, next: NextFunction) {
 }
 
 function requireAdminToken(req: Request, res: Response, next: NextFunction) {
+  if (!ADMIN_SECRET || !JWT_SECRET) return corporateAuthNotConfigured(res);
+
   const auth = req.headers.authorization;
   if (!auth) return res.status(401).json({ error: "Missing Authorization header" });
 
@@ -69,9 +112,20 @@ function requireAdminToken(req: Request, res: Response, next: NextFunction) {
   // Accept raw secret directly (for admin dashboard bootstrap)
   if (token === ADMIN_SECRET) return next();
 
-  // Or accept a signed JWT
+  // Or accept a signed JWT — but only one actually minted for an admin.
+  // Previously this just checked the signature was valid for ANY JWT signed
+  // with JWT_SECRET, without checking *which* role it was issued for. Since
+  // /api/corporate/portal/login (self-service, no admin approval needed
+  // beyond normal enrollment) signs tokens with the exact same JWT_SECRET
+  // for role "corporate-portal", every logged-in customer's own portal token
+  // also satisfied this check — full read/write access to every admin route
+  // (all accounts, approve/reject, force-activate, audit log, exports, etc.)
+  // for anyone who could self-enroll and log into the customer portal.
   try {
-    jwt.verify(token, JWT_SECRET);
+    const payload = jwt.verify(token, JWT_SECRET) as { role?: string };
+    if (payload.role !== "corporate-admin") {
+      return res.status(401).json({ error: "Invalid token role" });
+    }
     return next();
   } catch {
     return res.status(401).json({ error: "Invalid or expired token" });
@@ -90,7 +144,8 @@ export async function registerCorporateRoutes(app: Express): Promise<void> {
 
   // ── Admin Auth ──────────────────────────────────────────────────────────────
 
-  app.post("/api/admin/corporate/login", (req: Request, res: Response) => {
+  app.post("/api/admin/corporate/login", corporateRateLimit("corp-admin-login", 10, 15 * 60 * 1000), (req: Request, res: Response) => {
+    if (!ADMIN_SECRET || !JWT_SECRET) return corporateAuthNotConfigured(res);
     const { secret } = req.body as { secret?: string };
     if (!secret || secret !== ADMIN_SECRET) {
       return res.status(401).json({ error: "Invalid admin secret" });
@@ -582,7 +637,8 @@ export async function registerCorporateRoutes(app: Express): Promise<void> {
 
   // ── Customer Portal: Login ────────────────────────────────────────────────────
 
-  app.post("/api/corporate/portal/login", async (req: Request, res: Response) => {
+  app.post("/api/corporate/portal/login", corporateRateLimit("corp-portal-login", 10, 15 * 60 * 1000), async (req: Request, res: Response) => {
+    if (!JWT_SECRET) return corporateAuthNotConfigured(res);
     try {
       const { accountCode, email } = req.body as { accountCode?: string; email?: string };
       if (!accountCode || !email) {

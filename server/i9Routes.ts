@@ -47,7 +47,6 @@ import {
   hashPasswordResetToken,
   generateTotpSecret,
   totpProvisioningUri,
-  verifyTotpCode,
   matchTotpCodeStep,
   signMfaChallengeToken,
   verifyMfaChallengeToken,
@@ -67,6 +66,28 @@ const DOCUMENT_TOKEN_TTL_MS = 5 * 60 * 1000; // 5-minute signed download links
 
 function ensureUploadDir() {
   fs.mkdirSync(PRIVATE_UPLOAD_DIR, { recursive: true });
+}
+
+/** The upload route's `mimeType` field is client-declared metadata, not a
+ *  server-verified fact — a caller could send `application/pdf` alongside
+ *  bytes that are actually an HTML/script payload or an executable. This
+ *  checks the file's real magic bytes against the declared type so upload
+ *  validation isn't trusting the client's word for what the file is. Download
+ *  already forces `Content-Disposition: attachment` + `X-Content-Type-Options:
+ *  nosniff` (belt-and-suspenders against a browser executing served content),
+ *  but rejecting a mismatched file at upload time is the stronger control. */
+export function magicBytesMatchMimeType(buffer: Buffer, mimeType: string): boolean {
+  if (buffer.length < 4) return false;
+  switch (mimeType) {
+    case "application/pdf":
+      return buffer.subarray(0, 4).toString("latin1") === "%PDF";
+    case "image/png":
+      return buffer.subarray(0, 8).equals(Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]));
+    case "image/jpeg":
+      return buffer[0] === 0xff && buffer[1] === 0xd8 && buffer[2] === 0xff;
+    default:
+      return false;
+  }
 }
 
 /** Express 5's route-param/query types allow `string | string[] | ParsedQs |
@@ -487,9 +508,19 @@ export function registerI9Routes(app: Express): void {
       const { code } = req.body as { code?: string };
       const user = await store.getI9ClientUserById(req.i9User!.id);
       if (!user?.mfaEnabled || !user.mfaSecretEncrypted) return res.status(400).json({ error: "MFA is not enabled on this account." });
-      if (!code || !verifyTotpCode(decryptFromColumn(user.mfaSecretEncrypted), code)) {
+      // Anti-replay: this used to accept any code verifyTotpCode() considers
+      // currently valid (a bare boolean check with no memory of what's
+      // already been redeemed), unlike login and enrollment, which both use
+      // matchTotpCodeStep + mfaLastUsedStep. That meant a TOTP code already
+      // spent to log in (or observed/intercepted at that moment) stayed
+      // usable to disable MFA for the rest of its ~90s window. Matching the
+      // same anti-replay check the rest of the MFA flow uses here too.
+      if (!code) return res.status(400).json({ error: "A valid current authentication code is required to disable MFA." });
+      const matchedStep = matchTotpCodeStep(decryptFromColumn(user.mfaSecretEncrypted), code);
+      if (matchedStep === null || (user.mfaLastUsedStep != null && matchedStep <= user.mfaLastUsedStep)) {
         return res.status(400).json({ error: "A valid current authentication code is required to disable MFA." });
       }
+      await store.setI9ClientUserMfaLastUsedStep(user.id, matchedStep);
       await store.disableI9ClientUserMfa(user.id);
       await store.logI9Audit({ actorUserId: user.id, actorRole: user.role, action: "auth.mfa_disabled", clientCompanyId: user.clientCompanyId ?? undefined, ipAddress: req.ip });
       res.json({ success: true });
@@ -549,7 +580,7 @@ export function registerI9Routes(app: Express): void {
     }
   });
 
-  app.post("/api/i9/auth/logout", requireI9Auth, (req: I9AuthedRequest, res: Response) => {
+  app.post("/api/i9/auth/logout", requireI9Auth, requireI9Csrf, (req: I9AuthedRequest, res: Response) => {
     destroyI9Session(req, res, () => res.json({ success: true }));
   });
 
@@ -972,10 +1003,29 @@ export function registerI9Routes(app: Express): void {
   });
 
   app.get("/api/i9/new-hire-requests/:id/activity", requireI9Auth, async (req: I9AuthedRequest, res: Response) => {
+    // Tenant check: this endpoint was previously missing the same ownership
+    // check every sibling new-hire-request route enforces, so any
+    // authenticated client user — not just internal LBS staff or that
+    // request's own company — could read another company's case activity
+    // log (including free-text case notes) just by knowing/guessing the
+    // request's UUID. Mirrors the GET /new-hire-requests/:id check above.
+    // Same cross-tenant check every sibling new-hire-request route applies
+    // (see GET /:id above) — this was missing here, letting any authenticated
+    // client user read another company's case activity log by request ID.
+    const request = await store.getI9NewHireRequest(pstr(req.params.id));
+    if (!request) return res.status(404).json({ error: "Not found" });
+    const isInternal = req.i9User!.role.startsWith("lbs_");
+    if (!isInternal && request.clientCompanyId !== req.i9User!.clientCompanyId) return res.status(403).json({ error: "Access denied" });
     res.json({ activity: await store.listI9CaseActivity(pstr(req.params.id)) });
   });
 
   app.get("/api/i9/new-hire-requests/:id/deadlines", requireI9Auth, async (req: I9AuthedRequest, res: Response) => {
+    // Same tenant-isolation gap and fix as /activity above.
+    // Same cross-tenant check as above — was missing here too.
+    const request = await store.getI9NewHireRequest(pstr(req.params.id));
+    if (!request) return res.status(404).json({ error: "Not found" });
+    const isInternal = req.i9User!.role.startsWith("lbs_");
+    if (!isInternal && request.clientCompanyId !== req.i9User!.clientCompanyId) return res.status(403).json({ error: "Access denied" });
     res.json({ deadlines: await store.listI9CaseDeadlines(pstr(req.params.id)) });
   });
 
@@ -1086,6 +1136,9 @@ export function registerI9Routes(app: Express): void {
       const buffer = Buffer.from(parsed.data.base64Content, "base64");
       if (buffer.length > MAX_UPLOAD_BYTES) return res.status(413).json({ error: `File too large. Maximum size is ${MAX_UPLOAD_BYTES / 1024 / 1024}MB.` });
       if (buffer.length === 0) return res.status(400).json({ error: "Empty file" });
+      if (!magicBytesMatchMimeType(buffer, parsed.data.mimeType)) {
+        return res.status(400).json({ error: "File content does not match the declared file type." });
+      }
 
       ensureUploadDir();
       const id = crypto.randomUUID();
