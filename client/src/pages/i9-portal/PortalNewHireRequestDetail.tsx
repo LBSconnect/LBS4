@@ -31,6 +31,34 @@ interface DetailResponse {
   informationalCaseCreationTarget: { date: string; noncontrolling: true };
 }
 
+/** Neutral, non-legal starting points for the deficiency note — never
+ *  instructs how to alter an attestation, and always points the client to
+ *  official guidance or their own counsel rather than giving legal advice.
+ *  A processor can still edit the text after picking one; this just avoids
+ *  writing case-specific deficiency language from scratch each time. */
+const DEFICIENCY_TEMPLATES: { label: string; text: string }[] = [
+  {
+    label: "Missing Form I-9 Section 2 completion date",
+    text: "This request is missing a Form I-9 Section 2 completion date. Please confirm the date Section 2 was completed and update the request, or contact us if you have questions about completing Section 2. See the USCIS Form I-9 instructions for guidance, or consult your own counsel with legal questions.",
+  },
+  {
+    label: "Section 2 completed late, no reason on file",
+    text: "Our records show Form I-9 Section 2 was completed after the standard timeframe, and no explanation is on file. Please provide a brief explanation of the delay for our records. See the USCIS Form I-9 instructions for guidance, or consult your own counsel with legal questions.",
+  },
+  {
+    label: "List B document photo status unclear",
+    text: "Please confirm whether the List B document presented includes a photograph. This helps us process the case accurately. See the USCIS Form I-9 instructions for guidance, or consult your own counsel with legal questions.",
+  },
+  {
+    label: "Hiring site participation not yet confirmed",
+    text: "The hiring site on this request has not yet been confirmed as an active E-Verify participating location. Please confirm the site's participation status before we can proceed. Contact us with any questions.",
+  },
+  {
+    label: "Submitted information appears incomplete",
+    text: "Some information on this request appears incomplete or inconsistent. Please review the request in the portal and update it, or contact us with any questions. See the USCIS Form I-9 instructions for guidance, or consult your own counsel with legal questions.",
+  },
+];
+
 const GOVERNMENT_RESULT_OPTIONS: { value: string; label: string }[] = [
   { value: "employment_authorized", label: "Employment Authorized" },
   { value: "needs_more_time", label: "Needs More Time (DHS/SSA verifying)" },
@@ -41,6 +69,23 @@ const GOVERNMENT_RESULT_OPTIONS: { value: string; label: string }[] = [
   { value: "referred_to_dhs_and_ssa", label: "Referred to DHS & SSA" },
   { value: "final_nonconfirmation", label: "Final Nonconfirmation" },
 ];
+
+/** Neutral, non-legal note text for each government-result outcome. This is
+ *  administrative case tracking only — never adverse-action language, never
+ *  a hire/fire/payroll recommendation. "Case in Continuance" and "Final
+ *  Nonconfirmation" in particular must never read as a termination decision;
+ *  both explicitly point the client back to their own counsel and to
+ *  E-Verify's own written notice as the controlling source. */
+const GOV_RESULT_NOTE_TEMPLATES: Record<string, string> = {
+  employment_authorized: "E-Verify returned an Employment Authorized result for this case. No further action is required on this record.",
+  needs_more_time: "DHS/SSA is still verifying this case (\"Needs More Time\"). No adverse action should be taken while a case is in this status. We'll update this record once E-Verify returns a final result.",
+  mismatch_employee_decision_pending: "E-Verify returned a tentative nonconfirmation. The employee has been notified and is deciding whether to contest it. No adverse action should be taken during this period — see the official E-Verify notice for the controlling deadline and instructions.",
+  case_in_continuance: "This case is in continuance while DHS/SSA completes verification. No adverse action — the employee may continue to work while the case remains open. We'll update this record when E-Verify returns a final result.",
+  referred_to_dhs: "This case has been referred to DHS for further verification. No adverse action should be taken while the referral is pending.",
+  referred_to_ssa: "This case has been referred to SSA for further verification. No adverse action should be taken while the referral is pending.",
+  referred_to_dhs_and_ssa: "This case has been referred to both DHS and SSA for further verification. No adverse action should be taken while the referral is pending.",
+  final_nonconfirmation: "E-Verify returned a Final Nonconfirmation for this case. This is administrative case tracking only — it is not a termination recommendation and no employment decision should be inferred from it. Please consult your own legal counsel before taking any employment action, and refer to the official E-Verify notice for the controlling language.",
+};
 
 function RequiredAttestationsSummary({ request }: { request: I9NewHireRequest }) {
   const items: { label: string; ok: boolean }[] = [
@@ -230,8 +275,18 @@ function LbsStaffActions({ request, onUpdated }: { request: I9NewHireRequest; on
           </Button>
 
           <div className="pt-3 border-t border-border/50 space-y-2">
+            <Field label="Start from a template (optional)">
+              <select
+                className="w-full h-9 px-3 text-sm border border-input rounded-md bg-background"
+                value=""
+                onChange={(e) => { const t = DEFICIENCY_TEMPLATES.find((t) => t.label === e.target.value); if (t) setDeficientNote(t.text); }}
+              >
+                <option value="">Select a scenario...</option>
+                {DEFICIENCY_TEMPLATES.map((t) => <option key={t.label} value={t.label}>{t.label}</option>)}
+              </select>
+            </Field>
             <Field label="Deficiency note (if flagging back to client)" hint="Neutral, non-legal language only — never instruct how to alter an attestation.">
-              <Textarea value={deficientNote} onChange={(e) => setDeficientNote(e.target.value)} rows={2} />
+              <Textarea value={deficientNote} onChange={(e) => setDeficientNote(e.target.value)} rows={4} />
             </Field>
             {deficientError && <ErrorBanner message={deficientError} />}
             <Button variant="outline" onClick={markDeficient} disabled={deficientBusy}>
@@ -266,15 +321,39 @@ function LbsStaffActions({ request, onUpdated }: { request: I9NewHireRequest; on
         <PortalCard title="Record Government Result">
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <Field label="Result" required>
-              <select className="w-full h-9 px-3 text-sm border border-input rounded-md bg-background" value={govResult} onChange={(e) => setGovResult(e.target.value)}>
+              <select
+                className="w-full h-9 px-3 text-sm border border-input rounded-md bg-background"
+                value={govResult}
+                onChange={(e) => {
+                  const next = e.target.value;
+                  setGovResult(next);
+                  // Auto-suggest the neutral template note whenever the note field is
+                  // still empty or still holds a previous auto-suggested template —
+                  // never overwrite text a reviewer has actually typed themselves.
+                  const prevSuggested = Object.values(GOV_RESULT_NOTE_TEMPLATES).includes(govNote);
+                  if (next && GOV_RESULT_NOTE_TEMPLATES[next] && (!govNote || prevSuggested)) {
+                    setGovNote(GOV_RESULT_NOTE_TEMPLATES[next]);
+                  }
+                }}
+              >
                 <option value="">Select...</option>
                 {GOVERNMENT_RESULT_OPTIONS.map((o) => <option key={o.value} value={o.value}>{o.label}</option>)}
               </select>
             </Field>
           </div>
           <Field label="Notes" hint="No adverse-action language. This is administrative case tracking, not an employment recommendation.">
-            <Textarea value={govNote} onChange={(e) => setGovNote(e.target.value)} rows={2} />
+            <Textarea value={govNote} onChange={(e) => setGovNote(e.target.value)} rows={3} />
           </Field>
+          {govResult && GOV_RESULT_NOTE_TEMPLATES[govResult] && (
+            <button
+              type="button"
+              onClick={() => setGovNote(GOV_RESULT_NOTE_TEMPLATES[govResult])}
+              className="text-xs font-medium hover:underline"
+              style={{ color: NAVY }}
+            >
+              Reset to suggested neutral note for this result
+            </button>
+          )}
           {govError && <ErrorBanner message={govError} />}
           <Button onClick={recordGovResult} disabled={govBusy || !govResult} className="text-white" style={{ backgroundColor: NAVY }}>
             {govBusy ? "Saving..." : "Record Result"}
