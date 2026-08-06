@@ -751,45 +751,6 @@ export async function registerRoutes(
   });
 
 
-  // Test email endpoint — remove after confirming email works
-  app.get('/api/test-email', async (req, res) => {
-    const to = (req.query.to as string) || process.env.NOTIFICATION_EMAIL || 'info@lbsconnect.net';
-
-    const smtpUser = process.env.SMTP_USER;
-    const smtpPass = process.env.SMTP_PASS;
-
-    if (!smtpUser || !smtpPass) {
-      return res.status(500).json({
-        success: false,
-        error: 'SMTP_USER or SMTP_PASS not set in environment variables',
-      });
-    }
-
-    try {
-      const result = await sendEmail({
-        to,
-        subject: 'LBS Email Test',
-        html: `
-          <div style="font-family: Arial, sans-serif; max-width: 500px; margin: 0 auto; padding: 24px;">
-            <h2 style="color: #1e3a6e;">LBS Email Test</h2>
-            <p>This is a test email from LBS Test & Exam Center.</p>
-            <p>If you received this, email notifications are working correctly.</p>
-            <p style="color: #6b7280; font-size: 12px;">Sent via Microsoft 365 SMTP from ${smtpUser}</p>
-          </div>
-        `,
-      });
-
-      if (result) {
-        res.json({ success: true, message: `Test email sent to ${to}` });
-      } else {
-        res.status(500).json({ success: false, error: 'Email sending failed — check server logs for details' });
-      }
-    } catch (error: any) {
-      console.error('Test email error:', error.message);
-      res.status(500).json({ success: false, error: 'Email sending failed — check server logs for details' });
-    }
-  });
-
   // Corporate Notary Division routes
   await registerCorporateRoutes(app);
 
