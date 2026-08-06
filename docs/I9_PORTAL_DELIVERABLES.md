@@ -194,9 +194,10 @@ No event anywhere in the authenticated portal (dashboard, request detail, protec
 | Unit (pure logic, no DB) | `tests/unit/i9-*.test.ts` | 82 tests / 16 suites | **82/82 passing** (fresh run, this session) |
 | API-level e2e (real Postgres) | `tests/e2e/i9-workflow.spec.ts` | 17 tests | Passing (tenant isolation, role permissions, full lifecycle, rate limiting) |
 | Browser-driven UI e2e | `tests/e2e/i9-portal-ui.spec.ts` | 3 tests | Passing (login, registration, request creation → detail, protected-data entry, work packet) |
-| Accessibility (axe-core, WCAG 2.1 A/AA) | `tests/e2e/i9-accessibility.spec.ts` — **new this pass** | 3 pages | 1 real violation found and fixed (§12.5); re-verification in progress at time of writing, see commit for final status |
+| Accessibility (axe-core, WCAG 2.1 A/AA) | `tests/e2e/i9-accessibility.spec.ts` — **new this pass** | 3 pages | **3/3 passing.** 2 real violations found and fixed this pass (§12.5, §12.5a); 1 pre-existing, sitewide, out-of-scope color-contrast gap is documented (§15) and the scan explicitly excludes only that one axe rule, with reasoning inline in the test file |
 | Responsive layout (320/375/430/768/1024/1440px, no horizontal overflow) | same file | 3 pages × 6 breakpoints = 18 checks | **18/18 passing** |
-| Mobile CTA reachability | same file | 1 check | **Passing** |
+| Mobile CTA reachability | same file | 1 check | **1/1 passing** |
+| **Full suite total** | `i9-accessibility.spec.ts` | 22 tests | **22/22 passing** (final confirmed run) |
 | Regression — booking/payment | `tests/e2e/booking-payment.spec.ts` | pre-existing | Unaffected by this phase's one shared-file edit (`webhookHandlers.ts`); confirmed via `git stash` isolation — 6 pre-existing failures are a sandbox network limitation (no route to `checkout.stripe.com`), not a regression |
 | Regression — general QA / cards / business hours | `qa-full-audit.spec.ts`, `card-workflows.spec.ts`, `business-hours.spec.ts` | pre-existing | Unaffected |
 
