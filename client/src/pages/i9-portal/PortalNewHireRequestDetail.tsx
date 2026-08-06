@@ -3,7 +3,7 @@ import { useParams } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { Send, ShieldCheck } from "lucide-react";
+import { Send, ShieldCheck, Eye, EyeOff, ExternalLink, FileText } from "lucide-react";
 import {
   i9Api,
   I9ApiError,
@@ -285,6 +285,272 @@ function LbsStaffActions({ request, onUpdated }: { request: I9NewHireRequest; on
   );
 }
 
+interface RevealedData {
+  employeeName: string;
+  employeeContact: string | null;
+  ssn: string | null;
+  documentInfo: Record<string, unknown> | null;
+}
+
+/** Shown to every role that can see this request, but write access is
+ *  gated the same way the server gates it (any authenticated user in the
+ *  right tenant EXCEPT lbs_intake_billing) and reveal is gated to LBS
+ *  program admins / case processors only — matching
+ *  server/i9Routes.ts's protected-data routes exactly. This is the one
+ *  place in the whole portal that ever displays an unmasked SSN, and only
+ *  after an explicit, audited reveal action. */
+function ProtectedDataSection({ requestId, role, summary, onChanged }: { requestId: string; role: I9Role; summary: ProtectedSummary | null; onChanged: () => void }) {
+  const canWrite = role !== "lbs_intake_billing";
+  const canReveal = role === "lbs_program_admin" || role === "lbs_case_processor";
+
+  const [showForm, setShowForm] = useState(false);
+  const [employeeName, setEmployeeName] = useState("");
+  const [employeeContact, setEmployeeContact] = useState("");
+  const [ssn, setSsn] = useState("");
+  const [listB, setListB] = useState("");
+  const [listC, setListC] = useState("");
+  const [saving, setSaving] = useState(false);
+  const [writeError, setWriteError] = useState("");
+  const [saved, setSaved] = useState(false);
+
+  const [revealed, setRevealed] = useState<RevealedData | null>(null);
+  const [revealReason, setRevealReason] = useState("");
+  const [revealing, setRevealing] = useState(false);
+  const [revealError, setRevealError] = useState("");
+
+  async function submitWrite(e: React.FormEvent) {
+    e.preventDefault();
+    setWriteError("");
+    setSaving(true);
+    try {
+      await i9Api(`/api/i9/new-hire-requests/${requestId}/protected-data`, {
+        method: "POST",
+        body: JSON.stringify({
+          employeeName,
+          employeeContact: employeeContact || undefined,
+          ssn: ssn || undefined,
+          documentInfo: listB || listC ? { listB: listB || undefined, listC: listC || undefined } : undefined,
+        }),
+      });
+      setSaved(true);
+      setShowForm(false);
+      setSsn(""); // never linger in component state longer than needed
+      onChanged();
+    } catch (err) {
+      setWriteError(err instanceof Error ? err.message : "Failed to save protected employee data.");
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  async function reveal() {
+    setRevealError("");
+    if (revealReason.trim().length < 5) {
+      setRevealError("Please provide a brief reason (at least 5 characters) — this is recorded in the audit log.");
+      return;
+    }
+    setRevealing(true);
+    try {
+      const r = await i9Api<{ data: RevealedData }>(`/api/i9/new-hire-requests/${requestId}/protected-data/reveal`, {
+        method: "POST",
+        body: JSON.stringify({ reason: revealReason }),
+      });
+      setRevealed(r.data);
+    } catch (err) {
+      setRevealError(err instanceof Error ? err.message : "Failed to reveal protected employee data.");
+    } finally {
+      setRevealing(false);
+    }
+  }
+
+  return (
+    <PortalCard title="Protected Employee Data">
+      <div className="flex items-start gap-2 text-xs bg-amber-50 border border-amber-200 rounded-lg p-2.5 text-amber-800">
+        <ShieldCheck className="w-3.5 h-3.5 mt-0.5 shrink-0" />
+        <span>Encrypted at rest. Never shown in full outside this narrow, audited view — not in lists, reports, notifications, or URLs.</span>
+      </div>
+
+      {summary?.hasData ? (
+        <div className="flex items-center gap-2 text-sm">
+          <ShieldCheck className="w-4 h-4 text-green-600" />
+          <span>{summary.employeeName}{summary.ssnMasked ? ` · SSN ${summary.ssnMasked}` : ""}</span>
+        </div>
+      ) : (
+        <p className="text-sm text-muted-foreground">No protected employee data has been entered for this request yet.</p>
+      )}
+
+      {canWrite && (!summary?.hasData || showForm) && (
+        <form onSubmit={submitWrite} className="space-y-3 border-t border-border/50 pt-3">
+          <Field label="Employee Name" required><Input value={employeeName} onChange={(e) => setEmployeeName(e.target.value)} /></Field>
+          <Field label="Employee Contact (email or phone)"><Input value={employeeContact} onChange={(e) => setEmployeeContact(e.target.value)} /></Field>
+          <Field label="Social Security Number" hint="9 digits, with or without dashes. Encrypted immediately; only ever shown in full via an explicit, audited reveal.">
+            <Input value={ssn} onChange={(e) => setSsn(e.target.value)} placeholder="XXX-XX-XXXX" />
+          </Field>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <Field label="List B Document"><Input value={listB} onChange={(e) => setListB(e.target.value)} placeholder="e.g. Driver's License" /></Field>
+            <Field label="List C Document"><Input value={listC} onChange={(e) => setListC(e.target.value)} placeholder="e.g. Social Security Card" /></Field>
+          </div>
+          {writeError && <ErrorBanner message={writeError} />}
+          <div className="flex gap-2">
+            <Button type="submit" size="sm" disabled={saving || !employeeName} className="text-white" style={{ backgroundColor: NAVY }}>
+              {saving ? "Saving..." : "Save Protected Data"}
+            </Button>
+            {summary?.hasData && <Button type="button" size="sm" variant="outline" onClick={() => setShowForm(false)}>Cancel</Button>}
+          </div>
+        </form>
+      )}
+      {canWrite && summary?.hasData && !showForm && (
+        <Button size="sm" variant="outline" onClick={() => setShowForm(true)}>Update Protected Data</Button>
+      )}
+      {saved && <SuccessBanner message="Protected employee data saved securely." />}
+
+      {canReveal && summary?.hasData && (
+        <div className="border-t border-border/50 pt-3 space-y-2">
+          {!revealed ? (
+            <>
+              <Field label="Reason for reveal" required hint="A brief business reason — recorded in the audit log alongside who revealed it and when.">
+                <Input value={revealReason} onChange={(e) => setRevealReason(e.target.value)} placeholder="e.g. Manual E-Verify case entry" />
+              </Field>
+              {revealError && <ErrorBanner message={revealError} />}
+              <Button size="sm" variant="outline" onClick={reveal} disabled={revealing} className="gap-1.5">
+                <Eye className="w-3.5 h-3.5" /> {revealing ? "Revealing..." : "Reveal Full Details"}
+              </Button>
+            </>
+          ) : (
+            <div className="bg-red-50 border border-red-200 rounded-lg p-3 text-sm space-y-1.5">
+              <p className="font-semibold text-red-800 flex items-center gap-1.5"><ShieldCheck className="w-3.5 h-3.5" /> Revealed — handle per your organization's data-handling policy</p>
+              <p><span className="text-xs text-muted-foreground">Name:</span> {revealed.employeeName}</p>
+              {revealed.employeeContact && <p><span className="text-xs text-muted-foreground">Contact:</span> {revealed.employeeContact}</p>}
+              {revealed.ssn && <p className="font-mono"><span className="text-xs text-muted-foreground font-sans">SSN:</span> {revealed.ssn}</p>}
+              {revealed.documentInfo && (
+                <div>
+                  <span className="text-xs text-muted-foreground">Documents:</span>
+                  <ul className="list-disc list-inside">
+                    {Object.entries(revealed.documentInfo).map(([k, v]) => v ? <li key={k}>{k}: {String(v)}</li> : null)}
+                  </ul>
+                </div>
+              )}
+              <Button size="sm" variant="ghost" onClick={() => { setRevealed(null); setRevealReason(""); }} className="gap-1.5">
+                <EyeOff className="w-3.5 h-3.5" /> Hide
+              </Button>
+            </div>
+          )}
+        </div>
+      )}
+    </PortalCard>
+  );
+}
+
+interface WorkPacketField { value: unknown; source: string }
+interface WorkPacket {
+  clientCompanyName: WorkPacketField;
+  internalRequestNumber: WorkPacketField;
+  hiringSiteId: WorkPacketField;
+  firstDayOfEmploymentForPay: WorkPacketField;
+  informationalTarget: WorkPacketField;
+  formI9Section1Date: WorkPacketField;
+  formI9Section2Date: WorkPacketField;
+  attestations: WorkPacketField;
+  employeeName: WorkPacketField;
+  ssnMasked: WorkPacketField;
+  status: WorkPacketField;
+}
+
+function formatWorkPacketValue(value: unknown): string {
+  if (value === null || value === undefined) return "—";
+  if (typeof value === "object") return JSON.stringify(value);
+  return String(value);
+}
+
+/** LBS staff only — everything needed to manually create the case in
+ *  E-Verify, with each value's source labeled per the brief. The "Open
+ *  E-Verify" link is external-only: no credentials, no data in the URL, no
+ *  automation of the government portal. */
+function WorkPacketSection({ requestId }: { requestId: string }) {
+  const [packet, setPacket] = useState<WorkPacket | null>(null);
+  const [everifyUrl, setEverifyUrl] = useState<string>("https://everify.uscis.gov/everify/");
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+  const [open, setOpen] = useState(false);
+
+  async function load() {
+    setLoading(true);
+    setError("");
+    try {
+      const r = await i9Api<{ workPacket: WorkPacket; everifyExternalUrl: string }>(`/api/i9/new-hire-requests/${requestId}/work-packet`);
+      setPacket(r.workPacket);
+      setEverifyUrl(r.everifyExternalUrl);
+      setOpen(true);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Failed to load work packet.");
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  const rows: { label: string; field: keyof WorkPacket }[] = [
+    { label: "Client Company", field: "clientCompanyName" },
+    { label: "Internal Request #", field: "internalRequestNumber" },
+    { label: "Hiring Site ID", field: "hiringSiteId" },
+    { label: "First Day of Pay", field: "firstDayOfEmploymentForPay" },
+    { label: "Informational Target", field: "informationalTarget" },
+    { label: "Form I-9 Section 1 Date", field: "formI9Section1Date" },
+    { label: "Form I-9 Section 2 Date", field: "formI9Section2Date" },
+    { label: "Attestations", field: "attestations" },
+    { label: "Employee Name", field: "employeeName" },
+    { label: "SSN (masked)", field: "ssnMasked" },
+    { label: "Status", field: "status" },
+  ];
+
+  return (
+    <PortalCard
+      title="Case Work Packet"
+      action={
+        !open ? (
+          <Button size="sm" variant="outline" onClick={load} disabled={loading} className="gap-1.5">
+            <FileText className="w-3.5 h-3.5" /> {loading ? "Loading..." : "View Work Packet"}
+          </Button>
+        ) : (
+          <a href={everifyUrl} target="_blank" rel="noopener noreferrer">
+            <Button size="sm" className="text-white gap-1.5" style={{ backgroundColor: NAVY }}>
+              Open E-Verify <ExternalLink className="w-3.5 h-3.5" />
+            </Button>
+          </a>
+        )
+      }
+    >
+      {error && <ErrorBanner message={error} />}
+      {open && packet && (
+        <div className="overflow-x-auto">
+          <table className="w-full text-sm">
+            <thead>
+              <tr className="text-left text-xs text-muted-foreground border-b border-border/50">
+                <th className="py-1.5 pr-3 font-medium">Field</th>
+                <th className="py-1.5 pr-3 font-medium">Value</th>
+                <th className="py-1.5 font-medium">Source</th>
+              </tr>
+            </thead>
+            <tbody>
+              {rows.map(({ label, field }) => (
+                <tr key={field} className="border-b border-border/30 align-top">
+                  <td className="py-1.5 pr-3 font-medium whitespace-nowrap">{label}</td>
+                  <td className="py-1.5 pr-3">{formatWorkPacketValue(packet[field].value)}</td>
+                  <td className="py-1.5 text-xs text-muted-foreground">{packet[field].source}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+          <p className="text-xs text-muted-foreground pt-2">
+            E-Verify opens in a new tab — no credentials or case data are passed in the URL, and this portal never
+            automates or stores E-Verify credentials. Enter the case manually, then use "Record E-Verify Case Result"
+            below to log what E-Verify returned.
+          </p>
+        </div>
+      )}
+    </PortalCard>
+  );
+}
+
 function RequestDetail({ id, role }: { id: string; role: I9Role }) {
   const onUnauth = useUnauthRedirect();
   const [data, setData] = useState<DetailResponse | null>(null);
@@ -293,9 +559,18 @@ function RequestDetail({ id, role }: { id: string; role: I9Role }) {
   const [gateMissing, setGateMissing] = useState<string[] | null>(null);
   const [notFound, setNotFound] = useState(false);
 
-  const load = useCallback(() => {
+  /** `silent: true` re-fetches without toggling the page-level loading flag —
+   *  used when a child section (protected data, status actions) just wrote
+   *  something and wants fresh data reflected without blanking the whole
+   *  page back to "Loading request..." on every save. Without this, a child
+   *  triggering the ordinary (non-silent) refresh unmounts the entire detail
+   *  grid — including that same child — wiping any of its own local "saved"
+   *  confirmation state before the user has a chance to see it. Caught via a
+   *  Playwright test whose success-banner assertion kept failing even though
+   *  the write itself was succeeding every time. */
+  const load = useCallback((opts: { silent?: boolean } = {}) => {
     let active = true;
-    setLoading(true);
+    if (!opts.silent) setLoading(true);
     Promise.all([
       i9Api<DetailResponse>(`/api/i9/new-hire-requests/${id}`),
       i9Api<{ activity: I9CaseActivity[] }>(`/api/i9/new-hire-requests/${id}/activity`).catch(() => ({ activity: [] })),
@@ -315,13 +590,14 @@ function RequestDetail({ id, role }: { id: string; role: I9Role }) {
           onUnauth(err);
         }
       })
-      .finally(() => active && setLoading(false));
+      .finally(() => { if (active && !opts.silent) setLoading(false); });
     return () => {
       active = false;
     };
   }, [id, onUnauth]);
 
   useEffect(() => load(), [load]);
+  const silentReload = useCallback(() => load({ silent: true }), [load]);
 
   if (loading) return <p className="text-sm text-muted-foreground">Loading request...</p>;
   if (gateMissing) return <ServiceGateBanner missing={gateMissing} />;
@@ -360,21 +636,9 @@ function RequestDetail({ id, role }: { id: string; role: I9Role }) {
           </div>
         </PortalCard>
 
-        {isInternal && (
-          <PortalCard title="Employee Data on File">
-            {protectedDataSummary?.hasData ? (
-              <div className="flex items-center gap-2 text-sm">
-                <ShieldCheck className="w-4 h-4 text-green-600" />
-                <span>{protectedDataSummary.employeeName}{protectedDataSummary.ssnMasked ? ` · SSN ${protectedDataSummary.ssnMasked}` : ""}</span>
-              </div>
-            ) : (
-              <p className="text-sm text-muted-foreground">
-                No protected employee data has been entered for this request yet. Entry of protected employee data is
-                gated on secure-storage configuration and is not yet available in this build.
-              </p>
-            )}
-          </PortalCard>
-        )}
+        <ProtectedDataSection requestId={request.id} role={role} summary={protectedDataSummary} onChanged={silentReload} />
+
+        {isInternal && <WorkPacketSection requestId={request.id} />}
 
         {request.clientNotes && (
           <PortalCard title="Client Notes"><p className="text-sm whitespace-pre-wrap">{request.clientNotes}</p></PortalCard>
