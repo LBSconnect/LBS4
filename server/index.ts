@@ -17,6 +17,30 @@ declare module "http" {
   }
 }
 
+// Baseline security response headers (OWASP secure-headers defaults) applied
+// to every response, API and static alike. Deliberately conservative — no
+// Content-Security-Policy here, since this app loads first-party scripts,
+// Google Analytics/gtag, and Stripe.js from several origins, and a wrong CSP
+// silently breaks checkout/analytics rather than failing loudly; a real CSP
+// needs its own careful pass auditing every external origin the client
+// actually loads, not a drive-by addition. What's below has no such
+// downside — it can't break any existing page or API response.
+app.use((_req: Request, res: Response, next: NextFunction) => {
+  res.setHeader("X-Content-Type-Options", "nosniff");
+  // SAMEORIGIN (not DENY): nothing on this site needs to be framed by a
+  // third party, but same-origin framing is left available in case any
+  // internal page ever legitimately embeds another (e.g. a print view).
+  res.setHeader("X-Frame-Options", "SAMEORIGIN");
+  res.setHeader("Referrer-Policy", "strict-origin-when-cross-origin");
+  res.setHeader("Permissions-Policy", "camera=(), microphone=(), geolocation=()");
+  if (process.env.NODE_ENV === "production") {
+    // Only sent over HTTPS (Render terminates TLS in front of this app) —
+    // sending it over plain HTTP in dev would be misleading/unenforceable.
+    res.setHeader("Strict-Transport-Security", "max-age=63072000; includeSubDomains");
+  }
+  next();
+});
+
 async function initStripe() {
   // Check if Stripe is configured
   if (!process.env.STRIPE_SECRET_KEY) {
@@ -148,11 +172,17 @@ app.use((req, res, next) => {
 
   app.use((err: any, _req: Request, res: Response, next: NextFunction) => {
     const status = err.status || err.statusCode || 500;
-    const message = err.message || "Internal Server Error";
     console.error("Internal Server Error:", err);
     if (res.headersSent) {
       return next(err);
     }
+    // For genuine 5xx (unexpected/internal) errors, never forward the raw
+    // error message to the client — it can contain driver/internal detail
+    // (DB error text, file paths, library internals). Deliberately-thrown
+    // 4xx errors (an intentional `err.status`/`err.statusCode` a route set
+    // itself, e.g. a validation failure) are written for the client to read,
+    // so those messages still pass through.
+    const message = status >= 500 ? "Internal Server Error" : (err.message || "Request failed");
     return res.status(status).json({ message });
   });
 
