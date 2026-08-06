@@ -125,7 +125,14 @@ export default function CorporatePrograms() {
             >
               {plan.badge && (
                 <div
-                  className="text-center py-2 text-xs font-bold uppercase tracking-widest text-white"
+                  // White text on the Gold tier's #c9a84c only reaches ~2.28:1
+                  // (needs 4.5:1 at this 12px size) — real axe color-contrast
+                  // failure. Dark navy text on that same gold clears 7.5:1, and
+                  // matches how this gold is already paired with navy text
+                  // everywhere else in the corporate UI (buttons, badges).
+                  className={`text-center py-2 text-xs font-bold uppercase tracking-widest ${
+                    plan.tier === "gold" ? "text-[#0d1b35]" : "text-white"
+                  }`}
                   style={{ backgroundColor: plan.color }}
                 >
                   {plan.badge}
@@ -160,7 +167,8 @@ export default function CorporatePrograms() {
                 {/* CTA */}
                 <Link href={`/corporate/enroll?plan=${plan.tier}`}>
                   <Button
-                    className="w-full text-white font-semibold"
+                    // Same white-on-gold contrast fix as the badge above.
+                    className={`w-full font-semibold ${plan.tier === "gold" ? "text-[#0d1b35]" : "text-white"}`}
                     style={{ backgroundColor: plan.tier === "gold" ? plan.color : undefined }}
                     variant={plan.tier !== "gold" ? "default" : undefined}
                   >
@@ -208,10 +216,12 @@ export default function CorporatePrograms() {
             Our team is happy to help you choose the right plan or answer questions about the enrollment process.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center text-sm">
-            <a href="tel:2818365357" className="flex items-center justify-center gap-2 text-white/80 hover:text-white transition-colors">
+            {/* py-1 brings the tappable height to ~28px — the bare text line
+                was only ~20px, under the WCAG 2.2 SC 2.5.8 24px floor. */}
+            <a href="tel:2818365357" className="flex items-center justify-center gap-2 py-1 text-white/80 hover:text-white transition-colors">
               <Phone className="w-4 h-4" /> 281-836-5357
             </a>
-            <a href="mailto:info@lbsconnect.net" className="flex items-center justify-center gap-2 text-white/80 hover:text-white transition-colors">
+            <a href="mailto:info@lbsconnect.net" className="flex items-center justify-center gap-2 py-1 text-white/80 hover:text-white transition-colors">
               <Mail className="w-4 h-4" /> info@lbsconnect.net
             </a>
           </div>

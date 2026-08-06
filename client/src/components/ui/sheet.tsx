@@ -65,7 +65,10 @@ const SheetContent = React.forwardRef<
       {...props}
     >
       {children}
-      <SheetPrimitive.Close className="absolute right-4 top-4 rounded-sm opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:pointer-events-none data-[state=open]:bg-secondary">
+      {/* p-2 around the 16px icon brings the actual clickable/tappable target to
+          32x32px — the bare icon alone was a 16x16px hit area, under the WCAG
+          2.2 SC 2.5.8 (Target Size Minimum, AA) 24x24px floor. */}
+      <SheetPrimitive.Close className="absolute right-3 top-3 p-2 rounded-sm opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:pointer-events-none data-[state=open]:bg-secondary">
         <X className="h-4 w-4" />
         <span className="sr-only">Close</span>
       </SheetPrimitive.Close>

@@ -21,6 +21,9 @@ export default function CorporateActivated() {
             <CheckCircle2 className="w-10 h-10 text-green-600" />
           </div>
           <h1 className="text-3xl font-bold text-[#0d1b35]">Account Activated!</h1>
+          {/* Visually-hidden: keeps the footer's <h3> from directly following
+              this page's <h1> and skipping h2 (WCAG 1.3.1 / heading-order). */}
+          <h2 className="sr-only">Next Steps</h2>
           <p className="text-muted-foreground leading-relaxed">
             Your corporate notary account is now live. Your team can begin scheduling appointments immediately.
           </p>

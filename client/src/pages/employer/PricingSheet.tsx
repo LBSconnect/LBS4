@@ -35,9 +35,11 @@ export default function PricingSheet() {
 
       <div className="max-w-3xl mx-auto px-6 py-10 w-full print:py-0 print:px-0 print:max-w-none">
         <div className="flex flex-wrap items-center justify-between gap-3 mb-8 print:hidden">
+          {/* whitespace-normal — same 320px overflow fix as the identical
+              back-link on the Client Intake page. */}
           <Link href={EMPLOYER_BASE_ROUTE}>
-            <Button variant="ghost" size="sm" data-testid="button-back-from-pricing-sheet">
-              <ArrowLeft className="w-4 h-4 mr-1" />
+            <Button variant="ghost" size="sm" className="whitespace-normal text-left h-auto" data-testid="button-back-from-pricing-sheet">
+              <ArrowLeft className="w-4 h-4 mr-1 shrink-0" />
               Back to New-Hire Verification &amp; Form I-9 Support
             </Button>
           </Link>
@@ -88,12 +90,18 @@ export default function PricingSheet() {
 
           <section className="mb-8" data-testid="section-print-pay-as-you-go">
             <h2 className="text-lg font-bold text-[#0D1B3D] mb-3">Pay-As-You-Go Services</h2>
-            <table className="w-full text-sm border-collapse">
+            {/* table-fixed + explicit column widths: with the default
+                table-layout:auto, the browser sized both columns to fit their
+                unwrapped content, which didn't fit in 320px and pushed the
+                page wider. Fixed layout respects the table's own w-full
+                instead, so the label column actually wraps within its share
+                of the width rather than forcing the table to overflow. */}
+            <table className="w-full text-sm border-collapse table-fixed">
               <tbody>
                 {payAsYouGoServices.map((item) => (
                   <tr key={item.label} className="border-b border-border">
-                    <td className="py-2 pr-4">{item.label}</td>
-                    <td className="py-2 text-right font-semibold text-[#0D1B3D] whitespace-nowrap">{item.price}</td>
+                    <td className="py-2 pr-4 w-2/3 break-words">{item.label}</td>
+                    <td className="py-2 text-right font-semibold text-[#0D1B3D] w-1/3">{item.price}</td>
                   </tr>
                 ))}
               </tbody>

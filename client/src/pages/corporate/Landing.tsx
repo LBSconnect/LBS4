@@ -177,7 +177,18 @@ export default function CorporateLanding() {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
             {steps.map((step) => (
               <div key={step.number} className="space-y-3">
-                <div className="text-4xl font-extrabold text-[#c9a84c]/30">{step.number}</div>
+                {/* Was text-[#c9a84c]/30 (30%-opacity brand gold) — measured 1.23:1
+                    against this bg, nowhere near the 3:1 large-text minimum, and
+                    even the brand gold at FULL opacity only reaches 2.17:1 here, so
+                    no amount of opacity alone fixes it. #a6822f is a computed, actual
+                    darker gold that clears 3:1 (verified 3.4:1) while staying in the
+                    same hue family as the brand color. aria-hidden stays: the step
+                    order/name is still fully conveyed by the heading right below,
+                    so a screen reader doesn't need this decorative numeral announced
+                    — but aria-hidden does NOT exempt visible text from contrast
+                    requirements (sighted low-vision users still read it), which is
+                    why the color itself had to change too. */}
+                <div className="text-4xl font-extrabold text-[#a6822f]" aria-hidden="true">{step.number}</div>
                 <h3 className="font-semibold text-[#0d1b35] text-lg">{step.title}</h3>
                 <p className="text-sm text-muted-foreground leading-relaxed">{step.description}</p>
               </div>

@@ -288,15 +288,21 @@ export default function Home() {
                 </p>
               </div>
               <div className="flex lg:justify-end">
-                <Link href="/employer-services/new-hire-verification">
+                {/* w-full + whitespace-normal: at 320px this text (with the
+                    Button's own fixed padding/icon) needed ~266px, a few px
+                    more than fits, causing real page-level horizontal
+                    overflow. Letting it wrap onto two lines within a
+                    full-width button at narrow widths fixes that; sm:w-auto
+                    keeps the original single-line pill everywhere it fit. */}
+                <Link href="/employer-services/new-hire-verification" className="w-full sm:w-auto">
                   <Button
                     size="lg"
                     variant="outline"
-                    className="border-white/30 text-white bg-white/5 backdrop-blur-sm rounded-full"
+                    className="border-white/30 text-white bg-white/5 backdrop-blur-sm rounded-full w-full sm:w-auto whitespace-normal"
                     data-testid="button-view-employer-services"
                   >
                     Explore Employer Services
-                    <ArrowRight className="w-4 h-4 ml-2" />
+                    <ArrowRight className="w-4 h-4 ml-2 shrink-0" />
                   </Button>
                 </Link>
               </div>
@@ -318,14 +324,16 @@ export default function Home() {
                 From everyday essentials to specialized business solutions, we help you save time and focus on what
                 matters most.
               </p>
-              <Link href="/for-businesses">
+              {/* w-full + whitespace-normal — same 320px overflow fix as the
+                  "Explore Employer Services" CTA above. */}
+              <Link href="/for-businesses" className="block w-full sm:inline-block sm:w-auto">
                 <Button
                   size="lg"
-                  className="bg-gradient-to-r from-[#FF6A00] to-[#FF2D55] text-white rounded-full"
+                  className="bg-gradient-to-r from-[#FF6A00] to-[#FF2D55] text-white rounded-full w-full sm:w-auto whitespace-normal"
                   data-testid="button-explore-business-solutions"
                 >
                   Explore Business Solutions
-                  <ArrowRight className="w-4 h-4 ml-2" />
+                  <ArrowRight className="w-4 h-4 ml-2 shrink-0" />
                 </Button>
               </Link>
             </div>

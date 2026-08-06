@@ -572,7 +572,13 @@ export default function ServiceDetail({ slugOverride }: { slugOverride?: string 
                       {/* Date Picker */}
                       <div>
                         <Label className="text-sm font-medium mb-2 block">Select Date</Label>
-                        <div className="border rounded-md p-2">
+                        {/* p-1 (not p-2) at the narrowest widths: the day-grid's
+                            fixed-width cells (7 × 36px) left this wrapper a couple
+                            px too wide for a 320px viewport, causing real page
+                            overflow. Trimming the wrapper's own padding at the
+                            smallest breakpoint is enough; sm: restores the
+                            original spacing everywhere it already fit. */}
+                        <div className="border rounded-md p-1 sm:p-2">
                           <Calendar
                             mode="single"
                             selected={selectedDate}
@@ -581,7 +587,7 @@ export default function ServiceDetail({ slugOverride }: { slugOverride?: string 
                               setSelectedTime("");
                             }}
                             disabled={disabledDays}
-                            className="rounded-md"
+                            className="rounded-md p-1 sm:p-3"
                           />
                         </div>
                         <p className="text-xs text-muted-foreground mt-1">

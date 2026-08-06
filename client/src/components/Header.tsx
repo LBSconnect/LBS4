@@ -61,7 +61,22 @@ export default function Header() {
       }
     }
     document.addEventListener("mousedown", handleClick);
-    return () => document.removeEventListener("mousedown", handleClick);
+
+    // Keyboard-only users need a way to dismiss an open dropdown without a
+    // mouse click outside it — Escape is the standard convention for
+    // disclosure widgets like these (WCAG 2.1.1 Keyboard).
+    function handleKeyDown(e: KeyboardEvent) {
+      if (e.key === "Escape") {
+        setCorpOpen(false);
+        setBizOpen(false);
+      }
+    }
+    document.addEventListener("keydown", handleKeyDown);
+
+    return () => {
+      document.removeEventListener("mousedown", handleClick);
+      document.removeEventListener("keydown", handleKeyDown);
+    };
   }, []);
 
   return (
@@ -114,21 +129,30 @@ export default function Header() {
           </Link>
 
           <nav className="hidden md:flex items-center gap-1" data-testid="nav-desktop">
+            {/* asChild throughout this nav: an <a> (Link) wrapping a <button>
+                (Button) is two nested interactive elements at the same
+                position, which both axe's target-size check and manual
+                keyboard testing (Tab landing on the untagged outer <a> before
+                the inner <button>, doubling the stops per link) flagged as
+                real problems on the "Book a Service" CTA — see below. Same
+                fix applied to every plain nav link here, since they all share
+                the identical nested structure. */}
             {navLinksStart.map((link) => (
-              <Link key={link.href} href={link.href}>
-                <Button
-                  variant={location === link.href ? "default" : "ghost"}
-                  size="sm"
-                  className={
-                    location === link.href
-                      ? "bg-[#0D1B3D] text-white"
-                      : "text-foreground"
-                  }
-                  data-testid={`link-nav-${link.label.toLowerCase().replace(/\s/g, "-")}`}
-                >
+              <Button
+                key={link.href}
+                asChild
+                variant={location === link.href ? "default" : "ghost"}
+                size="sm"
+                className={
+                  location === link.href
+                    ? "bg-[#0D1B3D] text-white"
+                    : "text-foreground"
+                }
+              >
+                <Link href={link.href} data-testid={`link-nav-${link.label.toLowerCase().replace(/\s/g, "-")}`}>
                   {link.label}
-                </Button>
-              </Link>
+                </Link>
+              </Button>
             ))}
 
             {/* For Businesses dropdown */}
@@ -142,6 +166,8 @@ export default function Header() {
                     : "text-foreground"
                 }`}
                 onClick={() => setBizOpen((o) => !o)}
+                aria-haspopup="true"
+                aria-expanded={bizOpen}
                 data-testid="link-nav-for-businesses"
               >
                 For Businesses
@@ -173,6 +199,8 @@ export default function Header() {
                   size="sm"
                   className="text-foreground gap-1"
                   onClick={() => setCorpOpen((o) => !o)}
+                  aria-haspopup="true"
+                  aria-expanded={corpOpen}
                   data-testid="link-nav-corporate"
                 >
                   <Building2 className="w-3.5 h-3.5" />
@@ -208,48 +236,56 @@ export default function Header() {
             )}
 
             {navLinksMid.map((link) => (
-              <Link key={link.href} href={link.href}>
-                <Button
-                  variant={location === link.href ? "default" : "ghost"}
-                  size="sm"
-                  className={
-                    location === link.href
-                      ? "bg-[#0D1B3D] text-white"
-                      : "text-foreground"
-                  }
-                  data-testid={`link-nav-${link.label.toLowerCase().replace(/\s/g, "-")}`}
-                >
+              <Button
+                key={link.href}
+                asChild
+                variant={location === link.href ? "default" : "ghost"}
+                size="sm"
+                className={
+                  location === link.href
+                    ? "bg-[#0D1B3D] text-white"
+                    : "text-foreground"
+                }
+              >
+                <Link href={link.href} data-testid={`link-nav-${link.label.toLowerCase().replace(/\s/g, "-")}`}>
                   {link.label}
-                </Button>
-              </Link>
+                </Link>
+              </Button>
             ))}
 
             {navLinksEnd.map((link) => (
-              <Link key={link.href} href={link.href}>
-                <Button
-                  variant={location === link.href ? "default" : "ghost"}
-                  size="sm"
-                  className={
-                    location === link.href
-                      ? "bg-[#0D1B3D] text-white"
-                      : "text-foreground"
-                  }
-                  data-testid={`link-nav-${link.label.toLowerCase().replace(/\s/g, "-")}`}
-                >
+              <Button
+                key={link.href}
+                asChild
+                variant={location === link.href ? "default" : "ghost"}
+                size="sm"
+                className={
+                  location === link.href
+                    ? "bg-[#0D1B3D] text-white"
+                    : "text-foreground"
+                }
+              >
+                <Link href={link.href} data-testid={`link-nav-${link.label.toLowerCase().replace(/\s/g, "-")}`}>
                   {link.label}
-                </Button>
-              </Link>
+                </Link>
+              </Button>
             ))}
 
-            <Link href="/book">
-              <Button
-                size="sm"
-                className="ml-2 bg-gradient-to-r from-[#FF6A00] to-[#FF2D55] text-white rounded-full"
-                data-testid="button-book-now"
-              >
+            {/* asChild merges the Button's styling directly onto the <Link>'s
+                anchor instead of nesting a <button> inside it. An <a> wrapping
+                a <button> is two overlapping interactive elements at the same
+                position — axe-core's target-size check (WCAG 2.5.8) flags the
+                anchor as "obscured" by its own nested button here, right next
+                to the "About Us" link. Single element, same visible styling. */}
+            <Button
+              asChild
+              size="sm"
+              className="ml-2 bg-gradient-to-r from-[#FF6A00] to-[#FF2D55] text-white rounded-full"
+            >
+              <Link href="/book" data-testid="button-book-now">
                 Book a Service
-              </Button>
-            </Link>
+              </Link>
+            </Button>
           </nav>
 
           <Sheet open={mobileOpen} onOpenChange={setMobileOpen}>
@@ -276,17 +312,20 @@ export default function Header() {
                   </div>
                 </div>
                 <nav className="flex flex-col p-4 gap-1" data-testid="nav-mobile">
+                  {/* asChild throughout — same nested <a>/<button> fix as the
+                      desktop nav above. */}
                   {navLinksStart.map((link) => (
-                    <Link key={link.href} href={link.href}>
-                      <Button
-                        variant={location === link.href ? "default" : "ghost"}
-                        className={`w-full justify-start ${location === link.href ? "bg-[#0D1B3D] text-white" : ""}`}
-                        onClick={() => setMobileOpen(false)}
-                        data-testid={`link-mobile-${link.label.toLowerCase().replace(/\s/g, "-")}`}
-                      >
+                    <Button
+                      key={link.href}
+                      asChild
+                      variant={location === link.href ? "default" : "ghost"}
+                      className={`w-full justify-start ${location === link.href ? "bg-[#0D1B3D] text-white" : ""}`}
+                      onClick={() => setMobileOpen(false)}
+                    >
+                      <Link href={link.href} data-testid={`link-mobile-${link.label.toLowerCase().replace(/\s/g, "-")}`}>
                         {link.label}
-                      </Button>
-                    </Link>
+                      </Link>
+                    </Button>
                   ))}
                   <div className="pt-2 pb-1 px-1">
                     <p className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground flex items-center gap-1.5">
@@ -294,17 +333,18 @@ export default function Header() {
                     </p>
                   </div>
                   {businessDropdownLinks.map((link) => (
-                    <Link key={link.href} href={link.href}>
-                      <Button
-                        variant="ghost"
-                        className="w-full justify-start gap-2.5 text-sm pl-4"
-                        onClick={() => setMobileOpen(false)}
-                        data-testid={`link-mobile-dropdown-${link.label.toLowerCase().replace(/[^a-z0-9]+/g, "-")}`}
-                      >
+                    <Button
+                      key={link.href}
+                      asChild
+                      variant="ghost"
+                      className="w-full justify-start gap-2.5 text-sm pl-4"
+                      onClick={() => setMobileOpen(false)}
+                    >
+                      <Link href={link.href} data-testid={`link-mobile-dropdown-${link.label.toLowerCase().replace(/[^a-z0-9]+/g, "-")}`}>
                         <link.icon className="w-4 h-4 text-[#FF6A00] shrink-0" />
                         {link.label}
-                      </Button>
-                    </Link>
+                      </Link>
+                    </Button>
                   ))}
                   {CORPORATE_ENABLED && (
                     <>
@@ -314,62 +354,65 @@ export default function Header() {
                         </p>
                       </div>
                       {corporateMainLinks.map((link) => (
-                        <Link key={link.href} href={link.href}>
-                          <Button
-                            variant="ghost"
-                            className="w-full justify-start text-sm pl-4"
-                            onClick={() => setMobileOpen(false)}
-                          >
-                            {link.label}
-                          </Button>
-                        </Link>
+                        <Button
+                          key={link.href}
+                          asChild
+                          variant="ghost"
+                          className="w-full justify-start text-sm pl-4"
+                          onClick={() => setMobileOpen(false)}
+                        >
+                          <Link href={link.href}>{link.label}</Link>
+                        </Button>
                       ))}
                       <div className="my-1 border-t border-border/50" />
                       {corporateAccountLinks.map((link) => (
-                        <Link key={link.href} href={link.href}>
-                          <Button
-                            className={`w-full justify-start text-sm ${link.bg} ${link.text}`}
-                            onClick={() => setMobileOpen(false)}
-                          >
-                            {link.label}
-                          </Button>
-                        </Link>
+                        <Button
+                          key={link.href}
+                          asChild
+                          className={`w-full justify-start text-sm ${link.bg} ${link.text}`}
+                          onClick={() => setMobileOpen(false)}
+                        >
+                          <Link href={link.href}>{link.label}</Link>
+                        </Button>
                       ))}
                     </>
                   )}
                   {navLinksMid.map((link) => (
-                    <Link key={link.href} href={link.href}>
-                      <Button
-                        variant={location === link.href ? "default" : "ghost"}
-                        className={`w-full justify-start ${location === link.href ? "bg-[#0D1B3D] text-white" : ""}`}
-                        onClick={() => setMobileOpen(false)}
-                        data-testid={`link-mobile-${link.label.toLowerCase().replace(/\s/g, "-")}`}
-                      >
+                    <Button
+                      key={link.href}
+                      asChild
+                      variant={location === link.href ? "default" : "ghost"}
+                      className={`w-full justify-start ${location === link.href ? "bg-[#0D1B3D] text-white" : ""}`}
+                      onClick={() => setMobileOpen(false)}
+                    >
+                      <Link href={link.href} data-testid={`link-mobile-${link.label.toLowerCase().replace(/\s/g, "-")}`}>
                         {link.label}
-                      </Button>
-                    </Link>
+                      </Link>
+                    </Button>
                   ))}
                   {navLinksEnd.map((link) => (
-                    <Link key={link.href} href={link.href}>
-                      <Button
-                        variant={location === link.href ? "default" : "ghost"}
-                        className={`w-full justify-start ${location === link.href ? "bg-[#0D1B3D] text-white" : ""}`}
-                        onClick={() => setMobileOpen(false)}
-                        data-testid={`link-mobile-${link.label.toLowerCase().replace(/\s/g, "-")}`}
-                      >
-                        {link.label}
-                      </Button>
-                    </Link>
-                  ))}
-                  <Link href="/book">
                     <Button
-                      className="w-full mt-3 bg-gradient-to-r from-[#FF6A00] to-[#FF2D55] text-white rounded-full"
+                      key={link.href}
+                      asChild
+                      variant={location === link.href ? "default" : "ghost"}
+                      className={`w-full justify-start ${location === link.href ? "bg-[#0D1B3D] text-white" : ""}`}
                       onClick={() => setMobileOpen(false)}
-                      data-testid="button-mobile-book"
                     >
-                      Book a Service
+                      <Link href={link.href} data-testid={`link-mobile-${link.label.toLowerCase().replace(/\s/g, "-")}`}>
+                        {link.label}
+                      </Link>
                     </Button>
-                  </Link>
+                  ))}
+                  {/* asChild — see the desktop "Book a Service" CTA above for why. */}
+                  <Button
+                    asChild
+                    className="w-full mt-3 bg-gradient-to-r from-[#FF6A00] to-[#FF2D55] text-white rounded-full"
+                    onClick={() => setMobileOpen(false)}
+                  >
+                    <Link href="/book" data-testid="button-mobile-book">
+                      Book a Service
+                    </Link>
+                  </Button>
                 </nav>
                 <div className="mt-auto p-4 border-t border-border/50 space-y-3 text-sm text-muted-foreground">
                   <a href="tel:2818365357" className="flex items-center gap-2">
