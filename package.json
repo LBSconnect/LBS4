@@ -104,6 +104,7 @@
     "zod-validation-error": "^3.4.0"
   },
   "devDependencies": {
+    "@axe-core/playwright": "^4.12.1",
     "@playwright/test": "^1.49.0",
     "@types/connect-pg-simple": "^7.0.3",
     "@types/express": "^5.0.0",

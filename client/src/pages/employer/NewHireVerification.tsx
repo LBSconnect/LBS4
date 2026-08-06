@@ -428,6 +428,7 @@ export default function NewHireVerification() {
                   variant="outline"
                   className="border-white/30 text-white bg-white/5 backdrop-blur-sm rounded-full"
                   data-testid="button-hero-start-onboarding"
+                  onClick={() => trackEvent("portal_start_onboarding_click", { location: "hero" })}
                 >
                   Start Employer Onboarding
                 </Button>
@@ -437,6 +438,7 @@ export default function NewHireVerification() {
                   variant="ghost"
                   className="text-white/80 hover:text-white hover:bg-white/10 rounded-full"
                   data-testid="button-hero-client-portal-login"
+                  onClick={() => trackEvent("portal_login_click", { location: "hero" })}
                 >
                   <ShieldCheck className="w-4 h-4 mr-2" />
                   Client Portal Login
@@ -851,13 +853,13 @@ export default function NewHireVerification() {
                       />
                     </div>
                     <div className="space-y-2">
-                      <Label>Approx. Number of Employees *</Label>
+                      <Label htmlFor="select-employee-count">Approx. Number of Employees *</Label>
                       <Select
                         required
                         value={formData.employeeCount}
                         onValueChange={(v) => { handleFieldStart(); setFormData({ ...formData, employeeCount: v }); }}
                       >
-                        <SelectTrigger data-testid="select-employee-count">
+                        <SelectTrigger id="select-employee-count" data-testid="select-employee-count">
                           <SelectValue placeholder="Select a range" />
                         </SelectTrigger>
                         <SelectContent>
@@ -868,13 +870,13 @@ export default function NewHireVerification() {
                       </Select>
                     </div>
                     <div className="space-y-2">
-                      <Label>Approx. New Hires per Month *</Label>
+                      <Label htmlFor="select-new-hires-per-month">Approx. New Hires per Month *</Label>
                       <Select
                         required
                         value={formData.newHiresPerMonth}
                         onValueChange={(v) => { handleFieldStart(); setFormData({ ...formData, newHiresPerMonth: v }); }}
                       >
-                        <SelectTrigger data-testid="select-new-hires-per-month">
+                        <SelectTrigger id="select-new-hires-per-month" data-testid="select-new-hires-per-month">
                           <SelectValue placeholder="Select a range" />
                         </SelectTrigger>
                         <SelectContent>
@@ -885,13 +887,13 @@ export default function NewHireVerification() {
                       </Select>
                     </div>
                     <div className="space-y-2">
-                      <Label>Number of Hiring Locations *</Label>
+                      <Label htmlFor="select-hiring-locations">Number of Hiring Locations *</Label>
                       <Select
                         required
                         value={formData.hiringLocations}
                         onValueChange={(v) => { handleFieldStart(); setFormData({ ...formData, hiringLocations: v }); }}
                       >
-                        <SelectTrigger data-testid="select-hiring-locations">
+                        <SelectTrigger id="select-hiring-locations" data-testid="select-hiring-locations">
                           <SelectValue placeholder="Select a range" />
                         </SelectTrigger>
                         <SelectContent>
@@ -905,13 +907,13 @@ export default function NewHireVerification() {
 
                   <div className="grid grid-cols-1 sm:grid-cols-3 gap-5">
                     <div className="space-y-2">
-                      <Label>Already Enrolled in E-Verify? *</Label>
+                      <Label htmlFor="select-already-enrolled">Already Enrolled in E-Verify? *</Label>
                       <Select
                         required
                         value={formData.alreadyEnrolledInEverify}
                         onValueChange={(v) => { handleFieldStart(); setFormData({ ...formData, alreadyEnrolledInEverify: v as YesNoNotSure }); }}
                       >
-                        <SelectTrigger data-testid="select-already-enrolled">
+                        <SelectTrigger id="select-already-enrolled" data-testid="select-already-enrolled">
                           <SelectValue placeholder="Select one" />
                         </SelectTrigger>
                         <SelectContent>
@@ -922,13 +924,13 @@ export default function NewHireVerification() {
                       </Select>
                     </div>
                     <div className="space-y-2">
-                      <Label>Using Another Employer Agent? *</Label>
+                      <Label htmlFor="select-uses-another-agent">Using Another Employer Agent? *</Label>
                       <Select
                         required
                         value={formData.usesAnotherEmployerAgent}
                         onValueChange={(v) => { handleFieldStart(); setFormData({ ...formData, usesAnotherEmployerAgent: v as YesNoNotSure }); }}
                       >
-                        <SelectTrigger data-testid="select-uses-another-agent">
+                        <SelectTrigger id="select-uses-another-agent" data-testid="select-uses-another-agent">
                           <SelectValue placeholder="Select one" />
                         </SelectTrigger>
                         <SelectContent>
@@ -939,13 +941,13 @@ export default function NewHireVerification() {
                       </Select>
                     </div>
                     <div className="space-y-2">
-                      <Label>Federal Contractor? *</Label>
+                      <Label htmlFor="select-federal-contractor">Federal Contractor? *</Label>
                       <Select
                         required
                         value={formData.federalContractorStatus}
                         onValueChange={(v) => { handleFieldStart(); setFormData({ ...formData, federalContractorStatus: v as YesNoNotSure }); }}
                       >
-                        <SelectTrigger data-testid="select-federal-contractor">
+                        <SelectTrigger id="select-federal-contractor" data-testid="select-federal-contractor">
                           <SelectValue placeholder="Select one" />
                         </SelectTrigger>
                         <SelectContent>
@@ -959,13 +961,13 @@ export default function NewHireVerification() {
 
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
                     <div className="space-y-2">
-                      <Label>Desired Service *</Label>
+                      <Label htmlFor="select-desired-service">Desired Service *</Label>
                       <Select
                         required
                         value={formData.desiredService}
                         onValueChange={(v) => { handleFieldStart(); setFormData({ ...formData, desiredService: v as typeof formData.desiredService }); }}
                       >
-                        <SelectTrigger data-testid="select-desired-service">
+                        <SelectTrigger id="select-desired-service" data-testid="select-desired-service">
                           <SelectValue placeholder="Select a service" />
                         </SelectTrigger>
                         <SelectContent>
@@ -976,13 +978,13 @@ export default function NewHireVerification() {
                       </Select>
                     </div>
                     <div className="space-y-2">
-                      <Label>Preferred Consultation Method *</Label>
+                      <Label htmlFor="select-consultation-method">Preferred Consultation Method *</Label>
                       <Select
                         required
                         value={formData.preferredConsultationMethod}
                         onValueChange={(v) => { handleFieldStart(); setFormData({ ...formData, preferredConsultationMethod: v as typeof formData.preferredConsultationMethod }); }}
                       >
-                        <SelectTrigger data-testid="select-consultation-method">
+                        <SelectTrigger id="select-consultation-method" data-testid="select-consultation-method">
                           <SelectValue placeholder="Select a method" />
                         </SelectTrigger>
                         <SelectContent>
@@ -1051,11 +1053,11 @@ export default function NewHireVerification() {
 
           <p className="text-xs text-muted-foreground text-center mt-6">
             Have questions about employer onboarding requirements first? See the{" "}
-            <Link href={EMPLOYER_INTAKE_ROUTE} className="text-[#0D1B3D] dark:text-[#0077FF] hover:underline">
+            <Link href={EMPLOYER_INTAKE_ROUTE} className="text-[#0D1B3D] dark:text-[#0077FF] underline underline-offset-2 hover:opacity-80">
               employer onboarding checklist
             </Link>{" "}
             or the{" "}
-            <Link href={EMPLOYER_AGREEMENT_ROUTE} className="text-[#0D1B3D] dark:text-[#0077FF] hover:underline">
+            <Link href={EMPLOYER_AGREEMENT_ROUTE} className="text-[#0D1B3D] dark:text-[#0077FF] underline underline-offset-2 hover:opacity-80">
               draft service agreement
             </Link>.
           </p>
@@ -1122,12 +1124,22 @@ export default function NewHireVerification() {
           </div>
           <div className="flex flex-wrap items-center justify-center gap-4 pt-1">
             <Link href={PORTAL_ROUTES.register}>
-              <Button variant="outline" className="border-white/30 text-white bg-white/5 backdrop-blur-sm rounded-full" data-testid="button-cta-start-onboarding">
+              <Button
+                variant="outline"
+                className="border-white/30 text-white bg-white/5 backdrop-blur-sm rounded-full"
+                data-testid="button-cta-start-onboarding"
+                onClick={() => trackEvent("portal_start_onboarding_click", { location: "closing_cta" })}
+              >
                 Start Employer Onboarding
               </Button>
             </Link>
             <Link href={PORTAL_ROUTES.login}>
-              <Button variant="ghost" className="text-white/80 hover:text-white hover:bg-white/10 rounded-full" data-testid="button-cta-client-portal-login">
+              <Button
+                variant="ghost"
+                className="text-white/80 hover:text-white hover:bg-white/10 rounded-full"
+                data-testid="button-cta-client-portal-login"
+                onClick={() => trackEvent("portal_login_click", { location: "closing_cta" })}
+              >
                 <ShieldCheck className="w-4 h-4 mr-2" />
                 Client Portal Login
               </Button>

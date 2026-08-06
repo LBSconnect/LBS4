@@ -1,15 +1,18 @@
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
-import { CheckCircle2, ShieldAlert } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { CheckCircle2, ShieldAlert, Download, Trash2 } from "lucide-react";
 import {
   i9Api,
   formatCents,
   type I9UsageRecord,
   type I9AuditEvent,
   type I9SecurityIncident,
+  type I9ClientCompany,
   type I9Role,
 } from "@/lib/i9Portal";
-import { PortalGuard, PortalShell, PortalCard, ErrorBanner, useUnauthRedirect, NAVY } from "./_shared";
+import { PortalGuard, PortalShell, PortalCard, Field, ErrorBanner, SuccessBanner, useUnauthRedirect, NAVY } from "./_shared";
 
 interface CaseVolumeRow { monthYear: string; status: string; count: number }
 
@@ -186,6 +189,123 @@ function SecurityIncidentsSection() {
   );
 }
 
+/** Data-retention actions: exporting a company's case metadata (never
+ *  protected employee data — the export endpoint intentionally returns only
+ *  request IDs/status/timestamps, see server/i9Routes.ts) and hard-deleting
+ *  a single secure document. Both actions are program_admin-only, require a
+ *  written reason, and are recorded as an I9RetentionAction + audit event
+ *  server-side — this UI is a thin, honest front-end for controls that
+ *  already exist in the backend. */
+function RetentionSection() {
+  const [companies, setCompanies] = useState<I9ClientCompany[]>([]);
+  const [companyId, setCompanyId] = useState("");
+  const [exportReason, setExportReason] = useState("");
+  const [exportBusy, setExportBusy] = useState(false);
+  const [exportError, setExportError] = useState("");
+  const [exportSuccess, setExportSuccess] = useState("");
+
+  const [documentId, setDocumentId] = useState("");
+  const [deleteReason, setDeleteReason] = useState("");
+  const [deleteBusy, setDeleteBusy] = useState(false);
+  const [deleteError, setDeleteError] = useState("");
+  const [deleteSuccess, setDeleteSuccess] = useState("");
+
+  useEffect(() => {
+    i9Api<{ companies: I9ClientCompany[] }>("/api/i9/companies")
+      .then((r) => setCompanies(r.companies))
+      .catch(() => {});
+  }, []);
+
+  async function runExport() {
+    if (!companyId) return;
+    setExportBusy(true);
+    setExportError("");
+    setExportSuccess("");
+    try {
+      const result = await i9Api<{ export: unknown }>(`/api/i9/companies/${companyId}/retention/export`, {
+        method: "POST",
+        body: JSON.stringify({ reason: exportReason || undefined }),
+      });
+      // The export contains no SSNs, document numbers, or other protected
+      // employee data — only case metadata (request IDs, status, dates) and
+      // hiring-site records — so a client-side download is safe. It never
+      // touches analytics, logs, or a persisted URL.
+      const blob = new Blob([JSON.stringify(result.export, null, 2)], { type: "application/json" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `i9-retention-export-${companyId}-${new Date().toISOString().slice(0, 10)}.json`;
+      a.click();
+      URL.revokeObjectURL(url);
+      setExportSuccess("Export generated and downloaded. This action was recorded in the retention log and audit trail.");
+    } catch (err) {
+      setExportError(err instanceof Error ? err.message : "Export failed.");
+    } finally {
+      setExportBusy(false);
+    }
+  }
+
+  async function runDelete() {
+    if (!documentId || !deleteReason) return;
+    setDeleteBusy(true);
+    setDeleteError("");
+    setDeleteSuccess("");
+    try {
+      await i9Api(`/api/i9/documents/${documentId}/retention/delete`, {
+        method: "POST",
+        body: JSON.stringify({ reason: deleteReason }),
+      });
+      setDeleteSuccess("Secure document permanently deleted. This action was recorded in the retention log and audit trail.");
+      setDocumentId("");
+      setDeleteReason("");
+    } catch (err) {
+      setDeleteError(err instanceof Error ? err.message : "Delete failed.");
+    } finally {
+      setDeleteBusy(false);
+    }
+  }
+
+  return (
+    <PortalCard title="Data Retention">
+      <div className="space-y-3">
+        <p className="text-xs text-muted-foreground">
+          Export a client's case metadata (record IDs, statuses, dates — never SSNs, document numbers, or file
+          contents) for retention/compliance recordkeeping, or permanently delete a single secure document past its
+          retention need. Both actions require a reason and are permanently logged.
+        </p>
+        <Field label="Client company">
+          <select className="w-full h-9 px-3 text-sm border border-input rounded-md bg-background" value={companyId} onChange={(e) => setCompanyId(e.target.value)}>
+            <option value="">Select a company...</option>
+            {companies.map((c) => <option key={c.id} value={c.id}>{c.legalBusinessName}</option>)}
+          </select>
+        </Field>
+        <Field label="Reason for export" hint="Optional, but recommended for the retention log.">
+          <Textarea value={exportReason} onChange={(e) => setExportReason(e.target.value)} rows={2} />
+        </Field>
+        {exportError && <ErrorBanner message={exportError} />}
+        {exportSuccess && <SuccessBanner message={exportSuccess} />}
+        <Button onClick={runExport} disabled={exportBusy || !companyId} variant="outline" className="gap-1.5">
+          <Download className="w-3.5 h-3.5" /> {exportBusy ? "Exporting..." : "Export Case Metadata"}
+        </Button>
+      </div>
+
+      <div className="pt-4 border-t border-border/50 space-y-3">
+        <Field label="Secure document ID" hint="From the work packet or protected-data view.">
+          <Input value={documentId} onChange={(e) => setDocumentId(e.target.value)} placeholder="Document ID" />
+        </Field>
+        <Field label="Reason for deletion" required>
+          <Textarea value={deleteReason} onChange={(e) => setDeleteReason(e.target.value)} rows={2} />
+        </Field>
+        {deleteError && <ErrorBanner message={deleteError} />}
+        {deleteSuccess && <SuccessBanner message={deleteSuccess} />}
+        <Button onClick={runDelete} disabled={deleteBusy || !documentId || !deleteReason} variant="outline" className="gap-1.5 text-red-600 border-red-200 hover:bg-red-50">
+          <Trash2 className="w-3.5 h-3.5" /> {deleteBusy ? "Deleting..." : "Permanently Delete Document"}
+        </Button>
+      </div>
+    </PortalCard>
+  );
+}
+
 function AdminToolsContent({ role }: { role: I9Role }) {
   return (
     <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
@@ -194,6 +314,7 @@ function AdminToolsContent({ role }: { role: I9Role }) {
         <CaseVolumeReport />
       </div>
       <div className="space-y-5">
+        {role === "lbs_program_admin" && <RetentionSection />}
         {role === "lbs_program_admin" && <AuditLogSection />}
         {role === "lbs_program_admin" && <SecurityIncidentsSection />}
       </div>
