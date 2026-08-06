@@ -547,9 +547,59 @@ export async function updateI9ClientCompany(id: string, patch: Partial<InsertI9C
   await database.update(i9ClientCompanies).set(values as any).where(eq(i9ClientCompanies.id, id));
 }
 
+/** Separate from updateI9ClientCompany because these fields are LBS-recorded
+ *  (never client-editable — a client cannot self-report their own E-Verify
+ *  company ID or MOU signature) and aren't part of insertI9ClientCompanySchema
+ *  at all. The MOU itself is executed by the client directly with DHS/SSA,
+ *  outside this website; this only records status/reference info after the
+ *  fact — see server/i9Routes.ts's everify-enrollment route. */
+export async function recordI9EverifyEnrollment(
+  id: string,
+  data: { everifyCompanyId?: string; mouSignerName?: string; mouSignedDate?: string; mouSecureReference?: string }
+): Promise<void> {
+  const database = getDb();
+  await database.update(i9ClientCompanies).set({ ...data, updatedAt: new Date() } as any).where(eq(i9ClientCompanies.id, id));
+}
+
 // ─────────────────────────────────────────────────────────────────────────────
 // ClientUser (auth)
 // ─────────────────────────────────────────────────────────────────────────────
+
+// ─────────────────────────────────────────────────────────────────────────────
+// ClientAgreement — the LBS commercial agreement (separate from the E-Verify
+// MOU, which is executed by the client directly with DHS/SSA — see
+// recordI9EverifyEnrollment above). No e-signature provider is configured
+// (see server/i9Routes.ts's agreement routes), so this only ever generates
+// document text for download/print and records a reference to an uploaded
+// signed copy — it never simulates or fakes a signature capture.
+// ─────────────────────────────────────────────────────────────────────────────
+
+export async function createI9ClientAgreement(clientCompanyId: string, documentVersion: string, generatedDocumentHtml: string) {
+  const database = getDb();
+  const [row] = await database
+    .insert(i9ClientAgreements)
+    .values({ clientCompanyId, documentVersion, generatedDocumentHtml, status: "generated" } as any)
+    .returning();
+  return row;
+}
+
+export async function getLatestI9ClientAgreement(clientCompanyId: string) {
+  const database = getDb();
+  const rows = await database
+    .select()
+    .from(i9ClientAgreements)
+    .where(eq(i9ClientAgreements.clientCompanyId, clientCompanyId))
+    .orderBy(desc(i9ClientAgreements.createdAt));
+  return rows[0] ?? null;
+}
+
+export async function recordI9AgreementSignedCopy(id: string, data: { secureDocumentId: string; signedByName: string }) {
+  const database = getDb();
+  await database
+    .update(i9ClientAgreements)
+    .set({ status: "signed", signedByName: data.signedByName, signedDocumentSecureDocumentId: data.secureDocumentId, signedAt: new Date() } as any)
+    .where(eq(i9ClientAgreements.id, id));
+}
 
 export async function createI9ClientUser(data: InsertI9ClientUser): Promise<I9ClientUser> {
   const database = getDb();

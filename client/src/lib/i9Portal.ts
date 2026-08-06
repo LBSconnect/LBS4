@@ -291,6 +291,44 @@ export interface I9CaseActivity {
   createdAt: string | null;
 }
 
+export interface I9ClientAgreement {
+  id: string;
+  clientCompanyId: string;
+  documentVersion: string;
+  status: "pending" | "generated" | "awaiting_signature" | "signed" | "e_signature_not_configured";
+  generatedDocumentHtml: string | null;
+  signedDocumentSecureDocumentId: string | null;
+  signedByName: string | null;
+  signedAt: string | null;
+  eSignatureProvider: string | null;
+  createdAt: string | null;
+}
+
+export const SECURE_DOCUMENT_TYPES = [
+  "signed_lbs_agreement",
+  "everify_mou_copy",
+  "further_action_notice",
+  "authorized_rep_designation",
+  "case_related_upload",
+] as const;
+export type SecureDocumentType = (typeof SECURE_DOCUMENT_TYPES)[number];
+export const UPLOAD_ALLOWED_MIME_TYPES = ["application/pdf", "image/png", "image/jpeg"] as const;
+export const UPLOAD_MAX_BYTES = 8 * 1024 * 1024;
+
+export function fileToBase64(file: File): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => {
+      const result = reader.result as string;
+      // Strip the "data:<mime>;base64," prefix FileReader.readAsDataURL adds.
+      const commaIdx = result.indexOf(",");
+      resolve(commaIdx >= 0 ? result.slice(commaIdx + 1) : result);
+    };
+    reader.onerror = () => reject(reader.error ?? new Error("Failed to read file"));
+    reader.readAsDataURL(file);
+  });
+}
+
 export interface I9SystemStatus {
   databaseConfigured: boolean;
   protectedDataEncryptionConfigured: boolean;

@@ -23,6 +23,7 @@ import {
   I9_SECURE_DOCUMENT_TYPES,
   FORBIDDEN_SENSITIVE_FIELD_NAMES,
   type I9Role,
+  type I9ClientCompany,
 } from "@shared/i9Schema";
 import * as store from "./i9Storage";
 import {
@@ -77,6 +78,39 @@ function rejectForbiddenFields(body: unknown): string | null {
     }
   }
   return null;
+}
+
+/** Generates the LBS <-> Client commercial-services agreement as plain HTML
+ *  for download/print — never a live e-signature flow (none is configured;
+ *  see deliverables doc). This is filled-in *text*, not a signature: the
+ *  actual signature is captured on a physically- or externally-signed copy,
+ *  uploaded separately and linked via recordI9AgreementSignedCopy. Contains
+ *  no employee data — company-level fields only. Business document; legal
+ *  review is recommended before this text is used with a real client. */
+function renderI9AgreementHtml(company: I9ClientCompany): string {
+  const today = new Date().toISOString().slice(0, 10);
+  const esc = (v: string | null | undefined) => (v ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c] as string));
+  return `<!doctype html>
+<html><head><meta charset="utf-8"><title>LBS Employer-Support Services Agreement (Draft)</title></head>
+<body style="font-family: Georgia, serif; max-width: 720px; margin: 2rem auto; line-height: 1.6; color: #1a1a1a;">
+  <p style="text-align:center; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em; color: #b45309; border: 1px solid #f59e0b; background: #fffbeb; padding: 0.75rem;">
+    Draft generated ${today} — business document, legal review recommended before use. Not a substitute for legal advice.
+  </p>
+  <h1 style="font-size: 1.5rem;">Employer-Support Services Agreement</h1>
+  <p>This Agreement is entered into between <strong>Linton Business Solutions LLC</strong> ("LBS"), 616 FM 1960 Road West, Suite 101, Houston, Texas 77090, and <strong>${esc(company.legalBusinessName)}</strong>${company.dba ? ` (d/b/a ${esc(company.dba)})` : ""} ("Client").</p>
+  <h2 style="font-size: 1.1rem;">1. Services</h2>
+  <p>LBS will provide administrative Form I-9 and E-Verify case-management support services to Client as an E-Verify Employer Agent, per the plan and add-on services selected by Client through LBS's client portal. LBS is not the U.S. Department of Homeland Security, U.S. Citizenship and Immigration Services, or E-Verify, and does not provide immigration legal advice, determine immigration status, or make employment decisions on Client's behalf.</p>
+  <h2 style="font-size: 1.1rem;">2. Client Responsibilities</h2>
+  <p>Client remains responsible for its own Form I-9 and E-Verify compliance obligations, for the accuracy of information it submits, and for all employment decisions. LBS's services are administrative support only.</p>
+  <h2 style="font-size: 1.1rem;">3. E-Verify Memorandum of Understanding</h2>
+  <p>Client acknowledges that any E-Verify Memorandum of Understanding is executed directly between Client and the federal government outside of LBS's website, and that this Agreement does not itself constitute or replace that MOU.</p>
+  <h2 style="font-size: 1.1rem;">4. Fees</h2>
+  <p>Client agrees to pay the fees associated with its selected plan and any requested add-on services, as published by LBS and agreed to at the time of purchase.</p>
+  <h2 style="font-size: 1.1rem;">5. Term and Termination</h2>
+  <p>This Agreement remains in effect until terminated by either party in accordance with LBS's standard offboarding process.</p>
+  <p style="margin-top: 3rem;">Authorized Signer: ${esc(company.authorizedSignerName)}${company.authorizedSignerTitle ? `, ${esc(company.authorizedSignerTitle)}` : ""}<br/>
+  Date: ______________________</p>
+</body></html>`;
 }
 
 /** Response helper: a consistent "this needs infra we don't have configured
@@ -350,6 +384,73 @@ export function registerI9Routes(app: Express): void {
       res.json({ success: true, status });
     } catch {
       res.status(500).json({ error: "Failed to update status" });
+    }
+  });
+
+  // ═══════════════════════════════════════════════════════════════════════
+  // CLIENT AGREEMENT — no e-signature provider is configured (see
+  // deliverables doc). This generates document text for download/print and
+  // records a reference to a signed copy uploaded separately via
+  // /api/i9/documents/upload — it never simulates or fakes a signature
+  // capture. The E-Verify MOU is a completely separate document, executed
+  // by the client directly with DHS/SSA outside this website — see the
+  // everify-enrollment route below, which only records status afterward.
+  // ═══════════════════════════════════════════════════════════════════════
+
+  app.post("/api/i9/companies/:id/agreement/generate", requireI9Auth, requireI9Csrf, requireI9Role("lbs_program_admin", "lbs_intake_billing"), async (req: I9AuthedRequest, res: Response) => {
+    try {
+      const company = await store.getI9ClientCompany(pstr(req.params.id));
+      if (!company) return res.status(404).json({ error: "Company not found" });
+      const html = renderI9AgreementHtml(company);
+      const agreement = await store.createI9ClientAgreement(pstr(req.params.id), "0.1-draft", html);
+      await store.logI9Audit({ actorUserId: req.i9User!.id, actorRole: req.i9User!.role, action: "agreement.generate", entityType: "ClientCompany", entityId: pstr(req.params.id), clientCompanyId: pstr(req.params.id), ipAddress: req.ip });
+      res.json({ success: true, agreement });
+    } catch (err: any) {
+      console.error("agreement generate error:", err.message);
+      res.status(500).json({ error: "Failed to generate agreement" });
+    }
+  });
+
+  app.get("/api/i9/companies/:id/agreement", requireI9Auth, requireI9TenantMatch((req) => pstr(req.params.id)), async (req: I9AuthedRequest, res: Response) => {
+    const agreement = await store.getLatestI9ClientAgreement(pstr(req.params.id));
+    res.json({ agreement });
+  });
+
+  app.post("/api/i9/companies/:id/agreement/record-signed-copy", requireI9Auth, requireI9Csrf, requireI9Role("lbs_program_admin", "lbs_intake_billing"), async (req: I9AuthedRequest, res: Response) => {
+    try {
+      const { secureDocumentId, signedByName } = req.body as { secureDocumentId?: string; signedByName?: string };
+      if (!secureDocumentId || !signedByName) return res.status(400).json({ error: "secureDocumentId and signedByName are required" });
+      const doc = await store.getI9SecureDocument(secureDocumentId);
+      if (!doc || doc.clientCompanyId !== pstr(req.params.id)) return res.status(404).json({ error: "Secure document not found for this company" });
+      const agreement = await store.getLatestI9ClientAgreement(pstr(req.params.id));
+      if (!agreement) return res.status(404).json({ error: "No agreement has been generated for this company yet" });
+      await store.recordI9AgreementSignedCopy(agreement.id, { secureDocumentId, signedByName });
+      await store.logI9Audit({ actorUserId: req.i9User!.id, actorRole: req.i9User!.role, action: "agreement.record_signed_copy", entityType: "ClientCompany", entityId: pstr(req.params.id), clientCompanyId: pstr(req.params.id), ipAddress: req.ip });
+      res.json({ success: true });
+    } catch (err: any) {
+      console.error("agreement record-signed-copy error:", err.message);
+      res.status(500).json({ error: "Failed to record signed copy" });
+    }
+  });
+
+  app.post("/api/i9/companies/:id/everify-enrollment", requireI9Auth, requireI9Csrf, requireI9Role("lbs_program_admin", "lbs_intake_billing"), async (req: I9AuthedRequest, res: Response) => {
+    try {
+      const schema = z.object({
+        everifyCompanyId: z.string().max(100).optional(),
+        mouSignerName: z.string().max(200).optional(),
+        mouSignedDate: z.string().max(20).optional(),
+        mouSecureReference: z.string().max(300).optional(),
+      });
+      const parsed = schema.safeParse(req.body);
+      if (!parsed.success) return res.status(400).json({ error: "Invalid data", details: parsed.error.flatten() });
+      const company = await store.getI9ClientCompany(pstr(req.params.id));
+      if (!company) return res.status(404).json({ error: "Company not found" });
+      await store.recordI9EverifyEnrollment(pstr(req.params.id), parsed.data);
+      await store.logI9Audit({ actorUserId: req.i9User!.id, actorRole: req.i9User!.role, action: "company.everify_enrollment_recorded", entityType: "ClientCompany", entityId: pstr(req.params.id), clientCompanyId: pstr(req.params.id), ipAddress: req.ip });
+      res.json({ success: true });
+    } catch (err: any) {
+      console.error("everify-enrollment error:", err.message);
+      res.status(500).json({ error: "Failed to record E-Verify enrollment" });
     }
   });
 
