@@ -125,6 +125,22 @@ export function verifyPassword(password: string, stored: string): boolean {
   }
 }
 
+// ─── Password reset tokens ──────────────────────────────────────────────────
+// The raw token is high-entropy (32 random bytes) and is only ever seen in
+// the emailed reset link and, transiently, by the client submitting it back.
+// The database stores a SHA-256 hash of it (not the token itself, and not
+// scrypt — this is a lookup hash for a high-entropy random value, not a
+// password, so a fast hash is appropriate and correct here), so a database
+// compromise alone can't be used to redeem outstanding reset links.
+
+export function generatePasswordResetToken(): string {
+  return randomBytes(32).toString("base64url");
+}
+
+export function hashPasswordResetToken(token: string): string {
+  return createHmac("sha256", SESSION_SECRET).update(token).digest("hex");
+}
+
 // ─── Signed, short-lived document download tokens ──────────────────────────
 
 export function signDocumentToken(documentId: string, expiresAtMs: number): string {

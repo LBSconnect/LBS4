@@ -34,6 +34,8 @@ import EmployerClientIntake from "@/pages/employer/ClientIntake";
 import EmployerPricingSheet from "@/pages/employer/PricingSheet";
 import PortalLogin from "@/pages/i9-portal/PortalLogin";
 import PortalRegister from "@/pages/i9-portal/PortalRegister";
+import PortalForgotPassword from "@/pages/i9-portal/PortalForgotPassword";
+import PortalResetPassword from "@/pages/i9-portal/PortalResetPassword";
 import PortalDashboard from "@/pages/i9-portal/PortalDashboard";
 import PortalBusinessIntake from "@/pages/i9-portal/PortalBusinessIntake";
 import PortalHiringSites from "@/pages/i9-portal/PortalHiringSites";
@@ -95,6 +97,8 @@ function Router() {
         <Route path="/employer-services/new-hire-verification/pricing-sheet" component={EmployerPricingSheet} />
         <Route path={PORTAL_ROUTES.login} component={PortalLogin} />
         <Route path={PORTAL_ROUTES.register} component={PortalRegister} />
+        <Route path={PORTAL_ROUTES.forgotPassword} component={PortalForgotPassword} />
+        <Route path={PORTAL_ROUTES.resetPassword} component={PortalResetPassword} />
         <Route path={PORTAL_ROUTES.dashboard} component={PortalDashboard} />
         <Route path={PORTAL_ROUTES.businessIntake} component={PortalBusinessIntake} />
         <Route path={PORTAL_ROUTES.hiringSites} component={PortalHiringSites} />

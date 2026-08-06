@@ -60,7 +60,12 @@ export default function PortalLogin() {
             <Input id="i9-email" type="email" autoComplete="username" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="you@company.com" autoFocus />
           </div>
           <div className="space-y-1.5">
-            <Label htmlFor="i9-password">Password</Label>
+            <div className="flex items-center justify-between">
+              <Label htmlFor="i9-password">Password</Label>
+              <Link href={PORTAL_ROUTES.forgotPassword} className="text-xs font-medium hover:underline" style={{ color: NAVY }}>
+                Forgot password?
+              </Link>
+            </div>
             <Input id="i9-password" type="password" autoComplete="current-password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="••••••••••••" />
           </div>
           {error && <p className="text-red-500 text-sm">{error}</p>}

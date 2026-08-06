@@ -15,6 +15,8 @@ export const PORTAL_BASE = "/employer-services/new-hire-verification/portal";
 export const PORTAL_ROUTES = {
   login: `${PORTAL_BASE}/login`,
   register: `${PORTAL_BASE}/register`,
+  forgotPassword: `${PORTAL_BASE}/forgot-password`,
+  resetPassword: `${PORTAL_BASE}/reset-password`,
   dashboard: PORTAL_BASE,
   businessIntake: `${PORTAL_BASE}/business-intake`,
   hiringSites: `${PORTAL_BASE}/hiring-sites`,

@@ -20,6 +20,7 @@ export default function PortalRegister() {
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [error, setError] = useState("");
+  const [isDuplicateEmail, setIsDuplicateEmail] = useState(false);
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
@@ -29,6 +30,7 @@ export default function PortalRegister() {
   async function submit(e: React.FormEvent) {
     e.preventDefault();
     setError("");
+    setIsDuplicateEmail(false);
     if (password.length < MIN_PASSWORD_LENGTH) {
       setError(`Password must be at least ${MIN_PASSWORD_LENGTH} characters.`);
       return;
@@ -53,6 +55,9 @@ export default function PortalRegister() {
     } catch (err) {
       if (err instanceof I9ApiError && err.status === 503) {
         setError("The secure portal is not yet configured on this environment. Please contact LBS directly to begin onboarding.");
+      } else if (err instanceof I9ApiError && err.status === 409) {
+        setIsDuplicateEmail(true);
+        setError("An account with this email already exists.");
       } else {
         setError(err instanceof Error ? err.message : "Registration failed. Please try again.");
       }
@@ -94,7 +99,19 @@ export default function PortalRegister() {
             <Label htmlFor="i9-reg-password-confirm">Confirm Password</Label>
             <Input id="i9-reg-password-confirm" type="password" autoComplete="new-password" value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} required minLength={MIN_PASSWORD_LENGTH} />
           </div>
-          {error && <p className="text-red-500 text-sm">{error}</p>}
+          {error && (
+            <p className="text-red-500 text-sm">
+              {error}
+              {isDuplicateEmail && (
+                <>
+                  {" "}
+                  <Link href={PORTAL_ROUTES.login} className="font-medium underline">Sign in</Link>
+                  {" or "}
+                  <Link href={PORTAL_ROUTES.forgotPassword} className="font-medium underline">reset your password</Link>.
+                </>
+              )}
+            </p>
+          )}
           <Button
             type="submit"
             className="w-full text-white gap-1.5"
