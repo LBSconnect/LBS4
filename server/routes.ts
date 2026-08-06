@@ -6,6 +6,7 @@ import { insertContactSchema } from "@shared/schema";
 import { sendContactNotification, sendContactAcknowledgement, sendAppointmentConfirmation, sendAppointmentCalendarInvite, sendPrivacyRequestNotification, sendPrivacyRequestAcknowledgement, sendEmployerConsultationNotification, sendEmployerConsultationAcknowledgement, sendEmployerIntakeNotification, sendEmployerIntakeAcknowledgement } from "./emailService";
 import { sendEmail } from "./smtpClient";
 import { registerCorporateRoutes } from "./corporateRoutes";
+import { registerI9Routes } from "./i9Routes";
 import { z } from "zod";
 
 // Validation schema for appointment booking
@@ -753,6 +754,9 @@ export async function registerRoutes(
 
   // Corporate Notary Division routes
   await registerCorporateRoutes(app);
+
+  // New-Hire Verification & Form I-9 Support employer portal
+  registerI9Routes(app);
 
   return httpServer;
 }

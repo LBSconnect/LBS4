@@ -6,6 +6,7 @@ import { getUncachableStripeClient } from './stripeClient';
 import { WebhookHandlers } from './webhookHandlers';
 import { seedStripeProducts } from './seedProducts';
 import { storage } from './storage';
+import { createI9SessionMiddleware } from './i9Auth';
 
 const app = express();
 const httpServer = createServer(app);
@@ -98,6 +99,11 @@ app.use((req, res, next) => {
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
+
+// Trust the platform's reverse proxy (Render, etc.) so req.ip and secure
+// cookies (used by the I-9 portal session) work correctly in production.
+app.set("trust proxy", 1);
+app.use(createI9SessionMiddleware());
 
 export function log(message: string, source = "express") {
   const formattedTime = new Date().toLocaleTimeString("en-US", {
