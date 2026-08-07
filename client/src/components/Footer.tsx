@@ -1,6 +1,7 @@
 import { Link } from "wouter";
 import { Phone, Mail, MapPin, Clock } from "lucide-react";
 import logoImg from "@assets/lbs-logo-optimized.png";
+import { PORTAL_ROUTES } from "@/lib/i9Portal";
 
 export default function Footer() {
   const serviceLinks = [
@@ -69,6 +70,16 @@ export default function Footer() {
               >
                 Time Keeper
               </a>
+              {/* Same sign-in page for client and LBS-staff/admin accounts —
+                  role is determined server-side after auth, not by URL. */}
+              <Link href={PORTAL_ROUTES.login}>
+                <span
+                  className="text-sm text-white/70 cursor-pointer transition-colors hover:text-white"
+                  data-testid="link-footer-portal-login"
+                >
+                  Client & Admin Portal Login
+                </span>
+              </Link>
             </nav>
           </div>
 

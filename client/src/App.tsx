@@ -36,6 +36,7 @@ import PortalLogin from "@/pages/i9-portal/PortalLogin";
 import PortalRegister from "@/pages/i9-portal/PortalRegister";
 import PortalForgotPassword from "@/pages/i9-portal/PortalForgotPassword";
 import PortalResetPassword from "@/pages/i9-portal/PortalResetPassword";
+import PortalForceChangePassword from "@/pages/i9-portal/PortalForceChangePassword";
 import PortalOnboardingWizard from "@/pages/i9-portal/PortalOnboardingWizard";
 import PortalSecuritySettings from "@/pages/i9-portal/PortalSecuritySettings";
 import PortalDashboard from "@/pages/i9-portal/PortalDashboard";
@@ -101,6 +102,7 @@ function Router() {
         <Route path={PORTAL_ROUTES.register} component={PortalRegister} />
         <Route path={PORTAL_ROUTES.forgotPassword} component={PortalForgotPassword} />
         <Route path={PORTAL_ROUTES.resetPassword} component={PortalResetPassword} />
+        <Route path={PORTAL_ROUTES.forceChangePassword} component={PortalForceChangePassword} />
         <Route path={PORTAL_ROUTES.onboarding} component={PortalOnboardingWizard} />
         <Route path={PORTAL_ROUTES.security} component={PortalSecuritySettings} />
         <Route path={PORTAL_ROUTES.dashboard} component={PortalDashboard} />

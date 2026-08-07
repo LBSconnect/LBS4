@@ -441,7 +441,7 @@ export function registerI9Routes(app: Express): void {
       await establishI9Session(req, res, user.id, user.role as I9Role, user.clientCompanyId);
       await store.touchI9ClientUserLogin(user.id);
       await store.logI9Audit({ actorUserId: user.id, actorRole: user.role, action: "auth.login", clientCompanyId: user.clientCompanyId ?? undefined, ipAddress: req.ip });
-      res.json({ success: true, user: { id: user.id, email: user.email, fullName: user.fullName, role: user.role, clientCompanyId: user.clientCompanyId } });
+      res.json({ success: true, user: { id: user.id, email: user.email, fullName: user.fullName, role: user.role, clientCompanyId: user.clientCompanyId, mustChangePassword: user.mustChangePassword } });
     } catch (err: any) {
       console.error("i9 login error:", err.message);
       res.status(500).json({ error: "Login failed" });
@@ -471,7 +471,7 @@ export function registerI9Routes(app: Express): void {
       await establishI9Session(req, res, user.id, user.role as I9Role, user.clientCompanyId);
       await store.touchI9ClientUserLogin(user.id);
       await store.logI9Audit({ actorUserId: user.id, actorRole: user.role, action: "auth.login", clientCompanyId: user.clientCompanyId ?? undefined, details: { mfa: true }, ipAddress: req.ip });
-      res.json({ success: true, user: { id: user.id, email: user.email, fullName: user.fullName, role: user.role, clientCompanyId: user.clientCompanyId } });
+      res.json({ success: true, user: { id: user.id, email: user.email, fullName: user.fullName, role: user.role, clientCompanyId: user.clientCompanyId, mustChangePassword: user.mustChangePassword } });
     } catch (err: any) {
       console.error("i9 mfa verify error:", err.message);
       res.status(500).json({ error: "Verification failed" });
@@ -591,6 +591,26 @@ export function registerI9Routes(app: Express): void {
     }
   });
 
+  /** Completes a forced first-login password change (bootstrap-admin, or an
+   *  admin-issued account). Reachable even while mustChangePassword blocks
+   *  every other authenticated route — see the allowlist in
+   *  server/i9Auth.ts's requireI9Auth — since it's the only way out of
+   *  that state short of logging out. */
+  app.post("/api/i9/auth/force-change-password", requireI9Auth, requireI9Csrf, i9RateLimit("i9-force-change-password", 10, 15 * 60 * 1000), async (req: I9AuthedRequest, res: Response) => {
+    try {
+      const schema = z.object({ newPassword: passwordSchema });
+      const parsed = schema.safeParse(req.body);
+      if (!parsed.success) return res.status(400).json({ error: parsed.error.issues[0]?.message || "A strong password is required" });
+
+      await store.resetI9ClientUserPassword(req.i9User!.id, parsed.data.newPassword);
+      await store.logI9Audit({ actorUserId: req.i9User!.id, actorRole: req.i9User!.role, action: "auth.forced_password_change_completed", clientCompanyId: req.i9User!.clientCompanyId ?? undefined, ipAddress: req.ip });
+      res.json({ success: true });
+    } catch (err: any) {
+      console.error("i9 force-change-password error:", err.message);
+      res.status(500).json({ error: "Failed to change password" });
+    }
+  });
+
   app.post("/api/i9/auth/logout", requireI9Auth, requireI9Csrf, (req: I9AuthedRequest, res: Response) => {
     destroyI9Session(req, res, () => res.json({ success: true }));
   });
@@ -622,7 +642,9 @@ export function registerI9Routes(app: Express): void {
     }
     const existing = await store.getI9ClientUserByEmail(email);
     if (existing) return res.status(409).json({ error: "An account with this email already exists." });
-    const user = await store.createI9ClientUser({ email: email.toLowerCase(), password, fullName, role: "lbs_program_admin" });
+    // Bootstrap is inherently "an operator hands someone a known temporary
+    // password" — always force it to be changed on first login.
+    const user = await store.createI9ClientUser({ email: email.toLowerCase(), password, fullName, role: "lbs_program_admin", mustChangePassword: true });
     await store.logI9Audit({ actorUserId: user.id, actorRole: "lbs_program_admin", action: "admin.bootstrap", ipAddress: req.ip });
     res.json({ success: true, userId: user.id });
   });
@@ -640,6 +662,10 @@ export function registerI9Routes(app: Express): void {
         fullName: z.string().min(1).max(200),
         role: z.enum(I9_ROLES),
         assignedHiringSiteIds: z.array(z.string()).optional(),
+        // An admin creating this account is issuing a known temporary
+        // password, same as bootstrap-admin — force it to be changed on
+        // first login by default, with an explicit opt-out.
+        mustChangePassword: z.boolean().optional().default(true),
       });
       const parsed = schema.safeParse(req.body);
       if (!parsed.success) return res.status(400).json({ error: "Invalid data", details: parsed.error.flatten() });
