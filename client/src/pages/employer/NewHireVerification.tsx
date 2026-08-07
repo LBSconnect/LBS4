@@ -539,7 +539,7 @@ export default function NewHireVerification() {
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-8">
             {gettingStartedSteps.map((s) => (
               <div key={s.step} className="text-center space-y-3" data-testid={`step-getting-started-${s.step}`}>
-                <div className="text-4xl font-extrabold text-[#FF6A00]/30">{s.step}</div>
+                <div className="text-4xl font-extrabold text-[#BD4F00] dark:text-[#FF8A3D]" aria-hidden="true">{s.step}</div>
                 <h3 className="font-semibold text-lg">{s.title}</h3>
                 <p className="text-sm text-muted-foreground leading-relaxed">{s.copy}</p>
               </div>
