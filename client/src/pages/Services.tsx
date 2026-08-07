@@ -85,48 +85,6 @@ export default function Services() {
         </div>
       </section>
 
-      <section className="py-12 bg-background" data-testid="section-services-list">
-        <div className="max-w-7xl mx-auto px-6">
-          {filter && (
-            <div className="mb-6">
-              <a href="/services" className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors">
-                <ArrowRight className="w-3.5 h-3.5 rotate-180" /> Back to all services
-              </a>
-            </div>
-          )}
-          <div className="text-center max-w-2xl mx-auto mb-8 space-y-3">
-            <h2 className="text-3xl font-bold" data-testid="text-services-list-heading">{sectionHeading}</h2>
-            <p className="text-muted-foreground">{sectionDescription}</p>
-          </div>
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-            {visibleServices.map((service) => (
-              <CompactServiceCard
-                key={service.id}
-                title={service.title}
-                description={service.description}
-                image={service.image}
-                price={service.price}
-                priceLabel={service.priceLabel}
-                priceNote={service.priceNote}
-                slug={service.slug}
-                href={service.link ?? `/services/${service.slug}`}
-                icon={<service.icon className="w-5 h-5" />}
-                badge={service.saturdayOnly ? `Next: ${nextSat}` : undefined}
-              />
-            ))}
-            {showWebsiteDesignCard && (
-              <CompactServiceCard
-                slug="website-design"
-                title="Website Design"
-                description="Practical website design for Houston small businesses and entrepreneurs."
-                image={websiteDesignImg}
-                href="/website-design-houston-77090"
-              />
-            )}
-          </div>
-        </div>
-      </section>
-
       {showTestingBlock && (
       <section className="py-12 bg-muted/30" data-testid="section-testing-exam-programs">
         <div className="max-w-7xl mx-auto px-6">
@@ -200,6 +158,57 @@ export default function Services() {
         </div>
       </section>
       )}
+
+      <section className="py-12 bg-background" data-testid="section-services-list">
+        <div className="max-w-7xl mx-auto px-6">
+          {filter && (
+            <div className="mb-6">
+              <a href="/services" className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors">
+                <ArrowRight className="w-3.5 h-3.5 rotate-180" /> Back to all services
+              </a>
+            </div>
+          )}
+          <div className="text-center max-w-2xl mx-auto mb-8 space-y-3">
+            <h2 className="text-3xl font-bold" data-testid="text-services-list-heading">{sectionHeading}</h2>
+            <p className="text-muted-foreground">{sectionDescription}</p>
+          </div>
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+            {visibleServices.map((service) => (
+              <CompactServiceCard
+                key={service.id}
+                title={service.title}
+                description={service.description}
+                image={service.image}
+                price={service.price}
+                priceLabel={service.priceLabel}
+                priceNote={service.priceNote}
+                slug={service.slug}
+                href={service.link ?? `/services/${service.slug}`}
+                icon={<service.icon className="w-5 h-5" />}
+                badge={service.saturdayOnly ? `Next: ${nextSat}` : undefined}
+              />
+            ))}
+            {showWebsiteDesignCard && (
+              <CompactServiceCard
+                slug="website-design"
+                title="Website Design"
+                description="Practical website design for Houston small businesses and entrepreneurs."
+                image={websiteDesignImg}
+                href="/website-design-houston-77090"
+              />
+            )}
+            {showWebsiteDesignCard && (
+              <CompactServiceCard
+                slug="testing-center"
+                title="Testing Center"
+                description="Authorized Pearson VUE & Certiport exam testing, insurance license Boot Camps, and exam prep."
+                image="/images/hero-testing-center.png"
+                href="/certiport-testing-center-houston"
+              />
+            )}
+          </div>
+        </div>
+      </section>
 
       <Footer />
     </div>
