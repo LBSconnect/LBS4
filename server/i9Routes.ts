@@ -23,6 +23,7 @@ import {
   I9_SECURE_DOCUMENT_TYPES,
   FORBIDDEN_SENSITIVE_FIELD_NAMES,
   passwordSchema,
+  AGREEMENT_VERSION,
   type I9Role,
   type I9ClientCompany,
   type I9NotificationEvent,
@@ -54,7 +55,7 @@ import {
   decryptFromColumn,
 } from "./i9Security";
 import { informationalCaseCreationTarget } from "./i9BusinessDays";
-import { sendI9NotificationEmail, sendI9InternalNotificationEmail, sendI9PasswordResetEmail } from "./i9EmailService";
+import { sendI9NotificationEmail, sendI9InternalNotificationEmail, sendI9PasswordResetEmail, sendI9AgreementAcceptedEmail } from "./i9EmailService";
 import { sendEmployerConsultationNotification } from "./emailService";
 import { syncI9StripeProducts } from "./i9StripeSync";
 import { getUncachableStripeClient } from "./stripeClient";
@@ -120,34 +121,34 @@ function rejectForbiddenFields(body: unknown): string | null {
   return null;
 }
 
-/** Generates the LBS <-> Client commercial-services agreement as plain HTML
- *  for download/print — never a live e-signature flow (none is configured;
- *  see deliverables doc). This is filled-in *text*, not a signature: the
- *  actual signature is captured on a physically- or externally-signed copy,
- *  uploaded separately and linked via recordI9AgreementSignedCopy. Contains
- *  no employee data — company-level fields only. Business document; legal
- *  review is recommended before this text is used with a real client. */
-function renderI9AgreementHtml(company: I9ClientCompany): string {
+const PUBLIC_SITE_URL = process.env.PUBLIC_SITE_URL || "https://www.lbs4.com";
+const AGREEMENT_PAGE_URL = `${PUBLIC_SITE_URL}/employer-services/new-hire-verification/agreement`;
+
+/** Generates the client-specific agreement acceptance document as plain
+ *  HTML, for download/print and as the text shown before acceptance. The
+ *  full, comprehensive contract terms live in exactly one canonical place —
+ *  the public Agreement page (client/src/pages/employer/ServiceAgreement.tsx,
+ *  version AGREEMENT_VERSION) — and this document incorporates them by
+ *  reference at a specific, version-locked snapshot rather than restating
+ *  them here, so there is never a second copy of the legal text to drift out
+ *  of sync. This is filled-in *text* identifying the parties and the version
+ *  being agreed to; the actual signature is captured separately, either via
+ *  the client's own electronic acceptance (recordI9AgreementSelfAcceptance)
+ *  or an uploaded wet-ink-signed copy (recordI9AgreementSignedCopy).
+ *  Contains no employee data — company-level fields only. */
+function renderI9AgreementHtml(company: I9ClientCompany, version: string): string {
   const today = new Date().toISOString().slice(0, 10);
   const esc = (v: string | null | undefined) => (v ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c] as string));
   return `<!doctype html>
-<html><head><meta charset="utf-8"><title>LBS Employer-Support Services Agreement (Draft)</title></head>
+<html><head><meta charset="utf-8"><title>New-Hire Verification &amp; Form I-9 Support Services Agreement</title></head>
 <body style="font-family: Georgia, serif; max-width: 720px; margin: 2rem auto; line-height: 1.6; color: #1a1a1a;">
-  <p style="text-align:center; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em; color: #b45309; border: 1px solid #f59e0b; background: #fffbeb; padding: 0.75rem;">
-    Draft generated ${today} — business document, legal review recommended before use. Not a substitute for legal advice.
+  <p style="text-align:center; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em; color: #0d1b35; border: 1px solid #cbd5e1; background: #f8fafc; padding: 0.75rem;">
+    Prepared ${today} for signature — Agreement Version ${esc(version)}
   </p>
-  <h1 style="font-size: 1.5rem;">Employer-Support Services Agreement</h1>
+  <h1 style="font-size: 1.4rem;">New-Hire Verification &amp; Form I-9 Support Services Agreement</h1>
   <p>This Agreement is entered into between <strong>Linton Business Solutions LLC</strong> ("LBS"), 616 FM 1960 Road West, Suite 101, Houston, Texas 77090, and <strong>${esc(company.legalBusinessName)}</strong>${company.dba ? ` (d/b/a ${esc(company.dba)})` : ""} ("Client").</p>
-  <h2 style="font-size: 1.1rem;">1. Services</h2>
-  <p>LBS will provide administrative Form I-9 and E-Verify case-management support services to Client as an E-Verify Employer Agent, per the plan and add-on services selected by Client through LBS's client portal. LBS is not the U.S. Department of Homeland Security, U.S. Citizenship and Immigration Services, or E-Verify, and does not provide immigration legal advice, determine immigration status, or make employment decisions on Client's behalf.</p>
-  <h2 style="font-size: 1.1rem;">2. Client Responsibilities</h2>
-  <p>Client remains responsible for its own Form I-9 and E-Verify compliance obligations, for the accuracy of information it submits, and for all employment decisions. LBS's services are administrative support only.</p>
-  <h2 style="font-size: 1.1rem;">3. E-Verify Memorandum of Understanding</h2>
-  <p>Client acknowledges that any E-Verify Memorandum of Understanding is executed directly between Client and the federal government outside of LBS's website, and that this Agreement does not itself constitute or replace that MOU.</p>
-  <h2 style="font-size: 1.1rem;">4. Fees</h2>
-  <p>Client agrees to pay the fees associated with its selected plan and any requested add-on services, as published by LBS and agreed to at the time of purchase.</p>
-  <h2 style="font-size: 1.1rem;">5. Term and Termination</h2>
-  <p>This Agreement remains in effect until terminated by either party in accordance with LBS's standard offboarding process.</p>
+  <p>Client agrees to the full terms of Version ${esc(version)} of LBS's New-Hire Verification &amp; Form I-9 Support Services Agreement, published at <a href="${AGREEMENT_PAGE_URL}">${AGREEMENT_PAGE_URL}</a>, covering the nature and scope of services, client responsibilities, E-Verify enrollment and MOU compliance, the prohibition on applicant prescreening, Form I-9 timing, document choice and non-discrimination, E-Verify mismatch procedures, confidentiality and data security, fees and payment terms, limitation of liability, indemnification, termination, and governing law. Those published terms, at the version identified above, are incorporated into this Agreement by reference and are not restated here.</p>
+  <p>LBS is not the U.S. Department of Homeland Security, U.S. Citizenship and Immigration Services, or the Social Security Administration; is not affiliated with, certified by, or endorsed by any of them beyond its enrollment as an E-Verify Employer Agent; and does not provide immigration legal advice, determine immigration status, or make employment decisions on Client's behalf.</p>
   <p style="margin-top: 3rem;">Authorized Signer: ${esc(company.authorizedSignerName)}${company.authorizedSignerTitle ? `, ${esc(company.authorizedSignerTitle)}` : ""}<br/>
   Date: ______________________</p>
 </body></html>`;
@@ -767,21 +768,36 @@ export function registerI9Routes(app: Express): void {
   });
 
   // ═══════════════════════════════════════════════════════════════════════
-  // CLIENT AGREEMENT — no e-signature provider is configured (see
-  // deliverables doc). This generates document text for download/print and
-  // records a reference to a signed copy uploaded separately via
-  // /api/i9/documents/upload — it never simulates or fakes a signature
-  // capture. The E-Verify MOU is a completely separate document, executed
-  // by the client directly with DHS/SSA outside this website — see the
-  // everify-enrollment route below, which only records status afterward.
+  // CLIENT AGREEMENT. Two acceptance paths onto the same i9_client_agreements
+  // record: the client's own authenticated electronic acceptance
+  // (POST .../agreement/accept, below) or an LBS-staff-assisted path where a
+  // wet-ink-signed copy is uploaded via /api/i9/documents/upload and recorded
+  // (POST .../agreement/record-signed-copy). Neither simulates or fakes a
+  // signature — the electronic path captures real evidentiary elements
+  // (authenticated identity, IP, user agent, timestamp, accepted version);
+  // no third-party e-signature provider (DocuSign, etc.) is integrated. The
+  // E-Verify MOU is a completely separate document, executed by the client
+  // directly with DHS/SSA outside this website — see the everify-enrollment
+  // route below, which only records status afterward.
   // ═══════════════════════════════════════════════════════════════════════
+
+  /** Returns the company's current agreement, generating a fresh one first
+   *  if none exists yet or the existing one is text from an older
+   *  AGREEMENT_VERSION (regenerating never touches an already-*signed*
+   *  agreement's acceptance evidence — it only affects unsigned draft text). */
+  async function ensureCurrentI9Agreement(company: I9ClientCompany) {
+    const existing = await store.getLatestI9ClientAgreement(company.id);
+    if (existing && (existing.status === "signed" || existing.documentVersion === AGREEMENT_VERSION)) return existing;
+    const html = renderI9AgreementHtml(company, AGREEMENT_VERSION);
+    return store.createI9ClientAgreement(company.id, AGREEMENT_VERSION, html);
+  }
 
   app.post("/api/i9/companies/:id/agreement/generate", requireI9Auth, requireI9Csrf, requireI9Role("lbs_program_admin", "lbs_intake_billing"), async (req: I9AuthedRequest, res: Response) => {
     try {
       const company = await store.getI9ClientCompany(pstr(req.params.id));
       if (!company) return res.status(404).json({ error: "Company not found" });
-      const html = renderI9AgreementHtml(company);
-      const agreement = await store.createI9ClientAgreement(pstr(req.params.id), "0.1-draft", html);
+      const html = renderI9AgreementHtml(company, AGREEMENT_VERSION);
+      const agreement = await store.createI9ClientAgreement(pstr(req.params.id), AGREEMENT_VERSION, html);
       await store.logI9Audit({ actorUserId: req.i9User!.id, actorRole: req.i9User!.role, action: "agreement.generate", entityType: "ClientCompany", entityId: pstr(req.params.id), clientCompanyId: pstr(req.params.id), ipAddress: req.ip });
       res.json({ success: true, agreement });
     } catch (err: any) {
@@ -792,7 +808,7 @@ export function registerI9Routes(app: Express): void {
 
   app.get("/api/i9/companies/:id/agreement", requireI9Auth, requireI9TenantMatch((req) => pstr(req.params.id)), async (req: I9AuthedRequest, res: Response) => {
     const agreement = await store.getLatestI9ClientAgreement(pstr(req.params.id));
-    res.json({ agreement });
+    res.json({ agreement, currentVersion: AGREEMENT_VERSION });
   });
 
   app.post("/api/i9/companies/:id/agreement/record-signed-copy", requireI9Auth, requireI9Csrf, requireI9Role("lbs_program_admin", "lbs_intake_billing"), async (req: I9AuthedRequest, res: Response) => {
@@ -809,6 +825,72 @@ export function registerI9Routes(app: Express): void {
     } catch (err: any) {
       console.error("agreement record-signed-copy error:", err.message);
       res.status(500).json({ error: "Failed to record signed copy" });
+    }
+  });
+
+  /** The client's own electronic acceptance — only the company's own
+   *  authorized signer (not a limited user, and not usable cross-tenant —
+   *  requireI9TenantMatch below) may accept on the company's behalf. Reads
+   *  identity (name, email) from the authenticated session, never from the
+   *  request body, so the acceptance record can't be forged with someone
+   *  else's name while logged in as a different user. */
+  app.post("/api/i9/companies/:id/agreement/accept", requireI9Auth, requireI9Csrf, requireI9TenantMatch((req) => pstr(req.params.id)), i9RateLimit("i9-agreement-accept", 10, 60 * 60 * 1000), async (req: I9AuthedRequest, res: Response) => {
+    try {
+      if (req.i9User!.role !== "client_authorized_signer") {
+        return res.status(403).json({ error: "Only the company's authorized signer can accept this Agreement." });
+      }
+      const { acknowledged } = req.body as { acknowledged?: boolean };
+      if (acknowledged !== true) return res.status(400).json({ error: "You must check the acknowledgment box to accept the Agreement." });
+
+      const company = await store.getI9ClientCompany(pstr(req.params.id));
+      if (!company) return res.status(404).json({ error: "Company not found" });
+
+      const agreement = await ensureCurrentI9Agreement(company);
+      await store.recordI9AgreementSelfAcceptance(agreement.id, {
+        signedByName: req.i9User!.fullName,
+        signerEmail: req.i9User!.email,
+        signerIpAddress: req.ip || "",
+        signerUserAgent: (req.headers["user-agent"] as string) || "",
+        documentVersion: AGREEMENT_VERSION,
+      });
+
+      // Advance the onboarding pipeline only if this is where it actually
+      // is — accepting doesn't force a transition from an unrelated status.
+      if (company.status === "lbs_agreement_pending") {
+        await store.updateI9ClientCompanyStatus(company.id, "lbs_agreement_signed");
+      }
+
+      await store.logI9Audit({
+        actorUserId: req.i9User!.id,
+        actorRole: req.i9User!.role,
+        action: "agreement.accepted",
+        entityType: "ClientCompany",
+        entityId: company.id,
+        clientCompanyId: company.id,
+        details: { documentVersion: AGREEMENT_VERSION },
+        ipAddress: req.ip,
+      });
+
+      await store.createI9Notification({
+        clientCompanyId: company.id,
+        event: "agreement_accepted",
+        relatedEntityType: "ClientCompany",
+        relatedEntityId: company.id,
+        inPortalMessage: `You accepted the New-Hire Verification & Form I-9 Support Services Agreement (Version ${AGREEMENT_VERSION}).`,
+      });
+      sendI9AgreementAcceptedEmail({
+        to: req.i9User!.email,
+        signerName: req.i9User!.fullName,
+        companyName: company.legalBusinessName,
+        agreementVersion: AGREEMENT_VERSION,
+        acceptedAt: new Date(),
+      }).catch((err) => console.error("agreement accepted email failed:", err.message));
+
+      const updated = await store.getLatestI9ClientAgreement(company.id);
+      res.json({ success: true, agreement: updated });
+    } catch (err: any) {
+      console.error("agreement accept error:", err.message);
+      res.status(500).json({ error: "Failed to record agreement acceptance" });
     }
   });
 

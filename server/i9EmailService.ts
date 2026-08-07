@@ -71,6 +71,7 @@ function emailWrapper(content: string): string {
 const EVENT_LABELS: Record<I9NotificationEvent, string> = {
   consultation_requested: "Your employer consultation request was received",
   agreement_pending: "Your LBS service agreement is ready for signature",
+  agreement_accepted: "Your LBS service agreement has been accepted",
   setup_payment_pending: "A setup payment is pending on your account",
   business_intake_incomplete: "Business onboarding information is still needed",
   everify_enrollment_ready_for_lbs_action: "Your E-Verify enrollment is ready for LBS to process",
@@ -132,6 +133,43 @@ export async function sendI9PasswordResetEmail(data: {
     <p style="margin:0;color:#94a3b8;font-size:12px;text-align:center;">If you didn't request this, you can safely ignore this email — your password will not be changed.</p>
   `;
   return sendEmail({ to: data.to, subject: `Reset your password — ${BUSINESS_NAME}`, html: emailWrapper(content) });
+}
+
+/** Confirmation sent to the signer immediately after they electronically
+ *  accept the New-Hire Verification & Form I-9 Support Services Agreement
+ *  (POST /api/i9/companies/:id/agreement/accept). Unlike the generic
+ *  notification template above, this one names the specific agreement
+ *  version and acceptance timestamp — the durable record a signer would
+ *  reasonably expect a copy of — while still carrying no employee/case data.
+ *  Links to the public Agreement page rather than reproducing its full
+ *  text, so there's one canonical copy of the terms, not two that could
+ *  drift apart. */
+export async function sendI9AgreementAcceptedEmail(data: {
+  to: string;
+  signerName: string;
+  companyName: string;
+  agreementVersion: string;
+  acceptedAt: Date;
+}): Promise<boolean> {
+  const agreementUrl = `${process.env.PUBLIC_SITE_URL || "https://www.lbs4.com"}/employer-services/new-hire-verification/agreement`;
+  const acceptedAtDisplay = data.acceptedAt.toLocaleString("en-US", { dateStyle: "long", timeStyle: "short", timeZone: "America/Chicago" });
+  const content = `
+    <h2 style="margin:0 0 6px;color:#0d1b35;font-size:22px;font-weight:700;">Agreement accepted</h2>
+    <p style="margin:0 0 20px;color:#64748b;font-size:14px;">Hi ${escapeHtml(data.signerName)}, this confirms your electronic acceptance of the New-Hire Verification &amp; Form I-9 Support Services Agreement on behalf of ${escapeHtml(data.companyName)}.</p>
+    <table cellpadding="0" cellspacing="0" style="width:100%;margin:0 0 24px;font-size:13px;color:#334155;">
+      <tr><td style="padding:6px 0;font-weight:600;width:140px;">Company</td><td style="padding:6px 0;">${escapeHtml(data.companyName)}</td></tr>
+      <tr><td style="padding:6px 0;font-weight:600;">Accepted by</td><td style="padding:6px 0;">${escapeHtml(data.signerName)}</td></tr>
+      <tr><td style="padding:6px 0;font-weight:600;">Agreement version</td><td style="padding:6px 0;">${escapeHtml(data.agreementVersion)}</td></tr>
+      <tr><td style="padding:6px 0;font-weight:600;">Accepted (Central Time)</td><td style="padding:6px 0;">${escapeHtml(acceptedAtDisplay)}</td></tr>
+    </table>
+    <div style="text-align:center;margin:28px 0;">
+      <a href="${agreementUrl}" style="display:inline-block;background:linear-gradient(90deg,#FF6A00,#FF2D55);color:#ffffff;font-weight:700;font-size:14px;padding:14px 32px;border-radius:999px;text-decoration:none;">
+        View the Agreement
+      </a>
+    </div>
+    <p style="margin:0;color:#94a3b8;font-size:12px;text-align:center;">Your full acceptance record, including this version and timestamp, is kept on file in your secure LBS employer portal account.</p>
+  `;
+  return sendEmail({ to: data.to, subject: `Agreement accepted — ${BUSINESS_NAME}`, html: emailWrapper(content) });
 }
 
 /** Internal (LBS-staff-facing) copy of the same generic pattern, for events

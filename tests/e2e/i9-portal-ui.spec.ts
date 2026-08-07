@@ -60,6 +60,13 @@ test.describe.serial("I-9 portal — browser UI", () => {
     expect(boot.ok()).toBeTruthy();
     const login = await adminRequest.post("/api/i9/auth/login", { data: { email: adminEmail, password: "AdminPassword123!" } });
     expect(login.ok()).toBeTruthy();
+    const loginJson = await readJson(login);
+    expect(loginJson.user.mustChangePassword, "a freshly bootstrapped admin must be flagged to change their temp password").toBe(true);
+    // bootstrap-admin always issues a temp password that must be changed
+    // before anything else works (server/i9Auth.ts's requireI9Auth) — every
+    // other authenticated call below would otherwise 403.
+    const forceChange = await apiPost(adminRequest, "/api/i9/auth/force-change-password", { newPassword: "AdminRealPassword456!" });
+    expect(forceChange.ok()).toBeTruthy();
 
     processorEmail = `ui-processor-${rand()}@lbstest.internal`;
     const createProc = await apiPost(adminRequest, "/api/i9/admin/users", { email: processorEmail, password: "ProcPassword123!", fullName: "UI Test Processor", role: "lbs_case_processor" });
@@ -80,8 +87,12 @@ test.describe.serial("I-9 portal — browser UI", () => {
     await page.fill("#i9-reg-password", "ClientUiPassword123!");
     await page.fill("#i9-reg-password-confirm", "ClientUiPassword123!");
     await page.click('button[type="submit"]');
-    await page.waitForURL(`**${PORTAL}`, { timeout: 10_000 });
-    await expect(page.getByText(companyName)).toBeVisible();
+    // Registration lands on the onboarding wizard (not straight to the
+    // dashboard) — its first step prefills the company name it was just
+    // registered with.
+    await page.waitForURL(`**${PORTAL}/onboarding`, { timeout: 10_000 });
+    await expect(page.getByText("Employer Onboarding")).toBeVisible();
+    await expect(page.getByLabel("Legal Business Name")).toHaveValue(companyName);
 
     // Grab the companyId from the authenticated session for the admin-side
     // onboarding-advance calls below.
@@ -151,6 +162,13 @@ test.describe.serial("I-9 portal — browser UI", () => {
     await page.fill("#i9-email", processorEmail);
     await page.fill("#i9-password", "ProcPassword123!");
     await page.click('button[type="submit"]');
+    // The processor account was created via POST /api/i9/admin/users, which
+    // defaults to mustChangePassword — this is its first-ever login, so it
+    // lands on the forced password-change screen before anything else.
+    await page.waitForURL(`**${PORTAL}/force-change-password`, { timeout: 10_000 });
+    await page.fill("#i9-force-new-password", "ProcPasswordChanged456!");
+    await page.fill("#i9-force-new-password-confirm", "ProcPasswordChanged456!");
+    await page.click('button[type="submit"]');
     await page.waitForURL(`**${PORTAL}`, { timeout: 10_000 });
 
     await page.goto(`${BASE_URL}${PORTAL}/requests/${requestId}`);
@@ -180,7 +198,8 @@ test.describe.serial("I-9 portal — browser UI", () => {
 
     await page.goto(`${BASE_URL}${PORTAL}/login`);
     await page.fill("#i9-email", processorEmail);
-    await page.fill("#i9-password", "ProcPassword123!");
+    // Already changed from the initial temp password in the previous test.
+    await page.fill("#i9-password", "ProcPasswordChanged456!");
     await page.click('button[type="submit"]');
     await page.waitForURL(`**${PORTAL}`, { timeout: 10_000 });
 

@@ -46,10 +46,19 @@ async function req(session: I9Session, method: string, path: string, body?: unkn
   return session.req(BASE_URL, method, path, body);
 }
 
+/** If the account was issued with mustChangePassword set (bootstrap-admin,
+ *  or POST /api/i9/admin/users's default) — server/i9Auth.ts's requireI9Auth
+ *  blocks every other authenticated route until it's cleared, so every
+ *  caller needs this done transparently rather than remembering to do it
+ *  themselves at each call site. */
 async function loginAs(email: string, password: string, name = email): Promise<I9Session> {
   const session = new I9Session(name);
   const r = await req(session, "POST", "/api/i9/auth/login", { email, password });
   expect(r.status, `login as ${name}`).toBe(200);
+  if (r.json.user?.mustChangePassword) {
+    const forceChange = await req(session, "POST", "/api/i9/auth/force-change-password", { newPassword: "TestPasswordChanged456!" });
+    expect(forceChange.status, `force-change-password for ${name}`).toBe(200);
+  }
   return session;
 }
 
@@ -106,6 +115,12 @@ test.beforeAll(async () => {
   expect(boot.status, "bootstrap-admin should succeed").toBe(200);
   const adminLogin = await req(admin, "POST", "/api/i9/auth/login", { email: adminEmail, password: "AdminPassword123!" });
   expect(adminLogin.status).toBe(200);
+  expect(adminLogin.json.user.mustChangePassword, "a freshly bootstrapped admin must be flagged to change their temp password").toBe(true);
+  // bootstrap-admin always issues a temp password that must be changed before
+  // anything else works (server/i9Auth.ts's requireI9Auth) — every other
+  // authenticated call below would otherwise 403.
+  const forceChange = await req(admin, "POST", "/api/i9/auth/force-change-password", { newPassword: "AdminRealPassword456!" });
+  expect(forceChange.status, "force-change-password should succeed").toBe(200);
 
   const proc = await createInternalUser(admin, "lbs_case_processor");
   processor = await loginAs(proc.email, proc.password, "processor");

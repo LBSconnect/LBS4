@@ -433,6 +433,11 @@ export interface I9ClientAgreement {
   generatedDocumentHtml: string | null;
   signedDocumentSecureDocumentId: string | null;
   signedByName: string | null;
+  // Populated only for the client's own self-service electronic
+  // acceptance (POST .../agreement/accept) — null for the staff-assisted
+  // uploaded-copy path.
+  signerEmail: string | null;
+  signerIpAddress: string | null;
   signedAt: string | null;
   eSignatureProvider: string | null;
   createdAt: string | null;
