@@ -23,7 +23,7 @@ export default function PrivacyPolicy() {
             Privacy Policy
           </h1>
           <p className="text-white/80">
-            Version 1.0 &nbsp;·&nbsp; Effective Date: July 30, 2026 &nbsp;·&nbsp; Last Updated: August 4, 2026
+            Version 1.0 &nbsp;·&nbsp; Effective Date: July 30, 2026 &nbsp;·&nbsp; Last Updated: August 7, 2026
           </p>
         </div>
       </section>
@@ -222,6 +222,36 @@ export default function PrivacyPolicy() {
                 reasonably necessary to complete the requested service, troubleshoot immediate service issues,
                 process payment, and satisfy legal obligations. See the Business-Center Document Handling Notice.
               </p>
+
+              <h3 className="text-lg font-semibold mt-6">5.5 Employment Verification Services (New-Hire Verification &amp; Form I-9 Support)</h3>
+              <p className="text-muted-foreground leading-relaxed">
+                LBS's New-Hire Verification &amp; Form I-9 Support services may involve processing sensitive
+                employment-eligibility information on behalf of employer clients, including full legal names, home
+                addresses, dates of birth, Social Security numbers, citizenship or immigration attestations, Alien
+                Registration Numbers, USCIS Numbers, I-94 information, passport information, Employment
+                Authorization Documents, other government-issued identity documents, Form I-9 information, and
+                E-Verify case information and case numbers.
+              </p>
+              <p className="text-muted-foreground leading-relaxed">For this category of information:</p>
+              <ul className="list-disc pl-6 text-muted-foreground space-y-2">
+                <li>the employer client determines what employee information is submitted and remains the employer of record and the custodian responsible for its own Form I-9 compliance;</li>
+                <li>LBS acts as the employer's E-Verify Employer Agent and, when separately requested, as the employer's Form I-9 Authorized Representative — LBS does not make hiring, termination, compensation, or other employment decisions, and does not provide immigration legal advice;</li>
+                <li>LBS uses this information only as reasonably necessary to provide the contracted services, perform E-Verify functions, perform requested Form I-9 services, maintain legally or operationally necessary records, protect its systems, and comply with applicable law;</li>
+                <li>LBS does not sell this information, use it for advertising, use it for unrelated profiling, or sell Social Security numbers or identity-document information;</li>
+                <li>sensitive verification information is intended to be submitted through LBS's secure employer portal rather than by ordinary, unsecured email;</li>
+                <li>LBS maintains administrative, technical, and physical safeguards reasonably appropriate to the sensitivity of this information, described further in Section 10 (Security) below;</li>
+                <li>if LBS discovers unauthorized access to this information constituting, or reasonably suspected to constitute, a security incident, LBS will investigate, take reasonable mitigation measures, and notify affected parties as required by applicable law, including applicable Texas data-security and breach-notification requirements;</li>
+                <li>the employer client remains responsible for legally required Form I-9 and E-Verify recordkeeping and for producing its records to government agencies when legally required; LBS may separately maintain copies, audit records, case documentation, and verification records reasonably necessary to perform its services, document its performance, comply with E-Verify requirements, resolve disputes, or satisfy applicable law, and may securely delete such information once it is no longer reasonably required for those purposes, subject to any longer retention period required by law;</li>
+                <li>information about this service's terms — including the distinction between LBS's role and an employer's own responsibilities, and LBS's government-program-fee disclosures — is set out in the New-Hire Verification &amp; Form I-9 Support Services Agreement, which does not conflict with this Policy;</li>
+                <li>an employee or job applicant whose information is processed through this service and who has questions about it should generally contact their prospective or current employer first, since the employer controls the underlying employment relationship and instructs LBS's processing on their behalf.</li>
+              </ul>
+              <p className="text-muted-foreground leading-relaxed">
+                E-Verify is a federal program operated by the U.S. Department of Homeland Security in partnership
+                with the Social Security Administration. LBS is an independent private company, is not a government
+                agency, and is not sponsored, endorsed, certified, approved, or recommended by DHS, USCIS, SSA, or
+                E-Verify; where accurate and supported by its current enrollment, LBS may state that it
+                participates in E-Verify as an E-Verify Employer Agent.
+              </p>
             </div>
 
             <div className="space-y-4">
@@ -294,6 +324,7 @@ export default function PrivacyPolicy() {
                 <li>traditional notary records are retained by the commissioned notary as required by Texas law;</li>
                 <li>online-notary recordings, if offered, require separate statutory retention;</li>
                 <li>passport-photo and document-service working files should ordinarily be deleted promptly after service completion;</li>
+                <li>Form I-9 and E-Verify verification records processed through New-Hire Verification &amp; Form I-9 Support are retained only as long as reasonably necessary for those services, legal compliance, and E-Verify obligations, subject to the employer client's own independent Form I-9 recordkeeping duties (see Section 5.5);</li>
                 <li>backups may persist for a limited cycle before being overwritten.</li>
               </ul>
               <p className="text-muted-foreground leading-relaxed">

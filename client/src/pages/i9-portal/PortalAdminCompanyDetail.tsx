@@ -171,8 +171,9 @@ function AgreementSection({ companyId, canManage }: { companyId: string; canMana
   return (
     <PortalCard title="LBS Commercial Agreement">
       <p className="text-xs text-muted-foreground">
-        No e-signature provider is configured. This generates agreement text to download and sign outside the
-        portal, then records a reference once a signed copy is uploaded — it never simulates a signature.
+        Clients can accept this Agreement themselves from their onboarding wizard (a real electronic signature —
+        no third-party e-sign provider is integrated). Use this panel only for the alternate path: a wet-ink-signed
+        copy the client uploads or hands you directly.
       </p>
       {!agreement ? (
         canManage ? (

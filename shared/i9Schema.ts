@@ -20,6 +20,16 @@ import { z } from "zod";
 
 const uuidPk = (name = "id") => varchar(name).primaryKey().default(sql`gen_random_uuid()`);
 
+// Canonical version of the public New-Hire Verification & Form I-9 Support
+// Services Agreement (client/src/pages/employer/ServiceAgreement.tsx). Bump
+// this whenever that page's substantive terms change; never edit an
+// already-accepted i9_client_agreements row to match a later version. The
+// client bundle keeps its own copy of this same string (see that file) —
+// this table can't be imported client-side without pulling in
+// drizzle-orm/pg-core (same reason the SSN-pattern guard below is
+// duplicated rather than imported).
+export const AGREEMENT_VERSION = "1.0";
+
 // ─────────────────────────────────────────────────────────────────────────────
 // Roles (shared enum used across ClientUser and RBAC middleware)
 // ─────────────────────────────────────────────────────────────────────────────
@@ -408,10 +418,21 @@ export const i9ClientAgreements = pgTable("i9_client_agreements", {
   documentVersion: varchar("document_version", { length: 20 }).notNull().default("0.1-draft"),
   status: varchar("status", { length: 30 }).notNull().default("pending"), // pending | generated | awaiting_signature | signed | e_signature_not_configured
   generatedDocumentHtml: text("generated_document_html"), // the filled-in agreement text, not a signature
-  signedDocumentSecureDocumentId: varchar("signed_document_secure_document_id", { length: 100 }), // uploaded signed copy, if no e-sign integration
+  signedDocumentSecureDocumentId: varchar("signed_document_secure_document_id", { length: 100 }), // uploaded signed copy, from the LBS-staff-assisted wet-ink path
   signedByName: varchar("signed_by_name", { length: 200 }),
+  // Populated only by the client's own self-service electronic acceptance
+  // (POST /api/i9/companies/:id/agreement/accept) — null for the
+  // staff-assisted uploaded-copy path above, where there's no request to
+  // capture this from. Together with signedByName/signedAt/documentVersion,
+  // this is the acceptance evidence for that self-service path.
+  signerEmail: varchar("signer_email", { length: 200 }),
+  signerIpAddress: varchar("signer_ip_address", { length: 45 }),
+  signerUserAgent: text("signer_user_agent"),
   signedAt: timestamp("signed_at"),
-  eSignatureProvider: varchar("e_signature_provider", { length: 50 }), // null until a real provider is integrated
+  // "self_hosted_acknowledgment" for the electronic-acceptance path above;
+  // null for the staff-assisted uploaded-copy path; reserved for a real
+  // third-party value (DocuSign, etc.) if one is ever integrated.
+  eSignatureProvider: varchar("e_signature_provider", { length: 50 }),
   eSignatureEnvelopeId: varchar("e_signature_envelope_id", { length: 200 }),
   createdAt: timestamp("created_at").defaultNow(),
 });
@@ -682,6 +703,7 @@ export type I9InvoiceReference = typeof i9InvoiceReferences.$inferSelect;
 export const I9_NOTIFICATION_EVENTS = [
   "consultation_requested",
   "agreement_pending",
+  "agreement_accepted",
   "setup_payment_pending",
   "business_intake_incomplete",
   "everify_enrollment_ready_for_lbs_action",

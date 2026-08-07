@@ -482,6 +482,14 @@ export async function runI9Migrations(): Promise<void> {
     ALTER TABLE i9_client_users ADD COLUMN IF NOT EXISTS password_reset_expires_at TIMESTAMP;
     ALTER TABLE i9_client_users ADD COLUMN IF NOT EXISTS must_change_password BOOLEAN NOT NULL DEFAULT false;
   `);
+
+  // Client self-service electronic acceptance (POST /agreement/accept)
+  // added fields the original CREATE TABLE (above) never grew.
+  await pg.query(`
+    ALTER TABLE i9_client_agreements ADD COLUMN IF NOT EXISTS signer_email VARCHAR(200);
+    ALTER TABLE i9_client_agreements ADD COLUMN IF NOT EXISTS signer_ip_address VARCHAR(45);
+    ALTER TABLE i9_client_agreements ADD COLUMN IF NOT EXISTS signer_user_agent TEXT;
+  `);
 }
 
 /** Seeds the 3 monthly plans + 8 add-ons if the table is empty. Prices match
@@ -622,10 +630,13 @@ export async function recordI9EverifyEnrollment(
 // ─────────────────────────────────────────────────────────────────────────────
 // ClientAgreement — the LBS commercial agreement (separate from the E-Verify
 // MOU, which is executed by the client directly with DHS/SSA — see
-// recordI9EverifyEnrollment above). No e-signature provider is configured
-// (see server/i9Routes.ts's agreement routes), so this only ever generates
-// document text for download/print and records a reference to an uploaded
-// signed copy — it never simulates or fakes a signature capture.
+// recordI9EverifyEnrollment above). Two acceptance paths: the client's own
+// self-service electronic acceptance (recordI9AgreementSelfAcceptance —
+// authenticated, IP/user-agent/version captured, a valid electronic
+// signature under the U.S. ESIGN Act), or an LBS-staff-assisted path where
+// a wet-ink-signed copy is uploaded and recorded (recordI9AgreementSignedCopy)
+// for clients who prefer that. No third-party e-signature provider (e.g.
+// DocuSign) is integrated — see server/i9Routes.ts's agreement routes.
 // ─────────────────────────────────────────────────────────────────────────────
 
 export async function createI9ClientAgreement(clientCompanyId: string, documentVersion: string, generatedDocumentHtml: string) {
@@ -652,6 +663,33 @@ export async function recordI9AgreementSignedCopy(id: string, data: { secureDocu
   await database
     .update(i9ClientAgreements)
     .set({ status: "signed", signedByName: data.signedByName, signedDocumentSecureDocumentId: data.secureDocumentId, signedAt: new Date() } as any)
+    .where(eq(i9ClientAgreements.id, id));
+}
+
+/** Records the client's own electronic acceptance — distinct from
+ *  recordI9AgreementSignedCopy above (the staff-assisted uploaded-copy
+ *  path): this captures who accepted (the authenticated signer's own name
+ *  and email, not a free-text field anyone with access could fill in),
+ *  from where (IP + user agent), and at which document version, at the
+ *  moment they checked the acknowledgment box — the evidentiary elements
+ *  of a valid electronic signature. */
+export async function recordI9AgreementSelfAcceptance(
+  id: string,
+  data: { signedByName: string; signerEmail: string; signerIpAddress: string; signerUserAgent: string; documentVersion: string }
+): Promise<void> {
+  const database = getDb();
+  await database
+    .update(i9ClientAgreements)
+    .set({
+      status: "signed",
+      signedByName: data.signedByName,
+      signerEmail: data.signerEmail,
+      signerIpAddress: data.signerIpAddress,
+      signerUserAgent: data.signerUserAgent,
+      documentVersion: data.documentVersion,
+      eSignatureProvider: "self_hosted_acknowledgment",
+      signedAt: new Date(),
+    } as any)
     .where(eq(i9ClientAgreements.id, id));
 }
 
