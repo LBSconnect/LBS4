@@ -415,6 +415,118 @@ export default function ServiceDetail({ slugOverride }: { slugOverride?: string 
         </div>
       </section>
 
+      {isCertiport && (
+        <section className="py-14 bg-muted/30" data-testid="section-testing-center-overview">
+          <div className="max-w-7xl mx-auto px-6">
+            <div className="text-center max-w-3xl mx-auto mb-10 space-y-3">
+              <p className="text-xs font-bold uppercase tracking-widest text-[#BD4F00] dark:text-[#FF8A3D]">Testing Center</p>
+              <h2 className="text-3xl md:text-4xl font-bold">
+                Testing, Preparation and Support in One Convenient Location
+              </h2>
+              <p className="text-muted-foreground text-lg">
+                Access professional exam testing, focused preparation programs, and online study
+                resources through LBS.
+              </p>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-10">
+              <div className="bg-card border border-border/50 rounded-md p-6 space-y-3" data-testid="card-testing-pearson-vue">
+                <div className="w-12 h-12 rounded-md bg-[#0D1B3D]/10 dark:bg-[#0077FF]/20 flex items-center justify-center">
+                  <ShieldCheck className="w-6 h-6 text-[#0D1B3D] dark:text-[#0077FF]" />
+                </div>
+                <h3 className="font-semibold text-lg">Pearson VUE</h3>
+                <p className="text-sm text-muted-foreground">
+                  LBS is an authorized Pearson VUE testing center in Houston, Texas, offering a
+                  professional, secure environment for IT certifications, professional
+                  licenses, and academic admissions exams.
+                </p>
+                <a href="https://home.pearsonvue.com" target="_blank" rel="noopener noreferrer">
+                  <Button variant="outline" size="sm" data-testid="link-pearson-vue-info">
+                    Pearson VUE Information
+                    <ExternalLink className="w-3.5 h-3.5 ml-1.5" />
+                  </Button>
+                </a>
+              </div>
+
+              <div className="bg-card border border-border/50 rounded-md p-6 space-y-3" data-testid="card-testing-certiport">
+                <div className="w-12 h-12 rounded-md bg-[#0D1B3D]/10 dark:bg-[#0077FF]/20 flex items-center justify-center">
+                  <Award className="w-6 h-6 text-[#0D1B3D] dark:text-[#0077FF]" />
+                </div>
+                <h3 className="font-semibold text-lg">Certiport</h3>
+                <p className="text-sm text-muted-foreground">
+                  Book and pay for your Certiport exam right here: Microsoft Office
+                  Specialist (MOS), Adobe Certified Professional, and other industry
+                  certifications. $35 per session.
+                </p>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  data-testid="link-certiport-info"
+                  onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
+                >
+                  Book &amp; Pay $35
+                </Button>
+              </div>
+
+              <div className="bg-card border border-border/50 rounded-md p-6 space-y-3" data-testid="card-testing-bootcamp">
+                <div className="w-12 h-12 rounded-md bg-[#0D1B3D]/10 dark:bg-[#0077FF]/20 flex items-center justify-center">
+                  <BookOpen className="w-6 h-6 text-[#0D1B3D] dark:text-[#0077FF]" />
+                </div>
+                <h3 className="font-semibold text-lg">Texas Insurance Exam Cram Bootcamps</h3>
+                <p className="text-sm text-muted-foreground">
+                  Intensive Saturday morning Boot Camps for the Texas Life Insurance and
+                  Property &amp; Casualty license exams, $99 per session, taught by expert
+                  instructors.
+                </p>
+                <Link href="/services?filter=bootcamp">
+                  <Button variant="outline" size="sm" data-testid="link-bootcamp-info">
+                    View Bootcamps
+                  </Button>
+                </Link>
+              </div>
+
+              <div className="bg-card border border-border/50 rounded-md p-6 space-y-3" data-testid="card-testing-myeasypass">
+                <div className="w-12 h-12 rounded-md bg-[#0D1B3D]/10 dark:bg-[#0077FF]/20 flex items-center justify-center">
+                  <GraduationCap className="w-6 h-6 text-[#0D1B3D] dark:text-[#0077FF]" />
+                </div>
+                <h3 className="font-semibold text-lg">Prepare Online with MyEasyPass</h3>
+                <p className="text-sm text-muted-foreground">
+                  Access online practice resources and exam-preparation tools designed to
+                  help candidates study with greater confidence.
+                </p>
+                <a href="https://www.myeasypass.net" target="_blank" rel="noopener noreferrer">
+                  <Button variant="outline" size="sm" data-testid="link-myeasypass-info">
+                    Visit MyEasyPass.net
+                    <ExternalLink className="w-3.5 h-3.5 ml-1.5" />
+                  </Button>
+                </a>
+                <p className="text-xs text-muted-foreground pt-1 border-t border-border/30">
+                  MyEasyPass.net is an independent exam-preparation resource and is not
+                  affiliated with Pearson VUE, Certiport, or any government or licensing
+                  agency.
+                </p>
+              </div>
+            </div>
+
+            <div className="bg-card border border-border/50 rounded-md p-6 md:p-8 flex flex-col md:flex-row items-start gap-4">
+              <div className="w-12 h-12 rounded-md bg-[#0D1B3D]/10 dark:bg-[#0077FF]/20 flex items-center justify-center shrink-0">
+                <IdCard className="w-6 h-6 text-[#0D1B3D] dark:text-[#0077FF]" />
+              </div>
+              <div>
+                <h3 className="font-semibold text-lg mb-2">Appointment Preparation</h3>
+                <p className="text-sm text-muted-foreground">
+                  Bring a valid government-issued photo ID, driver's license, passport, or
+                  state ID, with a name that matches your exam registration exactly. This
+                  is a strict Pearson VUE and Certiport requirement. Arrive a few minutes
+                  early to check in, and contact us at least 24 hours in advance if you
+                  need to reschedule.
+                </p>
+              </div>
+            </div>
+          </div>
+        </section>
+      )}
+
       <section className="py-16 bg-background">
         <div className="max-w-7xl mx-auto px-6">
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
@@ -776,148 +888,36 @@ export default function ServiceDetail({ slugOverride }: { slugOverride?: string 
       </section>
 
       {isCertiport && (
-        <>
-          <section className="py-14 bg-muted/30" data-testid="section-testing-center-overview">
-            <div className="max-w-7xl mx-auto px-6">
-              <div className="text-center max-w-3xl mx-auto mb-10 space-y-3">
-                <p className="text-xs font-bold uppercase tracking-widest text-[#BD4F00] dark:text-[#FF8A3D]">Testing Center</p>
-                <h2 className="text-3xl md:text-4xl font-bold">
-                  Testing, Preparation and Support in One Convenient Location
-                </h2>
-                <p className="text-muted-foreground text-lg">
-                  Access professional exam testing, focused preparation programs, and online study
-                  resources through LBS.
-                </p>
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-10">
-                <div className="bg-card border border-border/50 rounded-md p-6 space-y-3" data-testid="card-testing-pearson-vue">
-                  <div className="w-12 h-12 rounded-md bg-[#0D1B3D]/10 dark:bg-[#0077FF]/20 flex items-center justify-center">
-                    <ShieldCheck className="w-6 h-6 text-[#0D1B3D] dark:text-[#0077FF]" />
-                  </div>
-                  <h3 className="font-semibold text-lg">Pearson VUE</h3>
-                  <p className="text-sm text-muted-foreground">
-                    LBS is an authorized Pearson VUE testing center in Houston, Texas, offering a
-                    professional, secure environment for IT certifications, professional
-                    licenses, and academic admissions exams.
-                  </p>
-                  <a href="https://home.pearsonvue.com" target="_blank" rel="noopener noreferrer">
-                    <Button variant="outline" size="sm" data-testid="link-pearson-vue-info">
-                      Pearson VUE Information
-                      <ExternalLink className="w-3.5 h-3.5 ml-1.5" />
-                    </Button>
-                  </a>
-                </div>
-
-                <div className="bg-card border border-border/50 rounded-md p-6 space-y-3" data-testid="card-testing-certiport">
-                  <div className="w-12 h-12 rounded-md bg-[#0D1B3D]/10 dark:bg-[#0077FF]/20 flex items-center justify-center">
-                    <Award className="w-6 h-6 text-[#0D1B3D] dark:text-[#0077FF]" />
-                  </div>
-                  <h3 className="font-semibold text-lg">Certiport</h3>
-                  <p className="text-sm text-muted-foreground">
-                    Book and pay for your Certiport exam right here: Microsoft Office
-                    Specialist (MOS), Adobe Certified Professional, and other industry
-                    certifications. $35 per session.
-                  </p>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    data-testid="link-certiport-info"
-                    onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
+        <section className="py-14 bg-background" data-testid="section-testing-faq">
+          <div className="max-w-7xl mx-auto px-6">
+            <div className="text-center max-w-2xl mx-auto mb-10 space-y-3">
+              <p className="text-xs font-bold uppercase tracking-widest text-[#BD4F00] dark:text-[#FF8A3D]">Common Questions</p>
+              <h2 className="text-3xl font-bold">Testing Center FAQ</h2>
+            </div>
+            <div className="max-w-2xl mx-auto divide-y divide-border/50 border border-border/50 rounded-xl overflow-hidden bg-card">
+              {TESTING_CENTER_FAQS.map((faq, i) => (
+                <div key={i}>
+                  <button
+                    className="w-full flex items-center justify-between gap-4 px-6 py-5 text-left text-sm font-semibold hover:bg-muted/40 transition-colors"
+                    onClick={() => setOpenFaq(openFaq === i ? null : i)}
+                    aria-expanded={openFaq === i}
+                    data-testid={`button-testing-faq-${i}`}
                   >
-                    Book &amp; Pay $35
-                  </Button>
+                    <span>{faq.q}</span>
+                    <ChevronDown
+                      className={`w-4 h-4 shrink-0 text-[#FF6A00] transition-transform duration-200 ${openFaq === i ? "rotate-180" : ""}`}
+                    />
+                  </button>
+                  {openFaq === i && (
+                    <div className="px-6 pb-5 text-sm text-muted-foreground leading-relaxed border-t border-border/30 pt-4">
+                      {faq.a}
+                    </div>
+                  )}
                 </div>
-
-                <div className="bg-card border border-border/50 rounded-md p-6 space-y-3" data-testid="card-testing-bootcamp">
-                  <div className="w-12 h-12 rounded-md bg-[#0D1B3D]/10 dark:bg-[#0077FF]/20 flex items-center justify-center">
-                    <BookOpen className="w-6 h-6 text-[#0D1B3D] dark:text-[#0077FF]" />
-                  </div>
-                  <h3 className="font-semibold text-lg">Texas Insurance Exam Cram Bootcamps</h3>
-                  <p className="text-sm text-muted-foreground">
-                    Intensive Saturday morning Boot Camps for the Texas Life Insurance and
-                    Property &amp; Casualty license exams, $99 per session, taught by expert
-                    instructors.
-                  </p>
-                  <Link href="/services?filter=bootcamp">
-                    <Button variant="outline" size="sm" data-testid="link-bootcamp-info">
-                      View Bootcamps
-                    </Button>
-                  </Link>
-                </div>
-
-                <div className="bg-card border border-border/50 rounded-md p-6 space-y-3" data-testid="card-testing-myeasypass">
-                  <div className="w-12 h-12 rounded-md bg-[#0D1B3D]/10 dark:bg-[#0077FF]/20 flex items-center justify-center">
-                    <GraduationCap className="w-6 h-6 text-[#0D1B3D] dark:text-[#0077FF]" />
-                  </div>
-                  <h3 className="font-semibold text-lg">Prepare Online with MyEasyPass</h3>
-                  <p className="text-sm text-muted-foreground">
-                    Access online practice resources and exam-preparation tools designed to
-                    help candidates study with greater confidence.
-                  </p>
-                  <a href="https://www.myeasypass.net" target="_blank" rel="noopener noreferrer">
-                    <Button variant="outline" size="sm" data-testid="link-myeasypass-info">
-                      Visit MyEasyPass.net
-                      <ExternalLink className="w-3.5 h-3.5 ml-1.5" />
-                    </Button>
-                  </a>
-                  <p className="text-xs text-muted-foreground pt-1 border-t border-border/30">
-                    MyEasyPass.net is an independent exam-preparation resource and is not
-                    affiliated with Pearson VUE, Certiport, or any government or licensing
-                    agency.
-                  </p>
-                </div>
-              </div>
-
-              <div className="bg-card border border-border/50 rounded-md p-6 md:p-8 flex flex-col md:flex-row items-start gap-4">
-                <div className="w-12 h-12 rounded-md bg-[#0D1B3D]/10 dark:bg-[#0077FF]/20 flex items-center justify-center shrink-0">
-                  <IdCard className="w-6 h-6 text-[#0D1B3D] dark:text-[#0077FF]" />
-                </div>
-                <div>
-                  <h3 className="font-semibold text-lg mb-2">Appointment Preparation</h3>
-                  <p className="text-sm text-muted-foreground">
-                    Bring a valid government-issued photo ID, driver's license, passport, or
-                    state ID, with a name that matches your exam registration exactly. This
-                    is a strict Pearson VUE and Certiport requirement. Arrive a few minutes
-                    early to check in, and contact us at least 24 hours in advance if you
-                    need to reschedule.
-                  </p>
-                </div>
-              </div>
+              ))}
             </div>
-          </section>
-
-          <section className="py-14 bg-background" data-testid="section-testing-faq">
-            <div className="max-w-7xl mx-auto px-6">
-              <div className="text-center max-w-2xl mx-auto mb-10 space-y-3">
-                <p className="text-xs font-bold uppercase tracking-widest text-[#BD4F00] dark:text-[#FF8A3D]">Common Questions</p>
-                <h2 className="text-3xl font-bold">Testing Center FAQ</h2>
-              </div>
-              <div className="max-w-2xl mx-auto divide-y divide-border/50 border border-border/50 rounded-xl overflow-hidden bg-card">
-                {TESTING_CENTER_FAQS.map((faq, i) => (
-                  <div key={i}>
-                    <button
-                      className="w-full flex items-center justify-between gap-4 px-6 py-5 text-left text-sm font-semibold hover:bg-muted/40 transition-colors"
-                      onClick={() => setOpenFaq(openFaq === i ? null : i)}
-                      aria-expanded={openFaq === i}
-                      data-testid={`button-testing-faq-${i}`}
-                    >
-                      <span>{faq.q}</span>
-                      <ChevronDown
-                        className={`w-4 h-4 shrink-0 text-[#FF6A00] transition-transform duration-200 ${openFaq === i ? "rotate-180" : ""}`}
-                      />
-                    </button>
-                    {openFaq === i && (
-                      <div className="px-6 pb-5 text-sm text-muted-foreground leading-relaxed border-t border-border/30 pt-4">
-                        {faq.a}
-                      </div>
-                    )}
-                  </div>
-                ))}
-              </div>
-            </div>
-          </section>
-        </>
+          </div>
+        </section>
       )}
 
       {!isCertiport && service.faqs && (
