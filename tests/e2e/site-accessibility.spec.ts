@@ -170,16 +170,18 @@ test.describe("Site — keyboard navigation", () => {
     await expect(nav).not.toBeVisible();
   });
 
-  test("Desktop 'For Businesses' dropdown opens and its links are keyboard-focusable", async ({ page }) => {
+  test("Desktop top-level nav tabs (formerly the 'For Businesses' dropdown) are keyboard-focusable and navigate correctly", async ({ page }) => {
     await page.setViewportSize({ width: 1440, height: 900 });
     await page.goto(BASE_URL + "/", { waitUntil: "networkidle" });
 
-    const trigger = page.getByTestId("link-nav-for-businesses");
-    await trigger.focus();
+    // "I-9 Verification" and "Web Design" used to live inside a "For
+    // Businesses" dropdown; they're now plain top-level tabs, so a simple
+    // focus + Enter is the whole interaction — no disclosure widget to open.
+    const i9Tab = page.getByTestId("link-nav-i-9-verification");
+    await expect(i9Tab).toBeVisible();
+    await i9Tab.focus();
     await page.keyboard.press("Enter");
-
-    const firstDropdownLink = page.getByTestId("link-nav-dropdown-corporate-notary-program");
-    await expect(firstDropdownLink).toBeVisible();
+    await expect(page).toHaveURL(/\/employer-services\/new-hire-verification/);
   });
 
   test("All interactive elements on Home reachable by Tab show a visible focus indicator", async ({ page }) => {
