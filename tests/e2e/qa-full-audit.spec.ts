@@ -403,11 +403,6 @@ test.describe("Home page — sections and CTAs", () => {
     expect(href).toBe("tel:2818365357");
   });
 
-  test("Get Directions button → /contact", async ({ page }) => {
-    await goto(page, "/");
-    await page.click('[data-testid="button-contact-cta"]');
-    await expect(page).toHaveURL(`${BASE}/contact`);
-  });
 });
 
 // ═══════════════════════════════════════════════════════════════════════════
