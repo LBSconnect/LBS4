@@ -151,8 +151,19 @@ export function destroyI9Session(req: Request, res: Response, cb: () => void) {
 // ─── Middleware ──────────────────────────────────────────────────────────────
 
 export interface I9AuthedRequest extends Request {
-  i9User?: { id: string; role: I9Role; clientCompanyId: string | null; email: string; fullName: string };
+  i9User?: { id: string; role: I9Role; clientCompanyId: string | null; email: string; fullName: string; mustChangePassword: boolean };
 }
+
+// Routes still reachable while an account has an outstanding forced
+// password change — the client needs /me to learn *whose* session this is
+// (and that a change is required) before it can even render the forced
+// change screen, and logout must always work so nobody gets stuck.
+// /auth/force-change-password is the only route that can actually clear it.
+const ALLOWED_WHILE_PASSWORD_CHANGE_REQUIRED = new Set([
+  "/api/i9/auth/me",
+  "/api/i9/auth/logout",
+  "/api/i9/auth/force-change-password",
+]);
 
 /** Requires a valid session AND that the user account is still active — an
  *  admin deactivating a user takes effect on their next request, not just
@@ -166,7 +177,15 @@ export const requireI9Auth: RequestHandler = async (req: I9AuthedRequest, res, n
     return destroyI9Session(req, res, () => res.status(401).json({ error: "Session is no longer valid. Please log in again." }));
   }
 
-  req.i9User = { id: user.id, role: user.role as I9Role, clientCompanyId: user.clientCompanyId, email: user.email, fullName: user.fullName };
+  if (user.mustChangePassword && !ALLOWED_WHILE_PASSWORD_CHANGE_REQUIRED.has(req.path)) {
+    // Nested under `details` (rather than a bare top-level field) so it
+    // flows through I9ApiError unchanged — i9Api only ever forwards
+    // `json.details`, matching every other structured-error shape already
+    // used across this API (e.g. Zod flatten() output).
+    return res.status(403).json({ error: "You must set a new password before continuing.", details: { mustChangePassword: true } });
+  }
+
+  req.i9User = { id: user.id, role: user.role as I9Role, clientCompanyId: user.clientCompanyId, email: user.email, fullName: user.fullName, mustChangePassword: user.mustChangePassword };
   next();
 };
 

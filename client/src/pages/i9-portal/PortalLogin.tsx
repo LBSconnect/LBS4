@@ -22,10 +22,13 @@ export default function PortalLogin() {
   const [mfaToken, setMfaToken] = useState<string | null>(null);
   const [mfaCode, setMfaCode] = useState("");
 
-  // Already signed in? Skip straight to the dashboard.
+  // Already signed in? Skip straight to the dashboard (or the forced
+  // password-change screen, if that's still outstanding).
   useEffect(() => {
-    if (session.status === "authed") setLocation(PORTAL_ROUTES.dashboard);
-  }, [session.status, setLocation]);
+    if (session.status === "authed") {
+      setLocation(session.user?.mustChangePassword ? PORTAL_ROUTES.forceChangePassword : PORTAL_ROUTES.dashboard);
+    }
+  }, [session.status, session.user, setLocation]);
 
   async function submit(e: React.FormEvent) {
     e.preventDefault();
@@ -43,7 +46,7 @@ export default function PortalLogin() {
       }
       session.setUser(result.user);
       session.setStatus("authed");
-      setLocation(PORTAL_ROUTES.dashboard);
+      setLocation(result.user.mustChangePassword ? PORTAL_ROUTES.forceChangePassword : PORTAL_ROUTES.dashboard);
     } catch (err) {
       if (err instanceof I9ApiError && err.status === 503) {
         setError("The secure portal is not yet configured on this environment. Please contact LBS directly.");
@@ -65,7 +68,7 @@ export default function PortalLogin() {
       });
       session.setUser(result.user);
       session.setStatus("authed");
-      setLocation(PORTAL_ROUTES.dashboard);
+      setLocation(result.user.mustChangePassword ? PORTAL_ROUTES.forceChangePassword : PORTAL_ROUTES.dashboard);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Invalid authentication code.");
       setLoading(false);

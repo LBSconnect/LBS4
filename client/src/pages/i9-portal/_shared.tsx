@@ -125,10 +125,17 @@ export function PortalGuard({
 
   useEffect(() => {
     if (session.status === "anon") setLocation(PORTAL_ROUTES.login);
-  }, [session.status, setLocation]);
+    // A temporary/admin-issued password must be changed before anything
+    // else in the portal is reachable — matches the server-side gate in
+    // requireI9Auth (server/i9Auth.ts), which would 403 every API call any
+    // of these pages made anyway. PortalForceChangePassword itself doesn't
+    // go through PortalGuard, so there's no loop here.
+    else if (session.status === "authed" && session.user?.mustChangePassword) setLocation(PORTAL_ROUTES.forceChangePassword);
+  }, [session.status, session.user, setLocation]);
 
   if (session.status === "loading") return <PortalLoading />;
   if (session.status === "anon" || !session.user) return null; // redirect effect above is in flight
+  if (session.user.mustChangePassword) return null; // redirect effect above is in flight
   if (roles && !roles.includes(session.user.role)) return <PortalDenied />;
 
   return <>{children(session.user, session)}</>;

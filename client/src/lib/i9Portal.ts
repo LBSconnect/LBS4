@@ -17,6 +17,7 @@ export const PORTAL_ROUTES = {
   register: `${PORTAL_BASE}/register`,
   forgotPassword: `${PORTAL_BASE}/forgot-password`,
   resetPassword: `${PORTAL_BASE}/reset-password`,
+  forceChangePassword: `${PORTAL_BASE}/force-change-password`,
   onboarding: `${PORTAL_BASE}/onboarding`,
   security: `${PORTAL_BASE}/security`,
   dashboard: PORTAL_BASE,
@@ -209,6 +210,12 @@ export interface I9User {
   fullName: string;
   role: I9Role;
   clientCompanyId: string | null;
+  // True for accounts issued with a known temporary password (bootstrap-admin,
+  // or an admin-created user) that haven't set their own password yet. The
+  // server blocks every route except /auth/me, /auth/logout, and
+  // /auth/force-change-password while this is true — see requireI9Auth in
+  // server/i9Auth.ts.
+  mustChangePassword?: boolean;
 }
 
 export interface I9ClientCompany {
@@ -522,6 +529,10 @@ export function isI9Unauthorized(err: unknown): boolean {
 
 export function isI9ServiceUnavailable(err: unknown): boolean {
   return err instanceof I9ApiError && err.status === 503;
+}
+
+export function isI9MustChangePassword(err: unknown): boolean {
+  return err instanceof I9ApiError && err.status === 403 && !!(err.details as { mustChangePassword?: boolean } | undefined)?.mustChangePassword;
 }
 
 // ─── Client-side mirror of shared/i9Schema.ts's SSN-pattern guard ───────────

@@ -480,6 +480,7 @@ export async function runI9Migrations(): Promise<void> {
     ALTER TABLE i9_client_users ADD COLUMN IF NOT EXISTS mfa_last_used_step INTEGER;
     ALTER TABLE i9_client_users ADD COLUMN IF NOT EXISTS password_reset_token_hash TEXT;
     ALTER TABLE i9_client_users ADD COLUMN IF NOT EXISTS password_reset_expires_at TIMESTAMP;
+    ALTER TABLE i9_client_users ADD COLUMN IF NOT EXISTS must_change_password BOOLEAN NOT NULL DEFAULT false;
   `);
 }
 
@@ -705,12 +706,14 @@ export async function getI9ClientUserByResetTokenHash(tokenHash: string): Promis
 }
 
 /** Sets a new password and atomically invalidates the reset token that was
- *  used to authorize it, so the same emailed link can't be replayed. */
+ *  used to authorize it, so the same emailed link can't be replayed. Also
+ *  clears mustChangePassword — any legitimate password change (whether via
+ *  an emailed reset link or the forced first-login change) satisfies it. */
 export async function resetI9ClientUserPassword(userId: string, newPassword: string): Promise<void> {
   const database = getDb();
   await database
     .update(i9ClientUsers)
-    .set({ passwordHash: hashPassword(newPassword), passwordResetTokenHash: null, passwordResetExpiresAt: null } as any)
+    .set({ passwordHash: hashPassword(newPassword), passwordResetTokenHash: null, passwordResetExpiresAt: null, mustChangePassword: false } as any)
     .where(eq(i9ClientUsers.id, userId));
 }
 

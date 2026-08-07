@@ -253,6 +253,12 @@ export const i9ClientUsers = pgTable("i9_client_users", {
   role: varchar("role", { length: 40 }).notNull(), // one of I9_ROLES
   assignedHiringSiteIds: jsonb("assigned_hiring_site_ids").default([]), // for client_limited_user scoping
   isActive: boolean("is_active").notNull().default(true),
+  // Set on admin-issued accounts (bootstrap-admin, or an admin creating
+  // another user) that were handed a known temporary password — every
+  // portal route except the change-password action itself and logout is
+  // blocked (requireI9Auth in server/i9Auth.ts) until this is cleared,
+  // which happens automatically the moment a real password is set.
+  mustChangePassword: boolean("must_change_password").notNull().default(false),
   mfaEnabled: boolean("mfa_enabled").notNull().default(false),
   // Both encrypted at rest via the same AES-256-GCM column encryption used
   // for protected employee data (encryptToColumn/decryptFromColumn in
@@ -283,6 +289,7 @@ export const insertI9ClientUserSchema = z.object({
   fullName: z.string().min(1).max(200),
   role: z.enum(I9_ROLES),
   assignedHiringSiteIds: z.array(z.string()).optional(),
+  mustChangePassword: z.boolean().optional(),
 });
 export type InsertI9ClientUser = z.infer<typeof insertI9ClientUserSchema>;
 export type I9ClientUser = typeof i9ClientUsers.$inferSelect;
