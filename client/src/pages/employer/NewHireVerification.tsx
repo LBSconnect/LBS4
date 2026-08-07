@@ -139,6 +139,17 @@ export default function NewHireVerification() {
   const [formStarted, setFormStarted] = useState(false);
   const [captchaToken, setCaptchaToken] = useState<string | null>(null);
   const [captchaLoaded, setCaptchaLoaded] = useState(false);
+  // Set when the widget script fails to load/render, or never finishes
+  // within a reasonable window (blocked by an ad/privacy blocker, network
+  // issue, or a misconfigured/domain-restricted site key). Without this,
+  // the submit button below stayed hard-disabled forever with no
+  // explanation the moment this third-party script had any trouble —
+  // a fully-completed form could never be submitted. Falling back to
+  // "let them submit" is safe: the server (server/i9Routes.ts) still does
+  // its own captcha verification when RECAPTCHA_SECRET_KEY is configured,
+  // and returns a real, visible error via the existing onError toast if
+  // that fails — so this only removes a silent, unrecoverable dead end.
+  const [captchaError, setCaptchaError] = useState(false);
   const captchaRef = useRef<HTMLDivElement>(null);
   const [formData, setFormData] = useState(emptyForm);
 
@@ -148,7 +159,9 @@ export default function NewHireVerification() {
       if (window.grecaptcha && window.grecaptcha.render) renderCaptcha();
       return;
     }
+    const loadTimeout = window.setTimeout(() => setCaptchaError(true), 8000);
     window.onRecaptchaLoad = () => {
+      window.clearTimeout(loadTimeout);
       setCaptchaLoaded(true);
       renderCaptcha();
     };
@@ -156,8 +169,13 @@ export default function NewHireVerification() {
     script.src = `https://www.google.com/recaptcha/api.js?onload=onRecaptchaLoad&render=explicit`;
     script.async = true;
     script.defer = true;
+    script.onerror = () => {
+      window.clearTimeout(loadTimeout);
+      setCaptchaError(true);
+    };
     document.head.appendChild(script);
     return () => {
+      window.clearTimeout(loadTimeout);
       window.onRecaptchaLoad = () => {};
     };
   }, []);
@@ -170,6 +188,12 @@ export default function NewHireVerification() {
           sitekey: RECAPTCHA_SITE_KEY,
           callback: (token: string) => setCaptchaToken(token),
           "expired-callback": () => setCaptchaToken(null),
+          // Fires when the widget itself can't reach Google (network issue,
+          // or the site key is domain-restricted and this domain isn't on
+          // its allowlist) — a more reliable signal for this than try/catch
+          // below, which only guards the synchronous "already rendered"
+          // case and would otherwise leave the button dead with no feedback.
+          "error-callback": () => setCaptchaError(true),
         });
       } catch (e) {
         // Captcha might already be rendered
@@ -1023,15 +1047,20 @@ export default function NewHireVerification() {
                   </div>
 
                   {RECAPTCHA_SITE_KEY && (
-                    <div className="flex justify-center">
+                    <div className="flex flex-col items-center gap-2">
                       <div ref={captchaRef} data-testid="recaptcha-container" />
+                      {captchaError && (
+                        <p className="text-xs text-muted-foreground text-center" data-testid="text-captcha-fallback">
+                          Verification widget couldn't load — you can still submit; we'll verify your request on our end.
+                        </p>
+                      )}
                     </div>
                   )}
 
                   <Button
                     type="submit"
                     className="w-full bg-gradient-to-r from-[#FF6A00] to-[#FF2D55] text-white rounded-full"
-                    disabled={consultationMutation.isPending || (RECAPTCHA_SITE_KEY ? !captchaToken : false)}
+                    disabled={consultationMutation.isPending || (RECAPTCHA_SITE_KEY ? !captchaToken && !captchaError : false)}
                     data-testid="button-submit-consultation"
                   >
                     {consultationMutation.isPending ? (
