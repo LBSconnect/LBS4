@@ -303,7 +303,11 @@ export default function NewHireVerification() {
       });
       return;
     }
-    if (RECAPTCHA_SITE_KEY && !captchaToken) {
+    // Skipped when the widget itself failed to load/render (captchaError) —
+    // the submit button is enabled in that case too (see its disabled=
+    // below), and the server still verifies the token server-side when one
+    // is present.
+    if (RECAPTCHA_SITE_KEY && !captchaToken && !captchaError) {
       toast({
         title: "Please complete the captcha",
         description: "Verify that you are not a robot.",
