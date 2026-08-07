@@ -60,20 +60,13 @@ test('Card 3 - View all services workflow (full unfiltered list, matching top-na
   await expect(page.locator('[data-testid="card-service-notary-service"]')).toBeVisible();
   await expect(page.locator('[data-testid="card-service-passport-photos"]')).toBeVisible();
 
-  // Unlike the old filter=business link, the unfiltered page also shows the
-  // Testing & Exam Programs section — same content a visitor gets from the
-  // top-nav "Services" link.
-  await expect(page.locator('[data-testid="section-testing-exam-programs"]')).toBeVisible();
-  // This row renders each service's abbreviated `shortTitle` ("Life Insurance
-  // Boot Camp"), not the full `title` ("Texas Life Insurance Exam Boot
-  // Camp") — see the card-testing-row-* markup in Services.tsx. Assert via
-  // the stable data-testid (keyed off the service id) rather than display
-  // text, so this doesn't drift again if the label copy changes.
-  // Note: the service's `id` ("life-insurance-bootcamp") differs from its
-  // `slug` ("life-insurance-boot-camp") — the data-testid is keyed off `id`.
-  const bootcamp = await page.locator('[data-testid="card-testing-row-life-insurance-bootcamp"]').count();
-  console.log('Bootcamp cards shown (should be 1, in the testing row):', bootcamp);
-  expect(bootcamp).toBeGreaterThan(0);
+  // Unlike the old filter=business link, the unfiltered page also shows a
+  // "Testing Center" card in the business grid, linking to the dedicated
+  // Testing Center page — same content a visitor gets from the top-nav
+  // "Services" link.
+  const testingCenterCard = await page.locator('[data-testid="card-service-testing-center"]').count();
+  console.log('Testing Center card shown (should be 1):', testingCenterCard);
+  expect(testingCenterCard).toBeGreaterThan(0);
 
   console.log('Card 3: PASS');
 });

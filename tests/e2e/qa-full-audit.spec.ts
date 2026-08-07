@@ -339,7 +339,7 @@ test.describe("Home page — sections and CTAs", () => {
     await goto(page, "/");
     await page.click('[data-testid="button-view-all-services"]');
     await expect(page).toHaveURL(`${BASE}/services`);
-    await expect(page.locator('[data-testid="section-testing-exam-programs"]')).toBeVisible();
+    await expect(page.locator('[data-testid="card-service-testing-center"]')).toBeVisible();
   });
 
   test("Exam Testing Services secondary section renders", async ({ page }) => {
@@ -415,7 +415,7 @@ test.describe("Home page — sections and CTAs", () => {
 // ═══════════════════════════════════════════════════════════════════════════
 
 test.describe("Services page", () => {
-  test("default view: title = LBS Services, business services + Testing & Exam Programs row visible", async ({
+  test("default view: title = LBS Services, business services + Testing Center card visible", async ({
     page,
   }) => {
     await goto(page, "/services");
@@ -431,10 +431,7 @@ test.describe("Services page", () => {
       ).toBeVisible();
     }
     await expect(
-      page.locator('[data-testid="section-testing-exam-programs"]')
-    ).toBeVisible();
-    await expect(
-      page.locator('[data-testid="card-testing-row-certification"]')
+      page.locator('[data-testid="card-service-testing-center"]')
     ).toBeVisible();
   });
 
@@ -520,32 +517,10 @@ test.describe("Services page", () => {
     await expect(page).toHaveURL(/notary-houston-77090/);
   });
 
-  test("Exam Cram card links to myeasypass.net", async ({ page }) => {
+  test("Testing Center card → /certiport-testing-center-houston", async ({ page }) => {
     await goto(page, "/services");
-    const href = await page
-      .locator('a[href*="myeasypass"]')
-      .first()
-      .getAttribute("href");
-    expect(href).toContain("myeasypass.net");
-  });
-
-  test("Testing & Exam Programs row shows certification, boot camps, and MyEasyPass", async ({ page }) => {
-    await goto(page, "/services");
-    await expect(
-      page.locator('[data-testid="section-testing-exam-programs"]')
-    ).toBeVisible();
-    await expect(
-      page.locator('[data-testid="card-testing-row-certification"]')
-    ).toBeVisible();
-    await expect(
-      page.locator('[data-testid="card-testing-row-life-insurance-bootcamp"]')
-    ).toBeVisible();
-    await expect(
-      page.locator('[data-testid="card-testing-row-property-casualty-bootcamp"]')
-    ).toBeVisible();
-    await expect(
-      page.locator('[data-testid="card-testing-row-myeasypass"]')
-    ).toBeVisible();
+    await page.click('[data-testid="card-service-testing-center"]');
+    await expect(page).toHaveURL(/certiport-testing-center-houston/);
   });
 });
 
