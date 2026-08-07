@@ -17,8 +17,11 @@ import {
 } from "@shared/schema";
 import { getUncachableStripeClient } from "./stripeClient";
 
-// Create pool only if DATABASE_URL is set
-let pool: Pool | null = null;
+// Create pool only if DATABASE_URL is set.
+// Exported so other modules (e.g. i9Auth's session-table bootstrap) can run
+// DDL through this same, already-proven-to-connect pool rather than opening
+// a second independent one that may not carry the same effective privileges.
+export let pool: Pool | null = null;
 let db: ReturnType<typeof drizzle> | null = null;
 
 if (process.env.DATABASE_URL) {

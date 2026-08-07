@@ -6,7 +6,7 @@ import { getUncachableStripeClient } from './stripeClient';
 import { WebhookHandlers, StripeWebhookNotConfiguredError } from './webhookHandlers';
 import { seedStripeProducts } from './seedProducts';
 import { storage } from './storage';
-import { createI9SessionMiddleware } from './i9Auth';
+import { createI9SessionMiddleware, ensureI9SessionTable } from './i9Auth';
 
 const app = express();
 const httpServer = createServer(app);
@@ -170,6 +170,7 @@ app.use((req, res, next) => {
 
 (async () => {
   await storage.runMigrations();
+  await ensureI9SessionTable();
   await initStripe();
 
   await registerRoutes(httpServer, app);

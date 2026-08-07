@@ -16,6 +16,7 @@ import createMemoryStore from "memorystore";
 import type { Request, Response, RequestHandler } from "express";
 import { checkRateLimit, generateCsrfToken, verifyCsrfToken } from "./i9Security";
 import { getI9ClientUserById, logI9Audit } from "./i9Storage";
+import { pool } from "./storage";
 import type { I9Role } from "@shared/i9Schema";
 
 /** Minimal cookie reader — the project doesn't include cookie-parser, and we
@@ -28,6 +29,50 @@ function readCookie(req: Request, name: string): string | undefined {
     if (k === name) return decodeURIComponent(rest.join("="));
   }
   return undefined;
+}
+
+/** Creates the i9_session table (schema exactly matching connect-pg-simple's
+ *  own bundled table.sql) through the app's own already-working DB pool,
+ *  before the server ever accepts a request.
+ *
+ *  Why this exists: connect-pg-simple's own `createTableIfMissing` option
+ *  creates this table lazily, at the moment of the *first* session write —
+ *  which requires the runtime app DB role to hold CREATE TABLE privilege on
+ *  the public schema. A production role that's correctly least-privileged
+ *  (full DML on the already-migrated app tables, no DDL) has that DML but
+ *  not CREATE, so every login/register call's session.save() fails with a
+ *  permission error the moment it tries to auto-create this table — while
+ *  every other query (against tables that already exist) keeps working
+ *  fine, which is exactly the "everything else works, auth is broken"
+ *  symptom this was chasing. Creating the table here instead runs through
+ *  the same pool/role that already successfully creates and writes every
+ *  other app table at startup, so it needs no privilege beyond what's
+ *  already proven to work. Call this once at startup, before the server
+ *  starts listening; createI9SessionMiddleware() below then sets
+ *  createTableIfMissing: false so the store never attempts the privileged
+ *  runtime path at all. */
+export async function ensureI9SessionTable(): Promise<void> {
+  if (!pool) return;
+  try {
+    await pool.query(`
+      CREATE TABLE IF NOT EXISTS "i9_session" (
+        "sid" varchar NOT NULL COLLATE "default",
+        "sess" json NOT NULL,
+        "expire" timestamp(6) NOT NULL,
+        CONSTRAINT "i9_session_pkey" PRIMARY KEY ("sid")
+      );
+    `);
+    await pool.query(`CREATE INDEX IF NOT EXISTS "IDX_i9_session_expire" ON "i9_session" ("expire");`);
+    console.log("[i9-portal] i9_session table ready.");
+  } catch (err: any) {
+    console.error(
+      "[i9-portal] Failed to create/verify the i9_session table — logins and registrations " +
+      "will fail until this is resolved (the DB role needs CREATE TABLE on the public schema, " +
+      "or create the table manually using node_modules/connect-pg-simple/table.sql renamed to " +
+      "i9_session):",
+      err.message
+    );
+  }
 }
 
 const SESSION_SECRET = process.env.SESSION_SECRET || process.env.ADMIN_SECRET;
@@ -59,13 +104,23 @@ export function createI9SessionMiddleware(): RequestHandler {
   }
 
   let store: session.Store | undefined;
-  if (process.env.DATABASE_URL) {
+  if (process.env.DATABASE_URL && pool) {
     try {
       const PgSessionStore = connectPgSimple(session);
       store = new PgSessionStore({
-        conString: process.env.DATABASE_URL,
+        // Reuse the app's single existing pool (server/storage.ts) instead
+        // of letting connect-pg-simple open its own second pool from the
+        // connection string. One pool means: no doubled connection-count
+        // against the DB's connection limit, and this store always runs
+        // with the exact same effective privileges as every other query in
+        // the app — no risk of it landing on a differently-configured
+        // connection than the one that's already proven to work.
+        pool,
         tableName: "i9_session",
-        createTableIfMissing: true,
+        // Table is created up front by ensureI9SessionTable() (via that
+        // same pool, at startup) — see that function's comment for why
+        // relying on this option's own runtime auto-create was the bug.
+        createTableIfMissing: false,
       });
     } catch (err) {
       console.error("[i9-portal] Failed to initialize connect-pg-simple session store, falling back to memory store:", err);
