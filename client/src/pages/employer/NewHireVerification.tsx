@@ -78,6 +78,14 @@ import {
   industriesServed,
   compliancePoints,
   employerFaqs,
+  employerPainPoints,
+  whatLbsHandlesCards,
+  gettingStartedSteps,
+  diyComparisonRows,
+  whyPayHeadlinePoints,
+  postEnrollmentTimeline,
+  securityTrustPoints,
+  employersServedCards,
 } from "@/lib/employerServices";
 import { PORTAL_ROUTES } from "@/lib/i9Portal";
 
@@ -152,6 +160,10 @@ export default function NewHireVerification() {
   const [captchaError, setCaptchaError] = useState(false);
   const captchaRef = useRef<HTMLDivElement>(null);
   const [formData, setFormData] = useState(emptyForm);
+
+  useEffect(() => {
+    trackEvent("employer_verification_page_view");
+  }, []);
 
   useEffect(() => {
     if (!RECAPTCHA_SITE_KEY) return;
@@ -415,64 +427,136 @@ export default function NewHireVerification() {
               <ShieldCheck className="w-4 h-4 text-[#FF2D55]" />
               Employer Services
             </div>
+            <p className="text-xs font-bold uppercase tracking-widest text-white/60">New-Hire Verification for Employers</p>
             <h1 className="text-4xl md:text-5xl font-bold text-white leading-tight" data-testid="text-employer-hero-title">
-              New-Hire Verification Without the Administrative Headache
+              You Hire Them.<br className="hidden sm:block" /> We'll Handle the Verification Workflow.
             </h1>
             <p className="text-lg text-white/80 max-w-3xl mx-auto leading-relaxed">
-              LBS helps Houston employers manage Form I-9 administrative workflows and E-Verify cases
-              accurately, consistently, and on time. From client enrollment and case creation to document
-              examination, case monitoring, and monthly reporting, we help your team maintain an organized
-              onboarding process.
+              Form I-9 support and E-Verify case management for employers who want a simpler way to manage
+              new-hire verification.
             </p>
             <div className="flex flex-wrap items-center justify-center gap-4 pt-2">
-              <a href="#consultation" onClick={() => handleConsultationClick("hero")}>
+              <Link href={PORTAL_ROUTES.register}>
                 <Button
                   size="lg"
                   className="bg-gradient-to-r from-[#FF6A00] to-[#FF2D55] text-white rounded-full"
-                  data-testid="button-hero-schedule-consultation"
+                  data-testid="button-hero-start-onboarding"
+                  onClick={() => trackEvent("employer_enrollment_cta_click", { location: "hero" })}
                 >
-                  Schedule an Employer Consultation
+                  Start Employer Enrollment
                   <ArrowRight className="w-4 h-4 ml-2" />
                 </Button>
-              </a>
-              <a href="#pricing">
+              </Link>
+              <a href="#consultation" onClick={() => { handleConsultationClick("hero"); trackEvent("verification_specialist_click", { location: "hero" }); }}>
                 <Button
                   size="lg"
                   variant="outline"
                   className="border-white/30 text-white bg-white/5 backdrop-blur-sm rounded-full"
-                  data-testid="button-hero-view-plans"
+                  data-testid="button-hero-talk-to-specialist"
                 >
-                  View Plans
+                  Talk to a Verification Specialist
                 </Button>
               </a>
             </div>
-            <div className="flex flex-wrap items-center justify-center gap-4 pt-1">
-              <Link href={PORTAL_ROUTES.register}>
-                <Button
-                  variant="outline"
-                  className="border-white/30 text-white bg-white/5 backdrop-blur-sm rounded-full"
-                  data-testid="button-hero-start-onboarding"
-                  onClick={() => trackEvent("portal_start_onboarding_click", { location: "hero" })}
-                >
-                  Start Employer Onboarding
-                </Button>
-              </Link>
+            <div className="pt-1">
               <Link href={PORTAL_ROUTES.login}>
                 <Button
                   variant="ghost"
-                  className="text-white/80 hover:text-white hover:bg-white/10 rounded-full"
+                  size="sm"
+                  className="text-white/70 hover:text-white hover:bg-white/10 rounded-full"
                   data-testid="button-hero-client-portal-login"
                   onClick={() => trackEvent("portal_login_click", { location: "hero" })}
                 >
                   <ShieldCheck className="w-4 h-4 mr-2" />
-                  Client Portal Login
+                  Employer Login
                 </Button>
               </Link>
             </div>
-            <p className="text-sm text-white/60 max-w-2xl mx-auto pt-2" data-testid="text-hero-trust-line">
-              Serving small businesses, staffing companies, home-health agencies, transportation companies,
-              contractors, and growing employers throughout Greater Houston.
-            </p>
+            <div className="flex flex-wrap items-center justify-center gap-x-6 gap-y-2 pt-3 text-sm text-white/70" data-testid="text-hero-trust-line">
+              <span className="flex items-center gap-1.5"><ShieldCheck className="w-4 h-4 text-[#FF2D55]" /> Secure Information Handling</span>
+              <span className="flex items-center gap-1.5"><FolderCheck className="w-4 h-4 text-[#FF2D55]" /> Organized Verification Records</span>
+              <span className="flex items-center gap-1.5"><Building2 className="w-4 h-4 text-[#FF2D55]" /> Employer-Agent Support</span>
+              <span className="flex items-center gap-1.5"><UserCheck className="w-4 h-4 text-[#FF2D55]" /> Human Assistance</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* ── EMPLOYER PAIN ── */}
+      <section className="py-16 bg-background" data-testid="section-employer-pain">
+        <div className="max-w-5xl mx-auto px-6 text-center space-y-3 mb-10">
+          <h2 className="text-3xl md:text-4xl font-bold">Stop Chasing New-Hire Verification Tasks</h2>
+          <p className="text-muted-foreground max-w-2xl mx-auto">
+            You have employees to onboard and a business to run. LBS helps manage the administrative
+            verification workflow so your team can spend less time processing cases and more time running
+            the business.
+          </p>
+        </div>
+        <div className="max-w-5xl mx-auto px-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+          {employerPainPoints.map((point) => {
+            const Icon = MANAGED_ICONS[point.icon] ?? ClipboardCheck;
+            return (
+              <div key={point.title} className="border border-border/50 bg-card rounded-xl p-5 space-y-2.5" data-testid={`card-pain-${point.title.toLowerCase().replace(/[^a-z0-9]+/g, "-")}`}>
+                <Icon className="w-5 h-5 text-[#FF6A00]" />
+                <h3 className="font-semibold text-sm">{point.title}</h3>
+                <p className="text-xs text-muted-foreground leading-relaxed">{point.copy}</p>
+              </div>
+            );
+          })}
+        </div>
+      </section>
+
+      {/* ── WHAT LBS HANDLES (summary) ── */}
+      <section className="py-16 bg-muted/30" data-testid="section-what-lbs-handles">
+        <div className="max-w-7xl mx-auto px-6">
+          <div className="text-center max-w-2xl mx-auto mb-10 space-y-3">
+            <p className="text-xs font-bold uppercase tracking-widest text-[#BD4F00] dark:text-[#FF8A3D]">What You're Paying For</p>
+            <h2 className="text-3xl md:text-4xl font-bold">What LBS Handles</h2>
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+            {whatLbsHandlesCards.map((card) => {
+              const Icon = MANAGED_ICONS[card.icon] ?? ClipboardCheck;
+              return (
+                <div key={card.title} className="border border-border/50 bg-card rounded-xl p-6 space-y-3 hover-elevate" data-testid={`card-handles-${card.title.toLowerCase().replace(/[^a-z0-9]+/g, "-")}`}>
+                  <div className="w-11 h-11 rounded-xl bg-[#0D1B3D]/10 dark:bg-[#0077FF]/20 flex items-center justify-center text-[#0D1B3D] dark:text-[#0077FF]">
+                    <Icon className="w-5 h-5" />
+                  </div>
+                  <h3 className="font-semibold">{card.title}</h3>
+                  <p className="text-sm text-muted-foreground leading-relaxed">{card.copy}</p>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      </section>
+
+      {/* ── GETTING STARTED (3-step) ── */}
+      <section className="py-16 bg-background" data-testid="section-getting-started">
+        <div className="max-w-5xl mx-auto px-6">
+          <div className="text-center max-w-2xl mx-auto mb-12 space-y-3">
+            <h2 className="text-3xl md:text-4xl font-bold">Getting Started Is Simple</h2>
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-8">
+            {gettingStartedSteps.map((s) => (
+              <div key={s.step} className="text-center space-y-3" data-testid={`step-getting-started-${s.step}`}>
+                <div className="text-4xl font-extrabold text-[#BD4F00] dark:text-[#FF8A3D]" aria-hidden="true">{s.step}</div>
+                <h3 className="font-semibold text-lg">{s.title}</h3>
+                <p className="text-sm text-muted-foreground leading-relaxed">{s.copy}</p>
+              </div>
+            ))}
+          </div>
+          <div className="text-center pt-10">
+            <Link href={PORTAL_ROUTES.register}>
+              <Button
+                size="lg"
+                className="bg-gradient-to-r from-[#FF6A00] to-[#FF2D55] text-white rounded-full"
+                data-testid="button-getting-started-start-enrollment"
+                onClick={() => trackEvent("employer_enrollment_cta_click", { location: "getting_started" })}
+              >
+                Start Employer Enrollment
+                <ArrowRight className="w-4 h-4 ml-2" />
+              </Button>
+            </Link>
           </div>
         </div>
       </section>
@@ -618,6 +702,80 @@ export default function NewHireVerification() {
           <p className="text-sm text-muted-foreground text-center max-w-3xl mx-auto mt-10" data-testid="text-monthly-plans-note">
             {monthlyPlansNote}
           </p>
+          <div className="text-center mt-8 border-t border-border/40 pt-8 max-w-lg mx-auto">
+            <p className="font-medium mb-3">Hiring 25+ employees per month?</p>
+            <a href="#consultation" onClick={() => { handleConsultationClick("volume_pricing"); trackEvent("volume_pricing_click", { location: "pricing" }); }}>
+              <Button variant="outline" className="rounded-full" data-testid="button-request-volume-pricing">
+                Request Volume Pricing
+              </Button>
+            </a>
+          </div>
+        </div>
+      </section>
+
+      {/* ── E-VERIFY IS FREE. YOUR TIME ISN'T. ── */}
+      <section className="py-16 bg-[#0D1B3D]" data-testid="section-why-pay-lbs">
+        <div className="max-w-4xl mx-auto px-6 text-center space-y-5">
+          <h2 className="text-3xl md:text-4xl font-bold text-white">E-Verify Is Free.<br className="hidden sm:block" /> Your Time Isn't.</h2>
+          <p className="text-white/80 max-w-2xl mx-auto leading-relaxed">
+            Employers can participate in E-Verify directly without paying LBS. LBS charges for the professional
+            administrative services surrounding the verification workflow — the tasks below are what businesses
+            otherwise manage themselves:
+          </p>
+          <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 max-w-2xl mx-auto pt-2 text-left">
+            {whyPayHeadlinePoints.map((point) => (
+              <div key={point} className="flex items-start gap-2 text-sm text-white/90 bg-white/5 rounded-md px-3 py-2.5" data-testid={`chip-why-pay-${point.toLowerCase().replace(/[^a-z0-9]+/g, "-")}`}>
+                <CheckCircle2 className="w-4 h-4 text-[#FF6A00] mt-0.5 shrink-0" />
+                <span>{point}</span>
+              </div>
+            ))}
+          </div>
+          <p className="text-white font-medium pt-2">LBS handles much of the administrative workflow for you.</p>
+        </div>
+      </section>
+
+      {/* ── DIY VS. LBS COMPARISON ── */}
+      <section className="py-16 bg-background" data-testid="section-diy-comparison">
+        <div className="max-w-4xl mx-auto px-6">
+          <div className="text-center max-w-2xl mx-auto mb-10 space-y-3">
+            <h2 className="text-3xl md:text-4xl font-bold">Handle It Yourself — Or Let LBS Manage the Workflow</h2>
+          </div>
+          <div className="overflow-x-auto rounded-xl border border-border/50">
+            <table className="w-full text-sm" data-testid="table-diy-comparison">
+              <thead>
+                <tr className="bg-muted/50 text-left">
+                  <th className="px-4 py-3 font-semibold">Task</th>
+                  <th className="px-4 py-3 font-semibold">Do It Yourself</th>
+                  <th className="px-4 py-3 font-semibold">LBS Employer-Agent Service</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-border/50 bg-card">
+                {diyComparisonRows.map((row) => (
+                  <tr key={row.task} data-testid={`row-diy-${row.task.toLowerCase().replace(/[^a-z0-9]+/g, "-")}`}>
+                    <td className="px-4 py-3 font-medium">{row.task}</td>
+                    <td className="px-4 py-3 text-muted-foreground">{row.diy}</td>
+                    <td className="px-4 py-3 text-[#0D1B3D] dark:text-white font-medium">{row.lbs}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+          <p className="text-xs text-muted-foreground text-center mt-4 max-w-2xl mx-auto">
+            LBS does not take on the employer's legal responsibility for its employment decisions or Form I-9/E-Verify obligations.
+          </p>
+          <div className="text-center pt-6">
+            <Link href={PORTAL_ROUTES.register}>
+              <Button
+                size="lg"
+                className="bg-gradient-to-r from-[#FF6A00] to-[#FF2D55] text-white rounded-full"
+                data-testid="button-diy-comparison-start-enrollment"
+                onClick={() => trackEvent("employer_enrollment_cta_click", { location: "diy_comparison" })}
+              >
+                Start Employer Enrollment
+                <ArrowRight className="w-4 h-4 ml-2" />
+              </Button>
+            </Link>
+          </div>
         </div>
       </section>
 
@@ -656,8 +814,8 @@ export default function NewHireVerification() {
       <section className="py-16 bg-background" data-testid="section-how-it-works">
         <div className="max-w-7xl mx-auto px-6">
           <div className="text-center max-w-2xl mx-auto mb-10 space-y-3">
-            <p className="text-xs font-bold uppercase tracking-widest text-[#BD4F00] dark:text-[#FF8A3D]">Getting Started</p>
-            <h2 className="text-3xl md:text-4xl font-bold">How It Works</h2>
+            <p className="text-xs font-bold uppercase tracking-widest text-[#BD4F00] dark:text-[#FF8A3D]">The Details</p>
+            <h2 className="text-3xl md:text-4xl font-bold">Your Onboarding Workflow, Step by Step</h2>
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
             {howItWorksSteps.map((s) => (
@@ -670,6 +828,79 @@ export default function NewHireVerification() {
               </div>
             ))}
           </div>
+        </div>
+      </section>
+
+      {/* ── BUILT FOR EMPLOYERS LIKE YOU ── */}
+      <section className="py-16 bg-background" data-testid="section-employers-served">
+        <div className="max-w-7xl mx-auto px-6">
+          <div className="text-center max-w-2xl mx-auto mb-10 space-y-3">
+            <p className="text-xs font-bold uppercase tracking-widest text-[#BD4F00] dark:text-[#FF8A3D]">Who We Serve</p>
+            <h2 className="text-3xl md:text-4xl font-bold">Built for Employers Like You</h2>
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+            {employersServedCards.map((card) => {
+              const Icon = MANAGED_ICONS[card.icon] ?? Building2;
+              return (
+                <div key={card.title} className="border border-border/50 bg-card rounded-xl p-6 space-y-3" data-testid={`card-served-${card.title.toLowerCase().replace(/[^a-z0-9]+/g, "-")}`}>
+                  <div className="w-11 h-11 rounded-xl bg-[#0D1B3D]/10 dark:bg-[#0077FF]/20 flex items-center justify-center text-[#0D1B3D] dark:text-[#0077FF]">
+                    <Icon className="w-5 h-5" />
+                  </div>
+                  <h3 className="font-semibold">{card.title}</h3>
+                  <p className="text-sm text-muted-foreground leading-relaxed">{card.copy}</p>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      </section>
+
+      {/* ── SECURITY AND TRUST ── */}
+      <section className="py-16 bg-[#0D1B3D]" data-testid="section-security-trust">
+        <div className="max-w-5xl mx-auto px-6">
+          <div className="text-center max-w-2xl mx-auto mb-10 space-y-3">
+            <p className="text-xs font-bold uppercase tracking-widest text-[#FF2D55]">Security &amp; Trust</p>
+            <h2 className="text-3xl md:text-4xl font-bold text-white">Sensitive Employee Information Deserves Serious Protection</h2>
+            <p className="text-white/70">
+              Employment verification may involve sensitive personal information. Here's how LBS approaches it.
+            </p>
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+            {securityTrustPoints.map((point) => {
+              const Icon = MANAGED_ICONS[point.icon] ?? ShieldCheck;
+              return (
+                <div key={point.title} className="bg-white/5 border border-white/10 rounded-xl p-5 space-y-2.5" data-testid={`card-security-${point.title.toLowerCase().replace(/[^a-z0-9]+/g, "-")}`}>
+                  <Icon className="w-5 h-5 text-[#FF2D55]" />
+                  <h3 className="font-semibold text-white text-sm">{point.title}</h3>
+                  <p className="text-xs text-white/70 leading-relaxed">{point.copy}</p>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      </section>
+
+      {/* ── WHAT HAPPENS AFTER I ENROLL ── */}
+      <section className="py-16 bg-background" data-testid="section-post-enrollment-timeline">
+        <div className="max-w-5xl mx-auto px-6">
+          <div className="text-center max-w-2xl mx-auto mb-10 space-y-3">
+            <h2 className="text-3xl md:text-4xl font-bold">What Happens After I Enroll?</h2>
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+            {postEnrollmentTimeline.map((t, i) => (
+              <div key={t.label} className="relative border border-border/50 bg-card rounded-xl p-5 space-y-2" data-testid={`step-timeline-${t.label.toLowerCase()}`}>
+                <p className="text-xs font-bold uppercase tracking-widest text-[#BD4F00] dark:text-[#FF8A3D]">{t.label}</p>
+                <p className="text-sm text-muted-foreground leading-relaxed">{t.copy}</p>
+                {i < postEnrollmentTimeline.length - 1 && (
+                  <ArrowRight className="hidden lg:block absolute -right-7 top-6 w-4 h-4 text-muted-foreground/40" aria-hidden="true" />
+                )}
+              </div>
+            ))}
+          </div>
+          <p className="text-xs text-muted-foreground text-center mt-6 max-w-xl mx-auto">
+            Applicable federal E-Verify enrollment and MOU steps are completed as part of activation. LBS does not
+            control federal system timing.
+          </p>
         </div>
       </section>
 
@@ -1130,38 +1361,37 @@ export default function NewHireVerification() {
         </div>
       </section>
 
-      {/* ── CTA ── */}
+      {/* ── FINAL CTA ── */}
       <section className="py-14 bg-[#0D1B3D]" data-testid="section-employer-cta">
         <div className="max-w-3xl mx-auto px-6 text-center space-y-5">
-          <h2 className="text-2xl md:text-3xl font-bold text-white">Make New-Hire Administration Easier</h2>
+          <h2 className="text-2xl md:text-3xl font-bold text-white">Ready to Take Verification Administration Off Your Plate?</h2>
           <p className="text-white/70">
-            Give your managers a consistent process for Form I-9 administration, E-Verify cases, document
-            examination, case tracking, and reporting.
+            Enroll your company with LBS and create a simpler workflow for managing new-hire verification.
           </p>
           <div className="flex flex-wrap items-center justify-center gap-4">
-            <a href="#consultation" onClick={() => handleConsultationClick("bottom_cta")}>
-              <Button size="lg" className="bg-gradient-to-r from-[#FF6A00] to-[#FF2D55] text-white rounded-full" data-testid="button-cta-schedule-consultation">
-                Schedule an Employer Consultation
+            <Link href={PORTAL_ROUTES.register}>
+              <Button
+                size="lg"
+                className="bg-gradient-to-r from-[#FF6A00] to-[#FF2D55] text-white rounded-full"
+                data-testid="button-cta-start-onboarding"
+                onClick={() => trackEvent("employer_enrollment_cta_click", { location: "closing_cta" })}
+              >
+                Start Employer Enrollment
               </Button>
-            </a>
-            <a href="tel:2818365357" onClick={handlePhoneClick}>
-              <Button size="lg" variant="outline" className="border-white/30 text-white bg-white/5 backdrop-blur-sm rounded-full" data-testid="button-cta-call">
-                <Phone className="w-4 h-4 mr-2" />
-                Call 281-836-5357
+            </Link>
+            <a href="#consultation" onClick={() => { handleConsultationClick("bottom_cta"); trackEvent("verification_specialist_click", { location: "closing_cta" }); }}>
+              <Button size="lg" variant="outline" className="border-white/30 text-white bg-white/5 backdrop-blur-sm rounded-full" data-testid="button-cta-talk-to-specialist">
+                Talk to a Verification Specialist
               </Button>
             </a>
           </div>
           <div className="flex flex-wrap items-center justify-center gap-4 pt-1">
-            <Link href={PORTAL_ROUTES.register}>
-              <Button
-                variant="outline"
-                className="border-white/30 text-white bg-white/5 backdrop-blur-sm rounded-full"
-                data-testid="button-cta-start-onboarding"
-                onClick={() => trackEvent("portal_start_onboarding_click", { location: "closing_cta" })}
-              >
-                Start Employer Onboarding
+            <a href="tel:2818365357" onClick={handlePhoneClick}>
+              <Button variant="ghost" className="text-white/80 hover:text-white hover:bg-white/10 rounded-full" data-testid="button-cta-call">
+                <Phone className="w-4 h-4 mr-2" />
+                Call 281-836-5357
               </Button>
-            </Link>
+            </a>
             <Link href={PORTAL_ROUTES.login}>
               <Button
                 variant="ghost"
@@ -1170,23 +1400,49 @@ export default function NewHireVerification() {
                 onClick={() => trackEvent("portal_login_click", { location: "closing_cta" })}
               >
                 <ShieldCheck className="w-4 h-4 mr-2" />
-                Client Portal Login
+                Employer Login
               </Button>
             </Link>
           </div>
         </div>
       </section>
 
-      {/* ── DISCLAIMER ── */}
+      {/* ── LEGAL / PROGRAM DISCLOSURES ── */}
       <section className="py-8 bg-background border-t border-border/50" data-testid="section-employer-disclaimer">
-        <div className="max-w-4xl mx-auto px-6">
+        <div className="max-w-4xl mx-auto px-6 space-y-4">
           <p className="text-xs text-muted-foreground leading-relaxed text-center" data-testid="text-employer-disclaimer">
-            {EVERIFY_FOOTER_DISCLAIMER}
+            {EVERIFY_FOOTER_DISCLAIMER} LBS fees are charges for LBS's administrative, employer-agent, case-management,
+            Form I-9 support, documentation, and related professional services — not government E-Verify access fees.
+            The employer retains responsibility for its own employment decisions and applicable Form I-9/E-Verify
+            obligations.
           </p>
+          <div className="flex flex-wrap items-center justify-center gap-x-5 gap-y-1 text-xs">
+            <Link href="/privacy-policy" className="text-[#0D1B3D] dark:text-[#0077FF] underline underline-offset-2 hover:opacity-80">Privacy Policy</Link>
+            <Link href="/terms-of-use" className="text-[#0D1B3D] dark:text-[#0077FF] underline underline-offset-2 hover:opacity-80">Terms</Link>
+            <Link href={EMPLOYER_AGREEMENT_ROUTE} className="text-[#0D1B3D] dark:text-[#0077FF] underline underline-offset-2 hover:opacity-80">Services Agreement</Link>
+          </div>
         </div>
       </section>
 
       <Footer />
+
+      {/* ── STICKY MOBILE CTA ──
+          Fixed to the bottom on small screens only; sits above the page's own
+          content (no cookie banner/legal chrome to worry about — this site has
+          none) and stays clear of the mobile nav, which is a top header here,
+          not a bottom bar. */}
+      <div className="sm:hidden fixed bottom-0 inset-x-0 z-40 bg-[#0D1B3D]/95 backdrop-blur-sm border-t border-white/10 px-4 py-3" data-testid="bar-sticky-mobile-cta">
+        <Link href={PORTAL_ROUTES.register}>
+          <Button
+            className="w-full bg-gradient-to-r from-[#FF6A00] to-[#FF2D55] text-white rounded-full"
+            data-testid="button-sticky-start-enrollment"
+            onClick={() => trackEvent("employer_enrollment_cta_click", { location: "sticky_mobile" })}
+          >
+            Start Employer Enrollment
+          </Button>
+        </Link>
+      </div>
+      <div className="sm:hidden h-16" aria-hidden="true" />
     </div>
   );
 }

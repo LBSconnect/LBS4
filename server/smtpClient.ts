@@ -67,7 +67,7 @@ export async function sendEmail(options: {
   }>;
 }): Promise<boolean> {
   const fromAddress = process.env.MAIL_FROM_ADDRESS || process.env.SMTP_USER;
-  const fromName = process.env.SMTP_FROM_NAME || 'LBS Test & Exam Center';
+  const fromName = process.env.SMTP_FROM_NAME || 'LBS Business Services Center';
 
   // ── Try Microsoft Graph API ──────────────────────────────────────────────
   const graphCli = getGraphClient();

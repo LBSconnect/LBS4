@@ -34,6 +34,7 @@ import {
   FEDERAL_CONTRACTOR_OPTIONS,
   INTAKE_PLAN_OPTIONS,
   ADD_ON_OPTIONS,
+  EVERIFY_FOOTER_DISCLAIMER,
 } from "@/lib/employerServices";
 
 const emptyForm = {
@@ -378,6 +379,14 @@ export default function ClientIntake() {
               )}
             </CardContent>
           </Card>
+        </div>
+      </section>
+
+      <section className="py-8 bg-background border-t border-border/50" data-testid="section-employer-disclaimer">
+        <div className="max-w-4xl mx-auto px-6">
+          <p className="text-xs text-muted-foreground leading-relaxed text-center" data-testid="text-employer-disclaimer">
+            {EVERIFY_FOOTER_DISCLAIMER}
+          </p>
         </div>
       </section>
 

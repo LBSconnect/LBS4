@@ -131,6 +131,13 @@ export default function PortalRegister() {
           Do not enter employee Social Security numbers, document numbers, or other employee-specific information
           anywhere on this page.
         </p>
+        <p className="text-center text-[11px] text-muted-foreground border-t border-border/40 pt-3" data-testid="text-employer-disclaimer">
+          Linton Business Solutions LLC is an independent private company and is not a government agency. E-Verify
+          is a federal employment-verification program administered by the U.S. Department of Homeland Security in
+          partnership with the Social Security Administration. LBS charges for its professional administrative,
+          employer-agent, Form I-9 support, case-management, documentation, and related services, not for access
+          to E-Verify.
+        </p>
       </div>
     </div>
   );

@@ -80,7 +80,7 @@ export default function CookiePolicy() {
           <h2 className="text-2xl font-bold text-[#0D1B3D] dark:text-white">6. Your Choices</h2>
           <p className="text-muted-foreground leading-relaxed">You may manage cookies through:</p>
           <ul className="list-disc pl-6 text-muted-foreground space-y-2">
-            <li>a cookie preference tool, where provided;</li>
+            <li>the "Cookie Preferences" control in the footer of lbs4.com, which lets you turn Google Analytics off for this site;</li>
             <li>your browser settings;</li>
             <li>device privacy settings;</li>
             <li>opt-out tools provided by relevant analytics providers.</li>
