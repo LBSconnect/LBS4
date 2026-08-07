@@ -317,6 +317,111 @@ export const ADD_ON_OPTIONS = [
   "Manager training",
 ] as const;
 
+// ── Sales-funnel content (landing page) ──────────────────────────────────
+// Added for the conversion-focused funnel rebuild: pain points, the
+// "E-Verify is free, your time isn't" transparency section, the DIY-vs-LBS
+// comparison table, and the post-enrollment timeline. Kept as data here,
+// consistent with the rest of this file, so copy stays centralized and easy
+// to revise without touching the page component.
+
+export interface PainPoint {
+  title: string;
+  copy: string;
+  icon: string;
+}
+
+export const employerPainPoints: PainPoint[] = [
+  { title: "Employer Enrollment", icon: "ClipboardCheck", copy: "Getting a company set up correctly as an E-Verify participant takes time your team doesn't always have." },
+  { title: "Creating E-Verify Cases", icon: "FilePlus2", copy: "Cases have to be created accurately and on time for every eligible new hire, every month." },
+  { title: "Tracking Case Status", icon: "CalendarClock", copy: "Cases requiring additional action need to be caught and followed up on before deadlines pass." },
+  { title: "Verification Documentation", icon: "FolderCheck", copy: "Keeping organized records for your Form I-9 and onboarding files takes ongoing administrative attention." },
+];
+
+export interface WhatLbsHandlesCard {
+  title: string;
+  copy: string;
+  icon: string;
+}
+
+export const whatLbsHandlesCards: WhatLbsHandlesCard[] = [
+  { title: "Employer Enrollment", icon: "ClipboardCheck", copy: "LBS helps guide your business through the employer-agent enrollment process and required setup." },
+  { title: "New-Hire Case Processing", icon: "FilePlus2", copy: "Submit eligible new-hire information through the LBS workflow and LBS handles the applicable E-Verify case-processing steps." },
+  { title: "Case Tracking", icon: "CalendarClock", copy: "LBS monitors case status, identifies cases requiring additional action, and keeps the employer informed." },
+  { title: "Verification Records", icon: "FolderCheck", copy: "Receive organized case documentation and verification records for your employment files." },
+];
+
+export interface GettingStartedStep {
+  step: string;
+  title: string;
+  copy: string;
+}
+
+export const gettingStartedSteps: GettingStartedStep[] = [
+  { step: "01", title: "Enroll Your Company", copy: "Complete the employer enrollment process and applicable service agreement." },
+  { step: "02", title: "Submit Your New Hires", copy: "Submit eligible new-hire verification requests securely through the LBS employer workflow." },
+  { step: "03", title: "LBS Handles the Case", copy: "LBS processes the applicable E-Verify case, tracks the status, and provides verification documentation." },
+];
+
+// What a business handles on its own today, vs. what LBS's administrative
+// workflow takes over. The final row is deliberately the same on both
+// sides — the employer's legal responsibility never transfers to LBS, and
+// the comparison table should say so plainly rather than imply otherwise.
+export interface DiyComparisonRow {
+  task: string;
+  diy: string;
+  lbs: string;
+}
+
+export const diyComparisonRows: DiyComparisonRow[] = [
+  { task: "Employer enrollment administration", diy: "Your staff", lbs: "LBS assists" },
+  { task: "Case creation", diy: "Your staff", lbs: "LBS" },
+  { task: "Case tracking", diy: "Your staff", lbs: "LBS" },
+  { task: "Workflow support when action is required", diy: "Your staff", lbs: "LBS provides case support/instructions" },
+  { task: "Verification documentation", diy: "Your staff organizes it", lbs: "Organized case documentation" },
+  { task: "Staff administrative time", diy: "Higher", lbs: "Reduced" },
+  { task: "Employer retains legal responsibility", diy: "Yes", lbs: "Yes" },
+];
+
+export const whyPayHeadlinePoints: string[] = [
+  "Employer enrollment administration",
+  "Staff familiarity with E-Verify procedures",
+  "Case creation",
+  "Case deadlines",
+  "Case-status tracking",
+  "Mismatch workflow",
+  "Employee notices",
+  "Verification records",
+  "Ongoing administrative processing",
+];
+
+export interface TimelineStep {
+  label: string;
+  copy: string;
+}
+
+export const postEnrollmentTimeline: TimelineStep[] = [
+  { label: "Today", copy: "Submit your employer enrollment." },
+  { label: "Next", copy: "LBS reviews the enrollment and begins the applicable employer-agent setup process." },
+  { label: "Activation", copy: "Complete applicable E-Verify enrollment and MOU requirements." },
+  { label: "Ready", copy: "Begin submitting eligible new-hire verification requests through LBS." },
+];
+
+export const employersServedCards: { title: string; copy: string; icon: string }[] = [
+  { title: "Staffing Agencies", icon: "ClipboardCheck", copy: "Support frequent new-hire processing without adding another administrative burden to your internal staff." },
+  { title: "Home-Health Agencies", icon: "UserCheck", copy: "Keep caregiver onboarding moving while your team focuses on clients and operations." },
+  { title: "Trucking & Transportation Companies", icon: "Car", copy: "Simplify recurring verification tasks for drivers and operational employees." },
+  { title: "Contractors & Service Companies", icon: "FileCheck2", copy: "Maintain an organized new-hire verification process as your workforce grows." },
+  { title: "Small Businesses", icon: "Building2", copy: "Get professional administrative support without maintaining a dedicated HR verification team." },
+  { title: "Multi-Location Employers", icon: "FolderCheck", copy: "Centralize verification requests through one structured workflow." },
+];
+
+export const securityTrustPoints: { title: string; copy: string; icon: string }[] = [
+  { title: "Secure Submission", icon: "ShieldCheck", copy: "Sensitive verification information should be submitted through the appropriate secure LBS workflow rather than ordinary unsecured communications whenever supported." },
+  { title: "Controlled Access", icon: "FolderCheck", copy: "Access to verification information is limited according to business and operational requirements." },
+  { title: "Confidential Handling", icon: "FileCheck2", copy: "Verification information is used for providing contracted services and legitimate operational/legal requirements." },
+  { title: "Human Support", icon: "UserCheck", copy: "Employers have access to real support when case questions arise." },
+];
+
 export const onboardingChecklist: string[] = [
   "Legal business name",
   "DBA (if applicable)",
