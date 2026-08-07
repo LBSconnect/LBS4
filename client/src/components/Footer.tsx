@@ -75,13 +75,23 @@ export default function Footer() {
                 Time Keeper
               </a>
               {/* Same sign-in page for client and LBS-staff/admin accounts —
-                  role is determined server-side after auth, not by URL. */}
+                  role is determined server-side after auth, and the nav each
+                  role sees post-login is already gated accordingly (Client
+                  Companies / Admin Tools only render for internal roles —
+                  see _shared.tsx's internalOnly items). The label here is
+                  deliberately client-only framing, not "& Admin": this is a
+                  public marketing footer, its audience is overwhelmingly
+                  prospective/existing employer clients, and advertising an
+                  "Admin" destination here reads as if there's a second,
+                  separate dashboard for LBS staff to discover from the public
+                  site — there isn't, and there's no reason for LBS staff to
+                  need this footer link to find their own login. */}
               <Link href={PORTAL_ROUTES.login}>
                 <span
                   className="text-sm text-white/70 cursor-pointer transition-colors hover:text-white"
                   data-testid="link-footer-portal-login"
                 >
-                  Client & Admin Portal Login
+                  Employer Portal Login
                 </span>
               </Link>
             </nav>
