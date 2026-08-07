@@ -2,9 +2,8 @@ import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import SEO from "@/components/SEO";
 import CompactServiceCard from "@/components/CompactServiceCard";
-import { services, getServiceBySlug } from "@/lib/services";
-import { Shield, ArrowRight, ExternalLink } from "lucide-react";
-import { Link } from "wouter";
+import { services } from "@/lib/services";
+import { Shield, ArrowRight } from "lucide-react";
 import websiteDesignImg from "@assets/service-website-design.jpg";
 
 function getNextSaturday(): string {
@@ -21,12 +20,6 @@ function getUrlFilter(): string | null {
   return new URLSearchParams(window.location.search).get("filter");
 }
 
-const testingAndExamRow = [
-  { service: getServiceBySlug("certification-exam-testing"), href: "/certiport-testing-center-houston" },
-  { service: getServiceBySlug("life-insurance-boot-camp"), href: "/services/life-insurance-boot-camp" },
-  { service: getServiceBySlug("property-casualty-boot-camp"), href: "/services/property-casualty-boot-camp" },
-];
-
 export default function Services() {
   const nextSat = getNextSaturday();
   const filter = getUrlFilter();
@@ -37,7 +30,6 @@ export default function Services() {
     ? services.filter((s) => s.category === "testing")
     : services.filter((s) => s.category === "business");
 
-  const showTestingBlock = !filter;
   const showWebsiteDesignCard = filter !== "bootcamp" && filter !== "testing";
 
   const pageTitle =
@@ -84,80 +76,6 @@ export default function Services() {
           </p>
         </div>
       </section>
-
-      {showTestingBlock && (
-      <section className="py-12 bg-muted/30" data-testid="section-testing-exam-programs">
-        <div className="max-w-7xl mx-auto px-6">
-          <div className="text-center max-w-2xl mx-auto mb-8 space-y-3">
-            <h2 className="text-3xl font-bold">Testing &amp; Exam Programs</h2>
-            <p className="text-muted-foreground">
-              Authorized exam testing, insurance license Boot Camps, and independent exam prep.
-            </p>
-          </div>
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-            {testingAndExamRow.map(({ service, href }) => service && (
-              <Link key={service.id} href={href}>
-                <div
-                  className="group border border-border/50 bg-card rounded-xl overflow-hidden hover-elevate cursor-pointer h-full"
-                  data-testid={`card-testing-row-${service.id}`}
-                >
-                  <div className="relative aspect-[4/3] overflow-hidden rounded-t-xl">
-                    {service.image && (
-                      <img
-                        src={service.image}
-                        alt={service.title}
-                        className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-                        loading="lazy"
-                        decoding="async"
-                      />
-                    )}
-                    {service.price && (
-                      <div className="absolute bottom-2 left-2 bg-white/95 dark:bg-card/95 backdrop-blur-sm rounded-md px-2 py-1 shadow-sm">
-                        <span className="text-sm font-bold text-[#0D1B3D] dark:text-white">{service.price}</span>
-                      </div>
-                    )}
-                  </div>
-                  <div className="p-3 space-y-1">
-                    <div className="flex items-start justify-between gap-1">
-                      <h3 className="text-sm font-semibold leading-tight">{service.shortTitle}</h3>
-                      <ArrowRight className="w-3.5 h-3.5 text-muted-foreground shrink-0 mt-0.5 transition-transform group-hover:translate-x-0.5" />
-                    </div>
-                    <p className="text-xs text-muted-foreground leading-snug line-clamp-2">
-                      {service.description}
-                    </p>
-                  </div>
-                </div>
-              </Link>
-            ))}
-            <a
-              href="https://www.myeasypass.net"
-              target="_blank"
-              rel="noopener noreferrer"
-              data-testid="card-testing-row-myeasypass"
-            >
-              <div className="group border border-border/50 bg-card rounded-xl overflow-hidden hover-elevate cursor-pointer h-full">
-                <div className="relative aspect-[4/3] overflow-hidden rounded-t-xl bg-white border-b border-border/50">
-                  <img
-                    src="/images/myeasypass-logo.png"
-                    alt="MyEasyPass.net Exam Cram"
-                    className="w-full h-full object-contain p-6"
-                    loading="lazy"
-                    decoding="async"
-                  />
-                  <ExternalLink className="absolute top-2 right-2 w-4 h-4 text-muted-foreground" />
-                </div>
-                <div className="p-3 space-y-1">
-                  <h3 className="text-sm font-semibold leading-tight">MyEasyPass.net Exam Cram</h3>
-                  <p className="text-xs text-muted-foreground leading-snug line-clamp-2">
-                    Online practice tests for Texas licensing exams.
-                  </p>
-                </div>
-              </div>
-            </a>
-          </div>
-        </div>
-      </section>
-      )}
 
       <section className="py-12 bg-background" data-testid="section-services-list">
         <div className="max-w-7xl mx-auto px-6">
