@@ -1,9 +1,13 @@
+import { useState } from "react";
 import { Link } from "wouter";
 import { Phone, Mail, MapPin, Clock } from "lucide-react";
 import logoImg from "@assets/lbs-logo-optimized.png";
 import { PORTAL_ROUTES } from "@/lib/i9Portal";
+import { EMPLOYER_AGREEMENT_ROUTE } from "@/lib/employerServices";
+import CookiePreferences from "@/components/CookiePreferences";
 
 export default function Footer() {
+  const [cookiePrefsOpen, setCookiePrefsOpen] = useState(false);
   const serviceLinks = [
     { href: "/notary-houston-77090", label: "Notary Service" },
     { href: "/passport-photos-houston-77090", label: "Passport Photos" },
@@ -156,13 +160,14 @@ export default function Footer() {
             {[
               { href: "/privacy-policy", label: "Privacy Policy" },
               { href: "/terms-of-use", label: "Terms of Use" },
+              { href: "/booking-cancellation-policy", label: "Refund & Cancellation Policy" },
+              { href: "/accessibility-statement", label: "Accessibility" },
               { href: "/cookie-policy", label: "Cookie Policy" },
+              { href: EMPLOYER_AGREEMENT_ROUTE, label: "Employer Services Agreement" },
               { href: "/notice-at-collection", label: "Notice at Collection" },
               { href: "/privacy-request", label: "Privacy Request" },
-              { href: "/accessibility-statement", label: "Accessibility" },
               { href: "/copyright-dmca-policy", label: "Copyright & DMCA" },
               { href: "/electronic-communications-terms", label: "Electronic Communications" },
-              { href: "/booking-cancellation-policy", label: "Booking & Cancellation" },
               { href: "/candidate-rules-surveillance-notice", label: "Candidate Rules" },
               { href: "/document-handling-notice", label: "Document Handling" },
             ].map((link, i, arr) => (
@@ -175,12 +180,21 @@ export default function Footer() {
                     {link.label}
                   </span>
                 </Link>
-                {i < arr.length - 1 && <span className="text-white/30">|</span>}
+                <span className="text-white/30">|</span>
               </span>
             ))}
+            <button
+              type="button"
+              onClick={() => setCookiePrefsOpen(true)}
+              className="cursor-pointer hover:text-white transition-colors"
+              data-testid="button-footer-cookie-preferences"
+            >
+              Cookie Preferences
+            </button>
           </div>
         </div>
       </div>
+      <CookiePreferences open={cookiePrefsOpen} onOpenChange={setCookiePrefsOpen} />
     </footer>
   );
 }

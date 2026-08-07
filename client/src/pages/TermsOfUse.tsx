@@ -49,6 +49,12 @@ export default function TermsOfUse() {
           <p className="text-muted-foreground leading-relaxed">
             When sponsor rules conflict with these Terms, sponsor rules control for the examination.
           </p>
+          <p className="text-muted-foreground leading-relaxed">
+            Pearson VUE, Certiport, PMI, and other third-party names and trademarks referenced on this site are the
+            property of their respective owners. Their use here identifies the examinations administered at LBS and
+            does not imply any sponsorship of, or affiliation with, LBS beyond LBS's role as an authorized testing
+            location.
+          </p>
         </div>
 
         <div className="space-y-4">

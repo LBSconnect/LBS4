@@ -314,7 +314,7 @@ export default function ServiceDetail({ slugOverride }: { slugOverride?: string 
     "provider": {
       "@type": "LocalBusiness",
       "@id": "https://www.lbs4.com/#business",
-      "name": "LBS Test & Exam Center",
+      "name": "Linton Business Solutions LLC",
       "telephone": "+12818365357",
       "address": {
         "@type": "PostalAddress",
