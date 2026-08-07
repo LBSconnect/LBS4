@@ -7,7 +7,6 @@ import {
   MapPin,
   Phone,
   Shield,
-  Clock,
   Users,
   Award,
   ChevronDown,
@@ -23,7 +22,6 @@ import Footer from "@/components/Footer";
 import SEO from "@/components/SEO";
 import { services } from "@/lib/services";
 import { testimonials } from "@/lib/testimonials";
-import logoImg from "@assets/lbs-logo-optimized.png";
 import heroImg from "@assets/hero.png";
 
 const businessServices = services.filter((s) => s.category === "business");
@@ -416,58 +414,6 @@ export default function Home() {
                 <p className="text-sm text-muted-foreground">{item.description}</p>
               </div>
             ))}
-          </div>
-          <div className="max-w-md mx-auto">
-            <Card className="border-border/50">
-              <CardContent className="p-8 space-y-6">
-                <div className="flex items-center gap-4 mb-2">
-                  <img src={logoImg} alt="Linton Business Solutions LLC logo" className="w-14 h-14 object-contain rounded-md" loading="lazy" decoding="async" />
-                  <div>
-                    <h3 className="text-lg font-bold text-[#0D1B3D] dark:text-white">Visit Us Today</h3>
-                    <p className="text-sm text-muted-foreground">Walk-ins welcome for most services</p>
-                  </div>
-                </div>
-                <div className="space-y-4">
-                  <div className="flex items-start gap-3">
-                    <MapPin className="w-5 h-5 text-[#FF6A00] mt-0.5 shrink-0" />
-                    <div>
-                      <p className="font-medium text-sm">Address</p>
-                      <p className="text-sm text-muted-foreground">
-                        616 FM 1960 Road West, Suite 101<br />Houston, Texas 77090-3048
-                      </p>
-                    </div>
-                  </div>
-                  <div className="flex items-start gap-3">
-                    <Phone className="w-5 h-5 text-[#FF6A00] mt-0.5 shrink-0" />
-                    <div>
-                      <p className="font-medium text-sm">Phone</p>
-                      <a href="tel:2818365357" className="text-sm text-muted-foreground hover:text-foreground">
-                        281-836-5357
-                      </a>
-                    </div>
-                  </div>
-                  <div className="flex items-start gap-3">
-                    <Clock className="w-5 h-5 text-[#FF6A00] mt-0.5 shrink-0" />
-                    <div>
-                      <p className="font-medium text-sm">Hours</p>
-                      <p className="text-sm text-muted-foreground">
-                        Mon – Fri: 8:00 AM – 5:00 PM<br />
-                        Sat: 8:00 AM – 4:00 PM<br />
-                        Closed Sun
-                      </p>
-                    </div>
-                  </div>
-                </div>
-                <Link href="/contact">
-                  <Button
-                    className="w-full bg-gradient-to-r from-[#FF6A00] to-[#FF2D55] text-white mt-4 rounded-full"
-                    data-testid="button-contact-cta"
-                  >
-                    Get Directions & Contact
-                  </Button>
-                </Link>
-              </CardContent>
-            </Card>
           </div>
         </div>
       </section>
