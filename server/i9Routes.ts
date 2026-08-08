@@ -289,8 +289,11 @@ export function registerI9Routes(app: Express): void {
         line_items: lineItems,
         // Company/plan identifiers only — never employee or case data.
         metadata: { app: "lbs4", i9SubscriptionId: pending.id, i9ClientCompanyId: company.id, i9ServicePlanId: plan.id, i9SetupFeeIncluded: String(!setupFeeAlreadyPaid) },
-        success_url: `${baseUrl}/employer-services/new-hire-verification/portal?checkout=success`,
-        cancel_url: `${baseUrl}/employer-services/new-hire-verification/portal/billing?checkout=cancelled`,
+        // Return to the onboarding wizard (not the generic dashboard) so a
+        // client who paid mid-onboarding lands back exactly where they left
+        // off and can continue the remaining steps immediately.
+        success_url: `${baseUrl}/employer-services/new-hire-verification/portal/onboarding?checkout=success`,
+        cancel_url: `${baseUrl}/employer-services/new-hire-verification/portal/onboarding?checkout=cancelled`,
       });
 
       await store.logI9Audit({ actorUserId: req.i9User!.id, actorRole: req.i9User!.role, action: "billing.checkout_created", entityType: "ClientCompany", entityId: company.id, clientCompanyId: company.id, details: { servicePlanId, sessionId: session.id }, ipAddress: req.ip });
@@ -729,6 +732,17 @@ export function registerI9Routes(app: Express): void {
     try {
       const parsed = insertI9ClientCompanySchema.partial().safeParse(req.body);
       if (!parsed.success) return res.status(400).json({ error: "Invalid data", details: parsed.error.flatten() });
+      // The EIN is stored encrypted (i9Storage.ts's updateI9ClientCompany calls
+      // encryptToColumn unconditionally whenever it's present). encryptToColumn
+      // throws if PROTECTED_DATA_ENCRYPTION_KEY isn't configured — previously
+      // that throw was caught below and reported as a generic, unactionable
+      // "Failed to update business intake" for the *entire* save (including
+      // every other field on the form). Gate it explicitly so the rest of the
+      // form can still be saved without an EIN, and the actual problem is
+      // reported when one is included.
+      if (parsed.data.ein && !isProtectedDataEncryptionConfigured()) {
+        return secureConfigRequired(res, ["PROTECTED_DATA_ENCRYPTION_KEY"]);
+      }
       await store.updateI9ClientCompany(pstr(req.params.id), parsed.data);
       await store.logI9Audit({ actorUserId: req.i9User!.id, actorRole: req.i9User!.role, action: "company.business_intake_update", entityType: "ClientCompany", entityId: pstr(req.params.id), clientCompanyId: pstr(req.params.id), ipAddress: req.ip });
       res.json({ success: true });

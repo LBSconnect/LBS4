@@ -20,7 +20,7 @@
 // with nothing to get out of sync.
 // ─────────────────────────────────────────────────────────────────────────────
 
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback, useRef } from "react";
 import { Link } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -36,7 +36,7 @@ import {
   type I9ClientAgreement,
 } from "@/lib/i9Portal";
 import { PortalGuard, PortalShell, PortalCard, ServiceGateBanner, ErrorBanner, useUnauthRedirect, NAVY } from "./_shared";
-import { BusinessIntakeForm } from "./PortalBusinessIntake";
+import { BusinessIntakeForm, type BusinessIntakeFormHandle } from "./PortalBusinessIntake";
 import { PlanCatalog } from "./PortalBilling";
 import { HiringSitesList } from "./PortalHiringSites";
 import { AGREEMENT_VERSION } from "@/pages/employer/ServiceAgreement";
@@ -152,6 +152,7 @@ function AgreementAcceptStep({ companyId, onAccepted }: { companyId: string; onA
           data-testid="checkbox-agreement-acknowledge"
         />
         <label htmlFor="agreement-acknowledge" className="text-sm leading-snug cursor-pointer">
+          <span className="text-red-500 mr-0.5">*</span>
           I certify that I am authorized to bind the company identified above and that I have read and agree to the
           New-Hire Verification &amp; Form I-9 Support Services Agreement.
         </label>
@@ -194,6 +195,22 @@ function OnboardingWizardContent({ companyId }: { companyId: string }) {
   const [gateMissing, setGateMissing] = useState<string[] | null>(null);
   const [active, setActive] = useState<StepKey>("business");
   const [hasPickedStep, setHasPickedStep] = useState(false);
+  const businessFormRef = useRef<BusinessIntakeFormHandle>(null);
+  const [checkoutNotice, setCheckoutNotice] = useState<"success" | "cancelled" | null>(null);
+
+  // Stripe redirects back here (server/i9Routes.ts's checkout route) after
+  // the client pays — show a quick confirmation and drop the query param so
+  // a page refresh doesn't keep re-showing it.
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const checkout = params.get("checkout");
+    if (checkout === "success" || checkout === "cancelled") {
+      setCheckoutNotice(checkout);
+      params.delete("checkout");
+      const rest = params.toString();
+      window.history.replaceState({}, "", window.location.pathname + (rest ? `?${rest}` : ""));
+    }
+  }, []);
 
   const load = useCallback(() => {
     return Promise.all([
@@ -235,6 +252,12 @@ function OnboardingWizardContent({ companyId }: { companyId: string }) {
     sites: siteCount > 0,
   };
 
+  // Clients can freely revisit any step up through the first incomplete one,
+  // but can't jump ahead of it — required fields on the current step must be
+  // completed before moving to the next page.
+  const firstIncompleteIndex = STEPS.findIndex((s) => !complete[s.key]);
+  const maxReachableIndex = firstIncompleteIndex === -1 ? STEPS.length - 1 : firstIncompleteIndex;
+
   // Land on the first incomplete step by default, but only before the user
   // has manually picked one — otherwise clicking backward to review an
   // earlier, already-complete step would keep bouncing them forward.
@@ -251,6 +274,14 @@ function OnboardingWizardContent({ companyId }: { companyId: string }) {
   }
 
   async function refreshAndAdvance() {
+    // Persist whatever's currently in the active step's form before moving
+    // on — previously "Next" only re-fetched from the server, so anything
+    // typed but not explicitly saved was silently discarded and gone when
+    // the client came back via "Back". Best-effort: a failed save (e.g. an
+    // encryption-config issue on the EIN) shouldn't block navigation.
+    if (active === "business") {
+      await businessFormRef.current?.saveProgress().catch(() => false);
+    }
     await load().catch(() => {});
     const idx = STEPS.findIndex((s) => s.key === active);
     const next = STEPS[idx + 1];
@@ -266,6 +297,17 @@ function OnboardingWizardContent({ companyId }: { companyId: string }) {
 
   return (
     <div className="space-y-6">
+      {checkoutNotice === "success" && (
+        <div className="p-4 rounded-xl bg-green-50 border border-green-200 text-sm text-green-800 flex items-center gap-2">
+          <CheckCircle2 className="w-4 h-4 shrink-0" /> Payment received — your plan is active. A confirmation email is on its way. Continue below to finish onboarding.
+        </div>
+      )}
+      {checkoutNotice === "cancelled" && (
+        <div className="p-4 rounded-xl bg-amber-50 border border-amber-200 text-sm text-amber-800">
+          Checkout was cancelled — no charge was made. You can pick a plan below whenever you're ready.
+        </div>
+      )}
+
       {/* Stepper header */}
       <PortalCard>
         <ol className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-0">
@@ -273,8 +315,14 @@ function OnboardingWizardContent({ companyId }: { companyId: string }) {
             <li key={s.key} className="flex-1 flex items-center gap-3 sm:gap-2">
               <button
                 type="button"
-                onClick={() => goTo(s.key)}
-                className="flex items-center gap-2.5 text-left"
+                disabled={i > maxReachableIndex}
+                onClick={async () => {
+                  if (active === "business" && s.key !== "business") {
+                    await businessFormRef.current?.saveProgress().catch(() => false);
+                  }
+                  goTo(s.key);
+                }}
+                className="flex items-center gap-2.5 text-left disabled:opacity-40 disabled:cursor-not-allowed"
                 aria-current={active === s.key ? "step" : undefined}
               >
                 {complete[s.key] ? (
@@ -305,7 +353,13 @@ function OnboardingWizardContent({ companyId }: { companyId: string }) {
       )}
 
       {/* Active step panel */}
-      {active === "business" && <BusinessIntakeForm companyId={companyId} />}
+      {active === "business" && (
+        <BusinessIntakeForm
+          ref={businessFormRef}
+          companyId={companyId}
+          onSaved={() => load().catch(() => {})}
+        />
+      )}
       {active === "billing" && <PlanCatalog companyId={companyId} />}
       {active === "agreement" && <AgreementAcceptStep companyId={companyId} onAccepted={refreshAndAdvance} />}
       {active === "sites" && <HiringSitesList companyId={companyId} />}
@@ -322,7 +376,14 @@ function OnboardingWizardContent({ companyId }: { companyId: string }) {
           <ArrowLeft className="w-4 h-4" /> Back
         </Button>
         {activeIndex < STEPS.length - 1 ? (
-          <Button type="button" onClick={refreshAndAdvance} className="text-white gap-1.5" style={{ backgroundColor: NAVY }}>
+          <Button
+            type="button"
+            onClick={refreshAndAdvance}
+            disabled={!complete[active]}
+            title={!complete[active] ? "Finish the required fields on this step before continuing" : undefined}
+            className="text-white gap-1.5"
+            style={{ backgroundColor: NAVY }}
+          >
             Next <ArrowRight className="w-4 h-4" />
           </Button>
         ) : (

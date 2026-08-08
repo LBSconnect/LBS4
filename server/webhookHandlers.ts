@@ -3,7 +3,8 @@ import { storage } from './storage';
 import { sendAppointmentConfirmation, sendAppointmentCalendarInvite, sendPaymentNotification } from './emailService';
 import { updateCorporateAccountStripe, getCorporateAccount, logAudit } from './corporateStorage';
 import { sendActivationEmail } from './corporateEmailService';
-import { activateI9Subscription, getI9Subscription, logI9Audit } from './i9Storage';
+import { activateI9Subscription, getI9Subscription, getI9ClientCompany, getI9ServicePlan, logI9Audit } from './i9Storage';
+import { sendI9SubscriptionActivatedEmail } from './i9EmailService';
 import type Stripe from 'stripe';
 
 /** Thrown when STRIPE_WEBHOOK_SECRET isn't configured. Kept as a distinct,
@@ -139,10 +140,11 @@ export class WebhookHandlers {
           return;
         }
 
+        const setupFeePaid = session.metadata?.i9SetupFeeIncluded === 'true';
         await activateI9Subscription(i9SubscriptionId, {
           stripeCustomerId: (session.customer as string) || '',
           stripeSubscriptionId: (session.subscription as string) || '',
-          setupFeePaid: session.metadata?.i9SetupFeeIncluded === 'true',
+          setupFeePaid,
         });
         await logI9Audit({
           action: 'billing.subscription_activated',
@@ -151,6 +153,30 @@ export class WebhookHandlers {
           clientCompanyId: session.metadata?.i9ClientCompanyId,
           details: { stripeCustomer: session.customer, stripeSubscription: session.subscription },
         });
+
+        // Purchase confirmation email — best-effort, same pattern as the
+        // corporate-account branch above (sendActivationEmail); a delivery
+        // failure here must never fail webhook processing (Stripe retries
+        // the whole event on a non-2xx response, which would just repeat a
+        // legitimately-activated subscription's email attempt anyway).
+        const i9ClientCompanyId = session.metadata?.i9ClientCompanyId;
+        const i9ServicePlanId = session.metadata?.i9ServicePlanId;
+        if (i9ClientCompanyId && i9ServicePlanId) {
+          Promise.all([getI9ClientCompany(i9ClientCompanyId), getI9ServicePlan(i9ServicePlanId)])
+            .then(([company, plan]) => {
+              const to = company?.billingContactEmail || company?.authorizedSignerEmail || session.customer_details?.email;
+              if (!to || !company || !plan) return;
+              return sendI9SubscriptionActivatedEmail({
+                to,
+                companyName: company.legalBusinessName,
+                planName: plan.name,
+                monthlyPriceCents: plan.monthlyPriceCents,
+                setupFeeCents: plan.setupFeeCents,
+                setupFeePaid,
+              });
+            })
+            .catch((err) => console.error('Failed to send I-9 subscription confirmation email:', err?.message || err));
+        }
       } catch (error: any) {
         console.error('Error activating I-9 subscription for session:', session.id, error.message);
       }
