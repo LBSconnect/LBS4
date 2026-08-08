@@ -8,6 +8,7 @@ import { Badge } from "@/components/ui/badge";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import SEO from "@/components/SEO";
+import { sanitizePhoneInput } from "@/lib/phone";
 import {
   CheckCircle2,
   ChevronRight,
@@ -459,9 +460,10 @@ export default function CorporateEnroll() {
                   <Field label="Phone Number">
                     <Input
                       type="tel"
+                      inputMode="numeric"
                       value={form.primaryContactPhone}
-                      onChange={(e) => set("primaryContactPhone", e.target.value)}
-                      placeholder="281-555-1234"
+                      onChange={(e) => set("primaryContactPhone", sanitizePhoneInput(e.target.value))}
+                      placeholder="2815551234"
                     />
                   </Field>
                 </div>

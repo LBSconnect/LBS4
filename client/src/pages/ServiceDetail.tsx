@@ -10,6 +10,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { sanitizePhoneInput } from "@/lib/phone";
 import {
   Select,
   SelectContent,
@@ -779,9 +780,10 @@ export default function ServiceDetail({ slugOverride }: { slugOverride?: string 
                               <Input
                                 id="phone"
                                 type="tel"
-                                placeholder="(123) 456-7890"
+                                inputMode="numeric"
+                                placeholder="2815551234"
                                 value={customerPhone}
-                                onChange={(e) => setCustomerPhone(e.target.value)}
+                                onChange={(e) => setCustomerPhone(sanitizePhoneInput(e.target.value))}
                                 required
                               />
                             </div>

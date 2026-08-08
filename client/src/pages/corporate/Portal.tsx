@@ -7,6 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import SEO from "@/components/SEO";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
+import { sanitizePhoneInput } from "@/lib/phone";
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell } from "recharts";
 import {
   LogIn, LogOut, Building2, AlertTriangle, CheckCircle2, Calendar, Clock,
@@ -489,7 +490,7 @@ function BookingForm({ account, onBack, onSuccess, prefill }: BookingFormProps) 
             {errors.employeeEmail && <p className="text-red-500 text-xs mt-1">{errors.employeeEmail}</p>}
           </Field>
           <Field label="Phone Number">
-            <Input type="tel" value={form.employeePhone} onChange={(e) => set("employeePhone", e.target.value)} placeholder="281-555-1234" />
+            <Input type="tel" inputMode="numeric" value={form.employeePhone} onChange={(e) => set("employeePhone", sanitizePhoneInput(e.target.value))} placeholder="2815551234" />
           </Field>
         </div>
 
@@ -833,7 +834,7 @@ function SettingsTab({ account, onUnauth }: { account: PortalAccount; onUnauth: 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <Field label="Contact Name" required><Input value={contactForm.name} onChange={(e) => setContactForm((f) => ({ ...f, name: e.target.value }))} /></Field>
             <Field label="Contact Email" required><Input type="email" value={contactForm.email} onChange={(e) => setContactForm((f) => ({ ...f, email: e.target.value }))} /></Field>
-            <Field label="Contact Phone"><Input type="tel" value={contactForm.phone} onChange={(e) => setContactForm((f) => ({ ...f, phone: e.target.value }))} placeholder="281-555-1234" /></Field>
+            <Field label="Contact Phone"><Input type="tel" inputMode="numeric" value={contactForm.phone} onChange={(e) => setContactForm((f) => ({ ...f, phone: sanitizePhoneInput(e.target.value) }))} placeholder="2815551234" /></Field>
           </div>
           <Field label="Additional Notes"><Textarea value={contactForm.notes} onChange={(e) => setContactForm((f) => ({ ...f, notes: e.target.value }))} placeholder="e.g., Also add authorized user Jane Smith (jane@company.com)..." rows={2} /></Field>
           {contactMsg && <div className={`p-3 rounded-lg text-sm ${contactMsg.type === "success" ? "bg-green-50 text-green-700 border border-green-200" : "bg-red-50 text-red-700 border border-red-200"}`}>{contactMsg.text}</div>}

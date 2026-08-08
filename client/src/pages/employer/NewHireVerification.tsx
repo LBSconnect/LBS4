@@ -7,6 +7,7 @@ import { trackEvent } from "@/components/Analytics";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import SEO from "@/components/SEO";
+import { sanitizePhoneInput } from "@/lib/phone";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -1076,10 +1077,12 @@ export default function NewHireVerification() {
                       <Input
                         id="ec-business-phone"
                         type="tel"
+                        inputMode="numeric"
                         required
+                        placeholder="2815551234"
                         value={formData.businessPhone}
                         onFocus={handleFieldStart}
-                        onChange={(e) => setFormData({ ...formData, businessPhone: e.target.value })}
+                        onChange={(e) => setFormData({ ...formData, businessPhone: sanitizePhoneInput(e.target.value) })}
                         data-testid="input-business-phone"
                       />
                     </div>

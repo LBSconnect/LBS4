@@ -23,6 +23,7 @@ import {
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { testimonials } from "@/lib/testimonials";
+import { sanitizePhoneInput } from "@/lib/phone";
 import websiteDesignImg from "@assets/service-website-design.jpg";
 
 const MAPS_URL = "https://maps.google.com/?q=616+FM+1960+Rd+W+Ste+101+Houston+TX+77090";
@@ -403,9 +404,10 @@ export default function WebsiteDesignLanding() {
                           <Input
                             id="wd-phone"
                             type="tel"
-                            placeholder="(123) 456-7890"
+                            inputMode="numeric"
+                            placeholder="2815551234"
                             value={formData.phone}
-                            onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+                            onChange={(e) => setFormData({ ...formData, phone: sanitizePhoneInput(e.target.value) })}
                             required
                             data-testid="input-phone"
                           />
