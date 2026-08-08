@@ -205,10 +205,10 @@ export function BusinessIntakeForm({ companyId }: { companyId: string }) {
             <Input value={form.naicsSector} onChange={(e) => set("naicsSector", e.target.value.replace(/\D/g, "").slice(0, 3))} maxLength={3} placeholder="236" />
           </Field>
           <Field label="Total Employee Count">
-            <Input type="number" min="0" value={form.totalEmployeeCount} onChange={(e) => set("totalEmployeeCount", e.target.value)} />
+            <Input type="number" min="0" max="10000000" value={form.totalEmployeeCount} onChange={(e) => set("totalEmployeeCount", e.target.value)} />
           </Field>
           <Field label="Average Monthly Hires">
-            <Input type="number" min="0" value={form.averageMonthlyHires} onChange={(e) => set("averageMonthlyHires", e.target.value)} />
+            <Input type="number" min="0" max="10000000" value={form.averageMonthlyHires} onChange={(e) => set("averageMonthlyHires", e.target.value)} />
           </Field>
           <Field label="Federal Contractor Status">
             <select className="w-full h-9 px-3 text-sm border border-input rounded-md bg-background" value={form.federalContractorStatus} onChange={(e) => set("federalContractorStatus", e.target.value as FormState["federalContractorStatus"])}>

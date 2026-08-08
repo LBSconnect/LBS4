@@ -230,8 +230,13 @@ export const insertI9ClientCompanySchema = z.object({
   website: z.string().max(300).optional(),
   industry: z.string().max(150).optional(),
   naicsSector: z.string().length(3).regex(/^\d{3}$/).optional(),
-  totalEmployeeCount: z.number().int().nonnegative().optional(),
-  averageMonthlyHires: z.number().int().nonnegative().optional(),
+  // Upper bound well within Postgres's `integer` column range (max ~2.1B) —
+  // without it, a stray extra digit (or a copy/paste glitch) overflows the
+  // column and the DB throws, which previously surfaced as an opaque
+  // "Failed to update business intake" 500 instead of a normal validation
+  // error. 10,000,000 is far beyond any real client's headcount/hiring rate.
+  totalEmployeeCount: z.number().int().nonnegative().max(10_000_000).optional(),
+  averageMonthlyHires: z.number().int().nonnegative().max(10_000_000).optional(),
   federalContractorStatus: z.enum(["yes", "no", "not_sure"]).optional(),
   alreadyEnrolledInEverify: z.enum(["yes", "no", "not_sure"]).optional(),
   currentEmployerAgent: z.string().max(200).optional(),

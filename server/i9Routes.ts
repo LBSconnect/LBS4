@@ -732,7 +732,12 @@ export function registerI9Routes(app: Express): void {
       await store.updateI9ClientCompany(pstr(req.params.id), parsed.data);
       await store.logI9Audit({ actorUserId: req.i9User!.id, actorRole: req.i9User!.role, action: "company.business_intake_update", entityType: "ClientCompany", entityId: pstr(req.params.id), clientCompanyId: pstr(req.params.id), ipAddress: req.ip });
       res.json({ success: true });
-    } catch {
+    } catch (err: any) {
+      // Previously a bare `catch {}` — a real failure here (e.g. a DB
+      // constraint error) was completely invisible, both to the client
+      // (generic message) and to us (nothing logged). Log it so a future
+      // failure like this is diagnosable from server logs.
+      console.error("i9 business-intake update error:", err?.message || err);
       res.status(500).json({ error: "Failed to update business intake" });
     }
   });
