@@ -170,6 +170,10 @@ export const SEO_ROUTES: Record<string, RouteMeta> = {
     title: withSuffix("Privacy Request Procedure and Form"),
     description: "Submit a privacy request to Linton Business Solutions LLC (LBS): access, correction, deletion, opt-out, or appeal requests for lbsconnect.net, myeasypass.net, workabeez.net, and lbs4.com.",
   },
+  "/legal-notices": {
+    title: withSuffix("Legal Notices & Agreements"),
+    description: "One place for every Linton Business Solutions LLC policy, notice, and client agreement — Terms of Service, Privacy Policy, Cookie Policy, and more.",
+  },
 };
 
 function escapeHtmlAttr(value: string): string {
