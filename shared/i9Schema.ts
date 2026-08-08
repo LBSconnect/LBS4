@@ -223,7 +223,7 @@ export type I9ClientCompanyStatus = (typeof I9_CLIENT_COMPANY_STATUSES)[number];
 export const insertI9ClientCompanySchema = z.object({
   legalBusinessName: z.string().min(1).max(200),
   dba: z.string().max(200).optional(),
-  ein: z.string().max(20).optional(), // plaintext in, encrypted before storage — never persisted as-is
+  ein: z.string().length(9).regex(/^\d{9}$/).optional(), // 9 digits, no dash; plaintext in, encrypted before storage — never persisted as-is
   entityType: z.string().max(100).optional(),
   physicalAddress: z.string().max(500).optional(),
   mailingAddress: z.string().max(500).optional(),

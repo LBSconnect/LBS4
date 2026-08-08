@@ -172,6 +172,39 @@ export async function sendI9AgreementAcceptedEmail(data: {
   return sendEmail({ to: data.to, subject: `Agreement accepted — ${BUSINESS_NAME}`, html: emailWrapper(content) });
 }
 
+/** Sent right after a plan's Stripe Checkout session completes and the
+ *  subscription is activated (server/webhookHandlers.ts's checkout.session.completed
+ *  handler) — confirms the purchase and points the signer back to the
+ *  onboarding wizard to continue where they left off. */
+export async function sendI9SubscriptionActivatedEmail(data: {
+  to: string;
+  companyName: string;
+  planName: string;
+  monthlyPriceCents: number;
+  setupFeeCents?: number;
+  setupFeePaid: boolean;
+}): Promise<boolean> {
+  const onboardingUrl = `${process.env.PUBLIC_SITE_URL || "https://www.lbs4.com"}/employer-services/new-hire-verification/portal/onboarding`;
+  const formatCents = (cents: number) => (cents / 100).toLocaleString("en-US", { style: "currency", currency: "USD" });
+  const content = `
+    <h2 style="margin:0 0 6px;color:#0d1b35;font-size:22px;font-weight:700;">Payment received — you're subscribed</h2>
+    <p style="margin:0 0 20px;color:#64748b;font-size:14px;">This confirms your subscription purchase for ${escapeHtml(data.companyName)}.</p>
+    <table cellpadding="0" cellspacing="0" style="width:100%;margin:0 0 24px;font-size:13px;color:#334155;">
+      <tr><td style="padding:6px 0;font-weight:600;width:160px;">Plan</td><td style="padding:6px 0;">${escapeHtml(data.planName)}</td></tr>
+      <tr><td style="padding:6px 0;font-weight:600;">Monthly price</td><td style="padding:6px 0;">${escapeHtml(formatCents(data.monthlyPriceCents))}/mo</td></tr>
+      ${data.setupFeePaid && data.setupFeeCents ? `<tr><td style="padding:6px 0;font-weight:600;">One-time setup fee</td><td style="padding:6px 0;">${escapeHtml(formatCents(data.setupFeeCents))} (paid)</td></tr>` : ""}
+    </table>
+    <p style="margin:0 0 16px;color:#374151;font-size:14px;">Pick up right where you left off — the rest of your onboarding (service agreement and hiring sites) is a couple of quick steps in your secure employer portal.</p>
+    <div style="text-align:center;margin:28px 0;">
+      <a href="${onboardingUrl}" style="display:inline-block;background:linear-gradient(90deg,#FF6A00,#FF2D55);color:#ffffff;font-weight:700;font-size:14px;padding:14px 32px;border-radius:999px;text-decoration:none;">
+        Continue Onboarding
+      </a>
+    </div>
+    <p style="margin:0;color:#94a3b8;font-size:12px;text-align:center;">A detailed receipt for this charge was sent separately by Stripe, our payment processor.</p>
+  `;
+  return sendEmail({ to: data.to, subject: `Payment confirmed — ${BUSINESS_NAME}`, html: emailWrapper(content) });
+}
+
 /** Internal (LBS-staff-facing) copy of the same generic pattern, for events
  *  LBS itself needs to act on (e.g. everify_enrollment_ready_for_lbs_action). */
 export async function sendI9InternalNotificationEmail(data: {

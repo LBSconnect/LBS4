@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, forwardRef, useImperativeHandle } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Save } from "lucide-react";
@@ -85,7 +85,18 @@ function companyToForm(c: I9ClientCompany): FormState {
   };
 }
 
-export function BusinessIntakeForm({ companyId }: { companyId: string }) {
+/** Imperative handle so a parent (the onboarding wizard's "Next" button) can
+ *  trigger a save of whatever's currently in the form without going through
+ *  the submit button — used so progress isn't lost when a client moves on to
+ *  a later step before finishing this one. */
+export interface BusinessIntakeFormHandle {
+  /** Best-effort: saves the current form state and returns whether it
+   *  succeeded. Never throws — a failure just means progress wasn't saved,
+   *  which shouldn't block wizard navigation. */
+  saveProgress: () => Promise<boolean>;
+}
+
+export const BusinessIntakeForm = forwardRef<BusinessIntakeFormHandle, { companyId: string; onSaved?: () => void }>(function BusinessIntakeForm({ companyId, onSaved }, ref) {
   const onUnauth = useUnauthRedirect();
   const [company, setCompany] = useState<I9ClientCompany | null>(null);
   const [form, setForm] = useState<FormState>(EMPTY);
@@ -124,8 +135,10 @@ export function BusinessIntakeForm({ companyId }: { companyId: string }) {
     setSaved(false);
   }
 
-  async function save(e: React.FormEvent) {
-    e.preventDefault();
+  /** Core save logic, shared by the submit button and the imperative
+   *  saveProgress() handle exposed to the wizard. Returns whether it
+   *  succeeded; never throws. */
+  async function doSave(): Promise<boolean> {
     setSaving(true);
     setError("");
     setSaved(false);
@@ -158,12 +171,29 @@ export function BusinessIntakeForm({ companyId }: { companyId: string }) {
       await i9Api(`/api/i9/companies/${companyId}/business-intake`, { method: "PATCH", body: JSON.stringify(payload) });
       setSaved(true);
       setForm((f) => ({ ...f, ein: "" }));
+      onSaved?.();
+      return true;
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to save business intake information.");
+      if (form.ein && isI9ServiceUnavailable(err)) {
+        // The EIN is stored encrypted; the server rejects it (rather than
+        // silently dropping it) when that isn't configured yet. Everything
+        // else on this form saves fine without it.
+        setError("The EIN can't be saved right now (secure storage isn't configured yet). Clear the EIN field and save again — the rest of your information will save normally.");
+      } else {
+        setError(err instanceof Error ? err.message : "Failed to save business intake information.");
+      }
+      return false;
     } finally {
       setSaving(false);
     }
   }
+
+  async function save(e: React.FormEvent) {
+    e.preventDefault();
+    await doSave();
+  }
+
+  useImperativeHandle(ref, () => ({ saveProgress: doSave }));
 
   if (loading) return <p className="text-sm text-muted-foreground">Loading business intake...</p>;
   if (gateMissing) return <ServiceGateBanner missing={gateMissing} />;
@@ -186,8 +216,8 @@ export function BusinessIntakeForm({ companyId }: { companyId: string }) {
           <Field label="DBA (if applicable)">
             <Input value={form.dba} onChange={(e) => set("dba", e.target.value)} />
           </Field>
-          <Field label="EIN" hint={einMasked ? `Currently on file: ${einMasked}` : "Enter to set or replace. Stored encrypted; never displayed in full."}>
-            <Input value={form.ein} onChange={(e) => set("ein", e.target.value)} placeholder="XX-XXXXXXX" />
+          <Field label="EIN" hint={einMasked ? `Currently on file: ${einMasked}` : "9 digits. Enter to set or replace. Stored encrypted; never displayed in full."}>
+            <Input value={form.ein} onChange={(e) => set("ein", e.target.value.replace(/\D/g, "").slice(0, 9))} maxLength={9} placeholder="XXXXXXXXX" />
           </Field>
           <Field label="Entity Type">
             <select className="w-full h-9 px-3 text-sm border border-input rounded-md bg-background" value={form.entityType} onChange={(e) => set("entityType", e.target.value)}>
@@ -268,8 +298,9 @@ export function BusinessIntakeForm({ companyId }: { companyId: string }) {
           </Field>
         </div>
         <label className="flex items-start gap-2.5 cursor-pointer pt-1">
-          <input type="checkbox" className="mt-0.5 w-4 h-4" checked={form.acknowledgedResponsibilities} onChange={(e) => set("acknowledgedResponsibilities", e.target.checked)} />
+          <input type="checkbox" required className="mt-0.5 w-4 h-4" checked={form.acknowledgedResponsibilities} onChange={(e) => set("acknowledgedResponsibilities", e.target.checked)} />
           <span className="text-sm text-foreground">
+            <span className="text-red-500 mr-0.5">*</span>
             We acknowledge that LBS acts as our E-Verify Employer Agent and administrative support provider, and that
             our company remains responsible for its own Form I-9 and E-Verify compliance obligations. This is not a
             substitute for legal advice.
@@ -278,16 +309,16 @@ export function BusinessIntakeForm({ companyId }: { companyId: string }) {
       </PortalCard>
 
       {error && <ErrorBanner message={error} />}
-      {saved && <SuccessBanner message="Business intake information saved. An LBS representative will review it and move your account forward." />}
+      {saved && <SuccessBanner message="Progress saved. You can come back and finish this later — everything you've entered will still be here." />}
 
       <div className="flex justify-end">
         <Button type="submit" disabled={saving} className="text-white gap-1.5" style={{ backgroundColor: "#0D1B3D" }}>
-          <Save className="w-4 h-4" /> {saving ? "Saving..." : "Save Business Intake"}
+          <Save className="w-4 h-4" /> {saving ? "Saving..." : "Save Progress"}
         </Button>
       </div>
     </form>
   );
-}
+});
 
 export default function PortalBusinessIntake() {
   return (

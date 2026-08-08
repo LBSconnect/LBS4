@@ -220,7 +220,7 @@ test.describe.serial("Onboarding lifecycle gate", () => {
       entityType: "LLC", industry: "Manufacturing", naicsSector: "336",
       totalEmployeeCount: 85, averageMonthlyHires: 4,
       federalContractorStatus: "no", alreadyEnrolledInEverify: "no",
-      ein: "12-3456789", acknowledgedResponsibilities: true,
+      ein: "123456789", acknowledgedResponsibilities: true,
     });
     expect(patch.status).toBe(200);
 
@@ -228,7 +228,7 @@ test.describe.serial("Onboarding lifecycle gate", () => {
     expect(get.status).toBe(200);
     expect(get.json.company.einEncrypted).toBeUndefined();
     expect(get.json.company.einMasked).toMatch(/6789$/);
-    expect(get.json.company.einMasked).not.toContain("12-3456789");
+    expect(get.json.company.einMasked).not.toContain("123456789");
   });
 
   test("only lbs_program_admin / lbs_intake_billing can change onboarding status, and only along valid transitions", async () => {
