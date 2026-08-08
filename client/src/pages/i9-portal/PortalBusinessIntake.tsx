@@ -186,8 +186,8 @@ export function BusinessIntakeForm({ companyId }: { companyId: string }) {
           <Field label="DBA (if applicable)">
             <Input value={form.dba} onChange={(e) => set("dba", e.target.value)} />
           </Field>
-          <Field label="EIN" hint={einMasked ? `Currently on file: ${einMasked}` : "Enter to set or replace. Stored encrypted; never displayed in full."}>
-            <Input value={form.ein} onChange={(e) => set("ein", e.target.value)} placeholder="XX-XXXXXXX" />
+          <Field label="EIN" hint={einMasked ? `Currently on file: ${einMasked}` : "9 digits. Enter to set or replace. Stored encrypted; never displayed in full."}>
+            <Input value={form.ein} onChange={(e) => set("ein", e.target.value.replace(/\D/g, "").slice(0, 9))} maxLength={9} placeholder="XXXXXXXXX" />
           </Field>
           <Field label="Entity Type">
             <select className="w-full h-9 px-3 text-sm border border-input rounded-md bg-background" value={form.entityType} onChange={(e) => set("entityType", e.target.value)}>
@@ -268,8 +268,9 @@ export function BusinessIntakeForm({ companyId }: { companyId: string }) {
           </Field>
         </div>
         <label className="flex items-start gap-2.5 cursor-pointer pt-1">
-          <input type="checkbox" className="mt-0.5 w-4 h-4" checked={form.acknowledgedResponsibilities} onChange={(e) => set("acknowledgedResponsibilities", e.target.checked)} />
+          <input type="checkbox" required className="mt-0.5 w-4 h-4" checked={form.acknowledgedResponsibilities} onChange={(e) => set("acknowledgedResponsibilities", e.target.checked)} />
           <span className="text-sm text-foreground">
+            <span className="text-red-500 mr-0.5">*</span>
             We acknowledge that LBS acts as our E-Verify Employer Agent and administrative support provider, and that
             our company remains responsible for its own Form I-9 and E-Verify compliance obligations. This is not a
             substitute for legal advice.
