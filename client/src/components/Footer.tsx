@@ -3,7 +3,6 @@ import { Link } from "wouter";
 import { Phone, Mail, MapPin, Clock } from "lucide-react";
 import logoImg from "@assets/lbs-logo-optimized.png";
 import { PORTAL_ROUTES } from "@/lib/i9Portal";
-import { EMPLOYER_AGREEMENT_ROUTE } from "@/lib/employerServices";
 import CookiePreferences from "@/components/CookiePreferences";
 
 export default function Footer() {
@@ -167,32 +166,21 @@ export default function Footer() {
         <div className="max-w-7xl mx-auto px-6 py-5 flex flex-col md:flex-row items-center justify-between gap-3 text-sm text-white/50">
           <p>&copy; {new Date().getFullYear()} Linton Business Solutions LLC (LBS). All rights reserved.</p>
           <div className="flex flex-wrap items-center justify-center gap-x-3 gap-y-1.5">
-            {[
-              { href: "/privacy-policy", label: "Privacy Policy" },
-              { href: "/terms-of-use", label: "Terms of Use" },
-              { href: "/booking-cancellation-policy", label: "Refund & Cancellation Policy" },
-              { href: "/accessibility-statement", label: "Accessibility" },
-              { href: "/cookie-policy", label: "Cookie Policy" },
-              { href: EMPLOYER_AGREEMENT_ROUTE, label: "Employer Services Agreement" },
-              { href: "/notice-at-collection", label: "Notice at Collection" },
-              { href: "/privacy-request", label: "Privacy Request" },
-              { href: "/copyright-dmca-policy", label: "Copyright & DMCA" },
-              { href: "/electronic-communications-terms", label: "Electronic Communications" },
-              { href: "/candidate-rules-surveillance-notice", label: "Candidate Rules" },
-              { href: "/document-handling-notice", label: "Document Handling" },
-            ].map((link, i, arr) => (
-              <span key={link.href} className="flex items-center gap-3">
-                <Link href={link.href}>
-                  <span
-                    className="cursor-pointer hover:text-white transition-colors"
-                    data-testid={`link-footer-legal-${link.label.toLowerCase().replace(/[^a-z0-9]+/g, "-")}`}
-                  >
-                    {link.label}
-                  </span>
-                </Link>
-                <span className="text-white/30">|</span>
-              </span>
-            ))}
+            {/* All individual policy/notice/agreement links now live on one
+                index page (client/src/pages/LegalNotices.tsx) instead of
+                being listed out here one by one — add a new legal page there,
+                not as another entry in this array. */}
+            <span className="flex items-center gap-3">
+              <Link href="/legal-notices">
+                <span
+                  className="cursor-pointer hover:text-white transition-colors"
+                  data-testid="link-footer-legal-terms-of-use"
+                >
+                  Terms of Use
+                </span>
+              </Link>
+              <span className="text-white/30">|</span>
+            </span>
             <button
               type="button"
               onClick={() => setCookiePrefsOpen(true)}

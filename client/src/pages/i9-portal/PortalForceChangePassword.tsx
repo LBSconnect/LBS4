@@ -12,6 +12,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import SEO from "@/components/SEO";
+import Header from "@/components/Header";
+import Footer from "@/components/Footer";
 import { KeyRound, ShieldCheck } from "lucide-react";
 import { i9Api, PORTAL_ROUTES } from "@/lib/i9Portal";
 import { useI9Session, NAVY, PortalLoading } from "./_shared";
@@ -60,56 +62,60 @@ export default function PortalForceChangePassword() {
   if (session.status === "loading" || session.status === "anon" || !session.user?.mustChangePassword) return <PortalLoading />;
 
   return (
-    <div className="min-h-screen flex items-center justify-center px-6" style={{ backgroundColor: NAVY }}>
-      <SEO title="Set a New Password | LBS New-Hire Verification" canonical={PORTAL_ROUTES.forceChangePassword} noIndex />
-      <div className="w-full max-w-sm bg-white rounded-2xl shadow-xl p-8 space-y-6">
-        <div className="text-center space-y-1">
-          <ShieldCheck className="w-10 h-10 mx-auto" style={{ color: NAVY }} />
-          <h1 className="text-xl font-bold" style={{ color: NAVY }}>Set a New Password</h1>
-          <p className="text-sm text-muted-foreground">
-            Your account was created with a temporary password. Choose a new one to continue to the portal.
-          </p>
+    <div className="min-h-screen flex flex-col">
+      <Header />
+      <div className="flex-1 flex items-center justify-center px-6 py-10" style={{ backgroundColor: NAVY }}>
+        <SEO title="Set a New Password | LBS New-Hire Verification" canonical={PORTAL_ROUTES.forceChangePassword} noIndex />
+        <div className="w-full max-w-sm bg-white rounded-2xl shadow-xl p-8 space-y-6">
+          <div className="text-center space-y-1">
+            <ShieldCheck className="w-10 h-10 mx-auto" style={{ color: NAVY }} />
+            <h1 className="text-xl font-bold" style={{ color: NAVY }}>Set a New Password</h1>
+            <p className="text-sm text-muted-foreground">
+              Your account was created with a temporary password. Choose a new one to continue to the portal.
+            </p>
+          </div>
+          <form onSubmit={submit} className="space-y-4">
+            <div className="space-y-1.5">
+              <Label htmlFor="i9-force-new-password">New Password</Label>
+              <Input
+                id="i9-force-new-password"
+                type="password"
+                autoComplete="new-password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                placeholder={`At least ${MIN_PASSWORD_LENGTH} characters`}
+                minLength={MIN_PASSWORD_LENGTH}
+                autoFocus
+                required
+              />
+            </div>
+            <div className="space-y-1.5">
+              <Label htmlFor="i9-force-new-password-confirm">Confirm New Password</Label>
+              <Input
+                id="i9-force-new-password-confirm"
+                type="password"
+                autoComplete="new-password"
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
+                minLength={MIN_PASSWORD_LENGTH}
+                required
+              />
+            </div>
+            {error && <p className="text-red-500 text-sm">{error}</p>}
+            <Button type="submit" className="w-full text-white gap-1.5" style={{ backgroundColor: NAVY }} disabled={loading || !password || !confirmPassword}>
+              <KeyRound className="w-4 h-4" /> {loading ? "Saving..." : "Set Password & Continue"}
+            </Button>
+          </form>
+          <button
+            type="button"
+            onClick={() => void session.logout().then(() => setLocation(PORTAL_ROUTES.login))}
+            className="text-center text-xs text-muted-foreground hover:underline w-full"
+          >
+            Sign out
+          </button>
         </div>
-        <form onSubmit={submit} className="space-y-4">
-          <div className="space-y-1.5">
-            <Label htmlFor="i9-force-new-password">New Password</Label>
-            <Input
-              id="i9-force-new-password"
-              type="password"
-              autoComplete="new-password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              placeholder={`At least ${MIN_PASSWORD_LENGTH} characters`}
-              minLength={MIN_PASSWORD_LENGTH}
-              autoFocus
-              required
-            />
-          </div>
-          <div className="space-y-1.5">
-            <Label htmlFor="i9-force-new-password-confirm">Confirm New Password</Label>
-            <Input
-              id="i9-force-new-password-confirm"
-              type="password"
-              autoComplete="new-password"
-              value={confirmPassword}
-              onChange={(e) => setConfirmPassword(e.target.value)}
-              minLength={MIN_PASSWORD_LENGTH}
-              required
-            />
-          </div>
-          {error && <p className="text-red-500 text-sm">{error}</p>}
-          <Button type="submit" className="w-full text-white gap-1.5" style={{ backgroundColor: NAVY }} disabled={loading || !password || !confirmPassword}>
-            <KeyRound className="w-4 h-4" /> {loading ? "Saving..." : "Set Password & Continue"}
-          </Button>
-        </form>
-        <button
-          type="button"
-          onClick={() => void session.logout().then(() => setLocation(PORTAL_ROUTES.login))}
-          className="text-center text-xs text-muted-foreground hover:underline w-full"
-        >
-          Sign out
-        </button>
       </div>
+      <Footer />
     </div>
   );
 }

@@ -1322,7 +1322,7 @@ export default function NewHireVerification() {
             </Link>{" "}
             or the{" "}
             <Link href={EMPLOYER_AGREEMENT_ROUTE} className="text-[#0D1B3D] dark:text-[#0077FF] underline underline-offset-2 hover:opacity-80">
-              draft service agreement
+              service agreement
             </Link>.
           </p>
         </div>

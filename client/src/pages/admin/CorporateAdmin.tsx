@@ -6,6 +6,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import SEO from "@/components/SEO";
+import Header from "@/components/Header";
+import Footer from "@/components/Footer";
 import {
   BarChart,
   Bar,
@@ -244,26 +246,30 @@ function LoginScreen({ onLogin }: { onLogin: () => void }) {
   }
 
   return (
-    <div className="min-h-screen bg-[#0d1b35] flex items-center justify-center px-6">
-      <SEO title="Admin Login | LBS Corporate" canonical="/admin/corporate" noIndex />
-      <div className="w-full max-w-sm bg-white rounded-2xl shadow-xl p-8 space-y-6">
-        <div className="text-center space-y-1">
-          <Building2 className="w-10 h-10 text-[#0d1b35] mx-auto" />
-          <h1 className="text-xl font-bold text-[#0d1b35]">LBS Corporate Admin</h1>
-          <p className="text-sm text-muted-foreground">Enter your admin password to continue</p>
-        </div>
-        <form onSubmit={submit} className="space-y-4">
-          <div className="space-y-1.5">
-            <Label htmlFor="admin-password">Admin Password</Label>
-            <Input id="admin-password" type="password" value={secret} onChange={(e) => setSecret(e.target.value)} placeholder="••••••••" autoFocus />
+    <div className="min-h-screen flex flex-col">
+      <Header />
+      <div className="flex-1 flex items-center justify-center bg-[#0d1b35] px-6 py-10">
+        <SEO title="Admin Login | LBS Corporate" canonical="/admin/corporate" noIndex />
+        <div className="w-full max-w-sm bg-white rounded-2xl shadow-xl p-8 space-y-6">
+          <div className="text-center space-y-1">
+            <Building2 className="w-10 h-10 text-[#0d1b35] mx-auto" />
+            <h1 className="text-xl font-bold text-[#0d1b35]">LBS Corporate Admin</h1>
+            <p className="text-sm text-muted-foreground">Enter your admin password to continue</p>
           </div>
-          {error && <p className="text-red-500 text-sm">{error}</p>}
-          <Button type="submit" className="w-full bg-[#0d1b35] hover:bg-[#1a2d52] text-white" disabled={loading || !secret}>
-            <LogIn className="w-4 h-4 mr-2" />
-            {loading ? "Signing in…" : "Sign In"}
-          </Button>
-        </form>
+          <form onSubmit={submit} className="space-y-4">
+            <div className="space-y-1.5">
+              <Label htmlFor="admin-password">Admin Password</Label>
+              <Input id="admin-password" type="password" value={secret} onChange={(e) => setSecret(e.target.value)} placeholder="••••••••" autoFocus />
+            </div>
+            {error && <p className="text-red-500 text-sm">{error}</p>}
+            <Button type="submit" className="w-full bg-[#0d1b35] hover:bg-[#1a2d52] text-white" disabled={loading || !secret}>
+              <LogIn className="w-4 h-4 mr-2" />
+              {loading ? "Signing in…" : "Sign In"}
+            </Button>
+          </form>
+        </div>
       </div>
+      <Footer />
     </div>
   );
 }
@@ -1008,10 +1014,14 @@ export default function CorporateAdmin() {
 
   if (selected) {
     return (
-      <div className="min-h-screen bg-[#f8f9fb]">
-        <div className="max-w-5xl mx-auto px-6 py-8">
-          <AccountDetail account={selected} onBack={() => setSelected(null)} onRefresh={refreshSelected} />
+      <div className="min-h-screen flex flex-col">
+        <Header />
+        <div className="flex-1 bg-[#f8f9fb]">
+          <div className="max-w-5xl mx-auto px-6 py-8">
+            <AccountDetail account={selected} onBack={() => setSelected(null)} onRefresh={refreshSelected} />
+          </div>
         </div>
+        <Footer />
       </div>
     );
   }
@@ -1025,7 +1035,9 @@ export default function CorporateAdmin() {
   ];
 
   return (
-    <div className="min-h-screen bg-[#f8f9fb]">
+    <div className="min-h-screen flex flex-col">
+      <Header />
+      <div className="flex-1 bg-[#f8f9fb]">
       <SEO title="Corporate Admin Dashboard | LBS" canonical="/admin/corporate" noIndex />
 
       {/* Header */}
@@ -1122,6 +1134,8 @@ export default function CorporateAdmin() {
         {mainTab === "audit" && <AuditLogTab />}
         {mainTab === "sop" && <SOPTab />}
       </div>
+      </div>
+      <Footer />
     </div>
   );
 }

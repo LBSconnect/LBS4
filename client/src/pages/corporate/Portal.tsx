@@ -5,6 +5,8 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import SEO from "@/components/SEO";
+import Header from "@/components/Header";
+import Footer from "@/components/Footer";
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell } from "recharts";
 import {
   LogIn, LogOut, Building2, AlertTriangle, CheckCircle2, Calendar, Clock,
@@ -302,7 +304,7 @@ function LoginScreen({ onLogin }: { onLogin: (acct: PortalAccount) => void }) {
   }
 
   return (
-    <div className="min-h-screen bg-[#0d1b35] flex items-center justify-center px-6">
+    <div className="flex-1 flex items-center justify-center bg-[#0d1b35] px-6 py-10">
       <SEO title="Corporate Portal | LBS Notary" canonical="/corporate/portal" noIndex />
       <div className="w-full max-w-sm bg-white rounded-2xl shadow-xl p-8 space-y-6">
         <div className="text-center space-y-1">
@@ -947,7 +949,7 @@ function Dashboard({ account, onLogout, onUnauth }: DashboardProps) {
   ];
 
   return (
-    <div className="min-h-screen bg-[#f8f9fb]">
+    <div className="flex-1 flex flex-col bg-[#f8f9fb]">
       <SEO title="Corporate Portal | LBS Notary" canonical="/corporate/portal" noIndex />
 
       {/* Top Bar */}
@@ -1190,6 +1192,21 @@ export default function CorporatePortal() {
   const [account, setAccount] = useState<PortalAccount | null>(getToken() ? getSavedAccount() : null);
   const handleLogin = useCallback((acct: PortalAccount) => setAccount(acct), []);
   const handleLogout = useCallback(() => { clearToken(); setAccount(null); }, []);
-  if (!account || !getToken()) return <LoginScreen onLogin={handleLogin} />;
-  return <Dashboard account={account} onLogout={handleLogout} onUnauth={handleLogout} />;
+  // Same site-wide Header/Footer every public page uses, wrapped around
+  // whichever inner screen is showing — keeps the main nav and footer
+  // available from inside the corporate client portal too, not just the
+  // logged-out marketing pages.
+  return (
+    <div className="min-h-screen flex flex-col">
+      <Header />
+      <div className="flex-1 flex flex-col">
+        {!account || !getToken() ? (
+          <LoginScreen onLogin={handleLogin} />
+        ) : (
+          <Dashboard account={account} onLogout={handleLogout} onUnauth={handleLogout} />
+        )}
+      </div>
+      <Footer />
+    </div>
+  );
 }
