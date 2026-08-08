@@ -116,13 +116,13 @@ function AgreementSection({ companyId, canManage }: { companyId: string; canMana
     }
   }
 
-  function downloadDraft() {
+  function downloadAgreement() {
     if (!agreement?.generatedDocumentHtml) return;
     const blob = new Blob([agreement.generatedDocumentHtml], { type: "text/html" });
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
-    a.download = `LBS-Agreement-Draft-${companyId}.html`;
+    a.download = `LBS-Agreement-${companyId}.html`;
     a.click();
     URL.revokeObjectURL(url);
   }
@@ -180,7 +180,7 @@ function AgreementSection({ companyId, canManage }: { companyId: string; canMana
           <>
             {error && <ErrorBanner message={error} />}
             <Button size="sm" onClick={generate} disabled={generating} className="text-white gap-1.5" style={{ backgroundColor: NAVY }}>
-              <FileText className="w-3.5 h-3.5" /> {generating ? "Generating..." : "Generate Draft Agreement"}
+              <FileText className="w-3.5 h-3.5" /> {generating ? "Generating..." : "Generate Agreement"}
             </Button>
           </>
         ) : (
@@ -192,8 +192,8 @@ function AgreementSection({ companyId, canManage }: { companyId: string; canMana
             Status: <span className="font-semibold capitalize" style={{ color: NAVY }}>{agreement.status.replace(/_/g, " ")}</span>
             {agreement.signedByName && <span className="text-muted-foreground"> — signed by {agreement.signedByName}</span>}
           </p>
-          <Button size="sm" variant="outline" onClick={downloadDraft} className="gap-1.5">
-            <Download className="w-3.5 h-3.5" /> Download Draft (.html)
+          <Button size="sm" variant="outline" onClick={downloadAgreement} className="gap-1.5">
+            <Download className="w-3.5 h-3.5" /> Download Agreement (.html)
           </Button>
           {canManage && agreement.status !== "signed" && (
             <div className="border-t border-border/50 pt-3 space-y-2">

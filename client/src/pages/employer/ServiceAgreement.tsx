@@ -27,18 +27,6 @@ export default function ServiceAgreement() {
         title="New-Hire Verification & Form I-9 Support Services Agreement"
         meta={`Linton Business Solutions LLC · Version ${AGREEMENT_VERSION} · Effective ${EFFECTIVE_DATE}`}
       >
-        <div className="flex items-start gap-3 bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-900/50 rounded-lg p-5" data-testid="text-agreement-attorney-notice">
-          <AlertTriangle className="w-5 h-5 text-amber-600 mt-0.5 shrink-0" />
-          <div className="space-y-1">
-            <p className="font-bold text-amber-900 dark:text-amber-300">Final review by licensed Texas counsel recommended before this Agreement is relied upon as binding.</p>
-            <p className="text-sm text-amber-800 dark:text-amber-400">
-              This document has been comprehensively drafted to reflect current professional standards for E-Verify
-              Employer Agent and Form I-9 support services. It is not a substitute for advice from a licensed
-              attorney, who should confirm it before it is used as a final, enforceable agreement with clients.
-            </p>
-          </div>
-        </div>
-
         <div className="flex flex-wrap gap-3 print:hidden">
           <Button variant="outline" size="sm" className="gap-1.5" onClick={() => window.print()} data-testid="button-print-agreement">
             <Printer className="w-4 h-4" />

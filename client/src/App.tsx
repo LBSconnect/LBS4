@@ -25,6 +25,7 @@ import ElectronicCommunicationsTerms from "@/pages/ElectronicCommunicationsTerms
 import BookingCancellationPolicy from "@/pages/BookingCancellationPolicy";
 import CandidateRulesSurveillanceNotice from "@/pages/CandidateRulesSurveillanceNotice";
 import DocumentHandlingNotice from "@/pages/DocumentHandlingNotice";
+import LegalNotices from "@/pages/LegalNotices";
 import Book from "@/pages/Book";
 import InsuranceExamPrepHub from "@/pages/InsuranceExamPrepHub";
 import WebsiteDesignLanding from "@/pages/WebsiteDesignLanding";
@@ -133,6 +134,7 @@ function Router() {
         <Route path="/booking-cancellation-policy" component={BookingCancellationPolicy} />
         <Route path="/candidate-rules-surveillance-notice" component={CandidateRulesSurveillanceNotice} />
         <Route path="/document-handling-notice" component={DocumentHandlingNotice} />
+        <Route path="/legal-notices" component={LegalNotices} />
         <Route path="/book" component={Book} />
         <Route path="/corporate" component={CorporateLanding} />
         <Route path="/corporate/programs" component={CorporatePrograms} />

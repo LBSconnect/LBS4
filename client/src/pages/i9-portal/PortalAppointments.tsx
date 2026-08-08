@@ -70,7 +70,6 @@ function DesignationForm({ companyId, onCreated }: { companyId: string; onCreate
 
   return (
     <form onSubmit={submit} className="space-y-3 bg-[#f8f9fb] rounded-xl p-4 border border-border/50">
-      <p className="text-xs text-amber-700 bg-amber-50 border border-amber-200 rounded p-2">Business document — legal review recommended before use.</p>
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
         <Field label="Employer Legal Name" required><Input value={employerLegalName} onChange={(e) => setEmployerLegalName(e.target.value)} required /></Field>
         <Field label="Employee Name or Class" required hint='e.g. a named employee, or "all new hires at Site X, 8/1–8/31"'><Input value={employeeNameOrClass} onChange={(e) => setEmployeeNameOrClass(e.target.value)} required /></Field>

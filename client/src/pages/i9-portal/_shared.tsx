@@ -10,6 +10,8 @@ import { Link, useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import SEO from "@/components/SEO";
+import Header from "@/components/Header";
+import Footer from "@/components/Footer";
 import { Loader2, LogOut, LayoutDashboard, Building2, MapPin, ClipboardList, Users, ShieldAlert, CreditCard, CalendarClock, Bell, Wrench, KeyRound } from "lucide-react";
 import {
   i9Api,
@@ -185,12 +187,18 @@ export function PortalShell({
   });
 
   return (
-    <div className="min-h-screen bg-[#f8f9fb]">
+    <div className="min-h-screen flex flex-col bg-[#f8f9fb]">
       {/* canonical reflects the actual current portal route (not always the
           dashboard) so each authenticated page doesn't collide with every
           other page's canonical URL — moot for indexing since noIndex is
           set, but keeps the tag itself correct. */}
       <SEO title={noIndexTitle ?? title} canonical={location} noIndex />
+
+      {/* The same site-wide Header/Footer every public page uses, kept here
+          so an authenticated user never loses the main nav or the footer's
+          contact info/legal links just because they're inside the portal —
+          one consistent shell across the whole site, logged in or not. */}
+      <Header />
 
       <div className="text-white" style={{ backgroundColor: NAVY }}>
         <div className="max-w-6xl mx-auto px-4 sm:px-6 py-3 flex items-center gap-4">
@@ -226,10 +234,12 @@ export function PortalShell({
         </div>
       </div>
 
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 py-6 space-y-6">
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 py-6 space-y-6 flex-1 w-full">
         <h1 className="text-xl sm:text-2xl font-bold" style={{ color: NAVY }}>{title}</h1>
         {children}
       </div>
+
+      <Footer />
     </div>
   );
 }

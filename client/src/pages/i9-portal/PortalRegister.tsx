@@ -4,6 +4,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import SEO from "@/components/SEO";
+import Header from "@/components/Header";
+import Footer from "@/components/Footer";
 import { UserPlus, ShieldCheck } from "lucide-react";
 import { i9Api, I9ApiError, PORTAL_ROUTES, type I9User } from "@/lib/i9Portal";
 import { useI9Session, NAVY } from "./_shared";
@@ -67,78 +69,82 @@ export default function PortalRegister() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center px-6 py-10" style={{ backgroundColor: NAVY }}>
-      <SEO title="Start Employer Onboarding | LBS New-Hire Verification" canonical={PORTAL_ROUTES.register} noIndex />
-      <div className="w-full max-w-md bg-white rounded-2xl shadow-xl p-8 space-y-6">
-        <div className="text-center space-y-1">
-          <ShieldCheck className="w-10 h-10 mx-auto" style={{ color: NAVY }} />
-          <h1 className="text-xl font-bold" style={{ color: NAVY }}>Start Employer Onboarding</h1>
-          <p className="text-sm text-muted-foreground">
-            Create your secure portal account to begin. No employee data is collected here — this only creates the
-            business account used for onboarding, agreements, and case management.
+    <div className="min-h-screen flex flex-col">
+      <Header />
+      <div className="flex-1 flex items-center justify-center px-6 py-10" style={{ backgroundColor: NAVY }}>
+        <SEO title="Start Employer Onboarding | LBS New-Hire Verification" canonical={PORTAL_ROUTES.register} noIndex />
+        <div className="w-full max-w-md bg-white rounded-2xl shadow-xl p-8 space-y-6">
+          <div className="text-center space-y-1">
+            <ShieldCheck className="w-10 h-10 mx-auto" style={{ color: NAVY }} />
+            <h1 className="text-xl font-bold" style={{ color: NAVY }}>Start Employer Onboarding</h1>
+            <p className="text-sm text-muted-foreground">
+              Create your secure portal account to begin. No employee data is collected here — this only creates the
+              business account used for onboarding, agreements, and case management.
+            </p>
+          </div>
+          <form onSubmit={submit} className="space-y-4">
+            <div className="space-y-1.5">
+              <Label htmlFor="i9-company">Company Legal Name</Label>
+              <Input id="i9-company" value={companyLegalName} onChange={(e) => setCompanyLegalName(e.target.value)} placeholder="Acme Manufacturing LLC" required autoFocus />
+            </div>
+            <div className="space-y-1.5">
+              <Label htmlFor="i9-contact">Your Name</Label>
+              <Input id="i9-contact" value={contactName} onChange={(e) => setContactName(e.target.value)} placeholder="Jane Smith" required />
+            </div>
+            <div className="space-y-1.5">
+              <Label htmlFor="i9-reg-email">Business Email</Label>
+              <Input id="i9-reg-email" type="email" autoComplete="username" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="jane@acme.com" required />
+            </div>
+            <div className="space-y-1.5">
+              <Label htmlFor="i9-reg-password">Password</Label>
+              <Input id="i9-reg-password" type="password" autoComplete="new-password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder={`At least ${MIN_PASSWORD_LENGTH} characters`} required minLength={MIN_PASSWORD_LENGTH} />
+            </div>
+            <div className="space-y-1.5">
+              <Label htmlFor="i9-reg-password-confirm">Confirm Password</Label>
+              <Input id="i9-reg-password-confirm" type="password" autoComplete="new-password" value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} required minLength={MIN_PASSWORD_LENGTH} />
+            </div>
+            {error && (
+              <p className="text-red-500 text-sm">
+                {error}
+                {isDuplicateEmail && (
+                  <>
+                    {" "}
+                    <Link href={PORTAL_ROUTES.login} className="font-medium underline">Sign in</Link>
+                    {" or "}
+                    <Link href={PORTAL_ROUTES.forgotPassword} className="font-medium underline">reset your password</Link>.
+                  </>
+                )}
+              </p>
+            )}
+            <Button
+              type="submit"
+              className="w-full text-white gap-1.5"
+              style={{ backgroundColor: NAVY }}
+              disabled={loading || !companyLegalName || !contactName || !email || !password || !confirmPassword}
+            >
+              <UserPlus className="w-4 h-4" /> {loading ? "Creating account..." : "Create Account & Continue"}
+            </Button>
+          </form>
+          <p className="text-center text-xs text-muted-foreground">
+            Already have an account?{" "}
+            <Link href={PORTAL_ROUTES.login} className="font-medium hover:underline" style={{ color: NAVY }}>
+              Sign in
+            </Link>
+          </p>
+          <p className="text-center text-[11px] text-muted-foreground">
+            Do not enter employee Social Security numbers, document numbers, or other employee-specific information
+            anywhere on this page.
+          </p>
+          <p className="text-center text-[11px] text-muted-foreground border-t border-border/40 pt-3" data-testid="text-employer-disclaimer">
+            Linton Business Solutions LLC is an independent private company and is not a government agency. E-Verify
+            is a federal employment-verification program administered by the U.S. Department of Homeland Security in
+            partnership with the Social Security Administration. LBS charges for its professional administrative,
+            employer-agent, Form I-9 support, case-management, documentation, and related services, not for access
+            to E-Verify.
           </p>
         </div>
-        <form onSubmit={submit} className="space-y-4">
-          <div className="space-y-1.5">
-            <Label htmlFor="i9-company">Company Legal Name</Label>
-            <Input id="i9-company" value={companyLegalName} onChange={(e) => setCompanyLegalName(e.target.value)} placeholder="Acme Manufacturing LLC" required autoFocus />
-          </div>
-          <div className="space-y-1.5">
-            <Label htmlFor="i9-contact">Your Name</Label>
-            <Input id="i9-contact" value={contactName} onChange={(e) => setContactName(e.target.value)} placeholder="Jane Smith" required />
-          </div>
-          <div className="space-y-1.5">
-            <Label htmlFor="i9-reg-email">Business Email</Label>
-            <Input id="i9-reg-email" type="email" autoComplete="username" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="jane@acme.com" required />
-          </div>
-          <div className="space-y-1.5">
-            <Label htmlFor="i9-reg-password">Password</Label>
-            <Input id="i9-reg-password" type="password" autoComplete="new-password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder={`At least ${MIN_PASSWORD_LENGTH} characters`} required minLength={MIN_PASSWORD_LENGTH} />
-          </div>
-          <div className="space-y-1.5">
-            <Label htmlFor="i9-reg-password-confirm">Confirm Password</Label>
-            <Input id="i9-reg-password-confirm" type="password" autoComplete="new-password" value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} required minLength={MIN_PASSWORD_LENGTH} />
-          </div>
-          {error && (
-            <p className="text-red-500 text-sm">
-              {error}
-              {isDuplicateEmail && (
-                <>
-                  {" "}
-                  <Link href={PORTAL_ROUTES.login} className="font-medium underline">Sign in</Link>
-                  {" or "}
-                  <Link href={PORTAL_ROUTES.forgotPassword} className="font-medium underline">reset your password</Link>.
-                </>
-              )}
-            </p>
-          )}
-          <Button
-            type="submit"
-            className="w-full text-white gap-1.5"
-            style={{ backgroundColor: NAVY }}
-            disabled={loading || !companyLegalName || !contactName || !email || !password || !confirmPassword}
-          >
-            <UserPlus className="w-4 h-4" /> {loading ? "Creating account..." : "Create Account & Continue"}
-          </Button>
-        </form>
-        <p className="text-center text-xs text-muted-foreground">
-          Already have an account?{" "}
-          <Link href={PORTAL_ROUTES.login} className="font-medium hover:underline" style={{ color: NAVY }}>
-            Sign in
-          </Link>
-        </p>
-        <p className="text-center text-[11px] text-muted-foreground">
-          Do not enter employee Social Security numbers, document numbers, or other employee-specific information
-          anywhere on this page.
-        </p>
-        <p className="text-center text-[11px] text-muted-foreground border-t border-border/40 pt-3" data-testid="text-employer-disclaimer">
-          Linton Business Solutions LLC is an independent private company and is not a government agency. E-Verify
-          is a federal employment-verification program administered by the U.S. Department of Homeland Security in
-          partnership with the Social Security Administration. LBS charges for its professional administrative,
-          employer-agent, Form I-9 support, case-management, documentation, and related services, not for access
-          to E-Verify.
-        </p>
       </div>
+      <Footer />
     </div>
   );
 }

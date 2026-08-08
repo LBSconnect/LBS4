@@ -181,7 +181,7 @@ export default function ClientIntake() {
             LBS does not collect sensitive employee records (Form I-9 documents, SSNs, immigration status, or
             identity-document copies) on this page. See the{" "}
             <Link href={EMPLOYER_AGREEMENT_ROUTE} className="text-[#0D1B3D] dark:text-[#0077FF] underline underline-offset-2">
-              draft service agreement
+              service agreement
             </Link>{" "}
             for secure-communication terms used once your company is a client.
           </p>
