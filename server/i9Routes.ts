@@ -559,8 +559,26 @@ export function registerI9Routes(app: Express): void {
         const expiresAt = new Date(Date.now() + 60 * 60 * 1000); // 1 hour
         await store.setI9PasswordResetToken(user.id, hashPasswordResetToken(token), expiresAt);
         const resetUrl = `${process.env.PUBLIC_SITE_URL || "https://www.lbs4.com"}/employer-services/new-hire-verification/portal/reset-password?token=${token}`;
-        await sendI9PasswordResetEmail({ to: user.email, recipientName: user.fullName, resetUrl });
-        await store.logI9Audit({ actorUserId: user.id, actorRole: user.role, action: "auth.password_reset_requested", clientCompanyId: user.clientCompanyId ?? undefined, ipAddress: req.ip });
+        // The response below is deliberately identical whether this send
+        // succeeds or fails (account-enumeration protection — a differing
+        // client-visible message would itself confirm the email exists).
+        // That means send failures are otherwise completely invisible: the
+        // user is told "sent" and gets nothing, with zero way to tell a
+        // real outage from "check your spam folder." Recording the actual
+        // outcome in the audit trail (queryable via the admin Audit Log,
+        // unlike console output) is the only honest signal available here.
+        const emailSent = await sendI9PasswordResetEmail({ to: user.email, recipientName: user.fullName, resetUrl });
+        if (!emailSent) {
+          console.error(`[i9-portal] Password reset email failed to send to user ${user.id} (${user.email}) — SMTP/Graph may be unconfigured or erroring. Response to client is unaffected by design; see auth.password_reset_email_failed in the audit log.`);
+        }
+        await store.logI9Audit({
+          actorUserId: user.id,
+          actorRole: user.role,
+          action: emailSent ? "auth.password_reset_requested" : "auth.password_reset_email_failed",
+          details: { emailSent },
+          clientCompanyId: user.clientCompanyId ?? undefined,
+          ipAddress: req.ip,
+        });
       }
       res.json({ success: true, message: "If an account exists with that email, a reset link has been sent." });
     } catch (err: any) {
@@ -714,7 +732,12 @@ export function registerI9Routes(app: Express): void {
       await store.updateI9ClientCompany(pstr(req.params.id), parsed.data);
       await store.logI9Audit({ actorUserId: req.i9User!.id, actorRole: req.i9User!.role, action: "company.business_intake_update", entityType: "ClientCompany", entityId: pstr(req.params.id), clientCompanyId: pstr(req.params.id), ipAddress: req.ip });
       res.json({ success: true });
-    } catch {
+    } catch (err: any) {
+      // Previously a bare `catch {}` — a real failure here (e.g. a DB
+      // constraint error) was completely invisible, both to the client
+      // (generic message) and to us (nothing logged). Log it so a future
+      // failure like this is diagnosable from server logs.
+      console.error("i9 business-intake update error:", err?.message || err);
       res.status(500).json({ error: "Failed to update business intake" });
     }
   });
@@ -759,7 +782,12 @@ export function registerI9Routes(app: Express): void {
         inPortalMessage: `Your account status changed to "${status.replace(/_/g, " ")}".`,
       });
       if (status === "active" && company.authorizedSignerEmail) {
-        await sendI9NotificationEmail({ to: company.authorizedSignerEmail, recipientName: company.authorizedSignerName || "there", companyName: company.legalBusinessName, event: "client_activated" });
+        // In-portal notification above is created unconditionally, so a send
+        // failure here doesn't strand the client without any signal — but
+        // still worth a clear log line rather than a silently swallowed
+        // false, since email is the primary channel most clients notice.
+        const emailSent = await sendI9NotificationEmail({ to: company.authorizedSignerEmail, recipientName: company.authorizedSignerName || "there", companyName: company.legalBusinessName, event: "client_activated" });
+        if (!emailSent) console.error(`[i9-portal] client_activated email failed to send to company ${company.id} (${company.authorizedSignerEmail})`);
       }
       res.json({ success: true, status });
     } catch {
@@ -884,6 +912,8 @@ export function registerI9Routes(app: Express): void {
         companyName: company.legalBusinessName,
         agreementVersion: AGREEMENT_VERSION,
         acceptedAt: new Date(),
+      }).then((sent) => {
+        if (!sent) console.error(`agreement accepted email failed to send to ${req.i9User!.email} (company ${company.id}) — sendEmail returned false`);
       }).catch((err) => console.error("agreement accepted email failed:", err.message));
 
       const updated = await store.getLatestI9ClientAgreement(company.id);
@@ -1018,7 +1048,8 @@ export function registerI9Routes(app: Express): void {
 
       await store.updateI9NewHireRequestStatus(pstr(req.params.id), "submitted", req.i9User!.id);
       await store.createI9Notification({ clientCompanyId: request.clientCompanyId, event: "new_hire_request_submitted", relatedEntityType: "NewHireRequest", relatedEntityId: request.id, inPortalMessage: `New-hire request ${request.internalRequestNumber} was submitted and is awaiting LBS review.` });
-      await sendI9InternalNotificationEmail({ companyName: company.legalBusinessName, event: "new_hire_request_submitted", detail: `Request ${request.internalRequestNumber}` });
+      const internalEmailSent = await sendI9InternalNotificationEmail({ companyName: company.legalBusinessName, event: "new_hire_request_submitted", detail: `Request ${request.internalRequestNumber}` });
+      if (!internalEmailSent) console.error(`[i9-portal] internal new_hire_request_submitted email failed to send for request ${request.internalRequestNumber}`);
       res.json({ success: true });
     } catch {
       res.status(500).json({ error: "Failed to submit request" });
@@ -1074,12 +1105,16 @@ export function registerI9Routes(app: Express): void {
         // change itself; the in-portal notification always lands regardless.
         const company = await store.getI9ClientCompany(request.clientCompanyId);
         if (company?.authorizedSignerEmail) {
-          await sendI9NotificationEmail({
+          const sent = await sendI9NotificationEmail({
             to: company.authorizedSignerEmail,
             recipientName: company.authorizedSignerName || "there",
             companyName: company.legalBusinessName,
             event: notifyEvent,
-          }).catch((err) => console.error("i9 status-change notification email failed:", err?.message));
+          }).catch((err) => {
+            console.error("i9 status-change notification email failed:", err?.message);
+            return false;
+          });
+          if (!sent) console.error(`i9 status-change notification email failed to send to ${company.authorizedSignerEmail} (request ${request.internalRequestNumber})`);
         }
       }
       res.json({ success: true, status });
