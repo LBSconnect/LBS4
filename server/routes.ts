@@ -7,6 +7,7 @@ import { registerCorporateRoutes } from "./corporateRoutes";
 import { registerI9Routes } from "./i9Routes";
 import { z } from "zod";
 import { checkRateLimit } from "./i9Security";
+import { phoneSchema, optionalPhoneSchema } from "@shared/phone";
 
 // Public form/lead endpoints below had no rate limiting at all — reCAPTCHA
 // (where configured, via RECAPTCHA_SECRET_KEY) is the primary anti-spam
@@ -31,7 +32,7 @@ function publicFormRateLimit(bucket: string, limit: number, windowMs: number) {
 const contactFormSchema = z.object({
   name: z.string().trim().min(1, "Name is required").max(200),
   email: z.string().trim().min(1, "Email is required").email("Invalid email address").max(200),
-  phone: z.string().trim().max(40).optional().or(z.literal('')),
+  phone: optionalPhoneSchema,
   service: z.string().trim().max(100).optional().or(z.literal('')),
   message: z.string().trim().min(1, "Message is required").max(4000),
 });
@@ -40,7 +41,7 @@ const contactFormSchema = z.object({
 const bookAppointmentSchema = z.object({
   customerName: z.string().min(2, "Name must be at least 2 characters"),
   customerEmail: z.string().email("Invalid email address"),
-  customerPhone: z.string().optional(),
+  customerPhone: phoneSchema,
   serviceName: z.string().min(1, "Service name is required"),
   serviceSlug: z.string().optional(),
   serviceId: z.string().optional(),
@@ -327,7 +328,7 @@ export async function registerRoutes(
   const privacyRequestSchema = z.object({
     name: z.string().min(1).max(200),
     email: z.string().email().max(200),
-    phone: z.string().max(40).optional().or(z.literal('')),
+    phone: optionalPhoneSchema,
     organization: z.string().max(200).optional().or(z.literal('')),
     service: z.enum(['LBSconnect', 'MyEasyPass', 'Work-A-Beez', 'LBS4', 'Other']),
     requestType: z.enum([
@@ -387,7 +388,7 @@ export async function registerRoutes(
     contactName: z.string().min(1, "Contact name is required").max(200),
     companyName: z.string().min(1, "Company name is required").max(200),
     businessEmail: z.string().email("Invalid business email").max(200),
-    businessPhone: z.string().min(1, "Business phone is required").max(40),
+    businessPhone: phoneSchema,
     companyAddress: z.string().min(1, "Company address is required").max(300),
     industry: z.string().min(1, "Industry is required").max(150),
     employeeCount: z.string().min(1).max(50),
@@ -454,7 +455,12 @@ export async function registerRoutes(
   const employerIntakeSchema = z.object({
     companyLegalName: z.string().min(1, "Company legal name is required").max(200),
     dba: z.string().max(200).optional().or(z.literal('')),
-    ein: z.string().max(20).optional().or(z.literal('')),
+    // EIN is deliberately NOT collected on this public, pre-account lead
+    // form — it used to be, stored and emailed in plaintext with no
+    // encryption at all, a real gap next to the properly-encrypted EIN
+    // entry point (the authenticated Business Intake page, which uses
+    // encryptToColumn — see i9Storage.ts). The one place EIN is ever
+    // entered now is that encrypted path, post-registration.
     companyAddress: z.string().min(1, "Company address is required").max(300),
     mailingAddress: z.string().max(300).optional().or(z.literal('')),
     hiringLocations: z.string().min(1).max(50),
@@ -510,7 +516,7 @@ export async function registerRoutes(
       await storage.createEmployerIntakeSubmission({
         companyLegalName: data.companyLegalName,
         dba: data.dba || null,
-        ein: data.ein || null,
+        ein: null,
         companyAddress: data.companyAddress,
         mailingAddress: data.mailingAddress || null,
         hiringLocations: data.hiringLocations,

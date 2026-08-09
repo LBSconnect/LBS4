@@ -440,7 +440,6 @@ export async function sendEmployerConsultationAcknowledgement(data: {
 export async function sendEmployerIntakeNotification(data: {
   companyLegalName: string;
   dba?: string | null;
-  ein?: string | null;
   companyAddress: string;
   mailingAddress?: string | null;
   hiringLocations: string;
@@ -476,7 +475,6 @@ export async function sendEmployerIntakeNotification(data: {
             <table style="width: 100%; border-collapse: collapse;">
               <tr><td style="padding: 8px 12px; font-weight: bold; color: #1e3a6e; width: 200px;">Company Legal Name:</td><td style="padding: 8px 12px;">${escapeHtml(data.companyLegalName)}</td></tr>
               ${data.dba ? `<tr><td style="padding: 8px 12px; font-weight: bold; color: #1e3a6e;">DBA:</td><td style="padding: 8px 12px;">${escapeHtml(data.dba)}</td></tr>` : ''}
-              ${data.ein ? `<tr><td style="padding: 8px 12px; font-weight: bold; color: #1e3a6e;">EIN:</td><td style="padding: 8px 12px;">${escapeHtml(data.ein)}</td></tr>` : ''}
               <tr><td style="padding: 8px 12px; font-weight: bold; color: #1e3a6e;">Company Address:</td><td style="padding: 8px 12px;">${escapeHtml(data.companyAddress)}</td></tr>
               ${data.mailingAddress ? `<tr><td style="padding: 8px 12px; font-weight: bold; color: #1e3a6e;">Mailing Address:</td><td style="padding: 8px 12px;">${escapeHtml(data.mailingAddress)}</td></tr>` : ''}
               <tr><td style="padding: 8px 12px; font-weight: bold; color: #1e3a6e;">Hiring Locations:</td><td style="padding: 8px 12px;">${escapeHtml(data.hiringLocations)}</td></tr>

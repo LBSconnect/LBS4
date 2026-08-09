@@ -368,6 +368,8 @@ interface RevealedData {
   employeeName: string;
   employeeContact: string | null;
   ssn: string | null;
+  dateOfBirth: string | null;
+  employeeAddress: string | null;
   documentInfo: Record<string, unknown> | null;
 }
 
@@ -386,6 +388,8 @@ function ProtectedDataSection({ requestId, role, summary, onChanged }: { request
   const [employeeName, setEmployeeName] = useState("");
   const [employeeContact, setEmployeeContact] = useState("");
   const [ssn, setSsn] = useState("");
+  const [dateOfBirth, setDateOfBirth] = useState("");
+  const [employeeAddress, setEmployeeAddress] = useState("");
   const [listB, setListB] = useState("");
   const [listC, setListC] = useState("");
   const [saving, setSaving] = useState(false);
@@ -407,13 +411,18 @@ function ProtectedDataSection({ requestId, role, summary, onChanged }: { request
         body: JSON.stringify({
           employeeName,
           employeeContact: employeeContact || undefined,
-          ssn: ssn || undefined,
+          ssn,
+          dateOfBirth,
+          employeeAddress,
           documentInfo: listB || listC ? { listB: listB || undefined, listC: listC || undefined } : undefined,
         }),
       });
       setSaved(true);
       setShowForm(false);
-      setSsn(""); // never linger in component state longer than needed
+      // Never linger in component state longer than needed.
+      setSsn("");
+      setDateOfBirth("");
+      setEmployeeAddress("");
       onChanged();
     } catch (err) {
       setWriteError(err instanceof Error ? err.message : "Failed to save protected employee data.");
@@ -462,8 +471,14 @@ function ProtectedDataSection({ requestId, role, summary, onChanged }: { request
         <form onSubmit={submitWrite} className="space-y-3 border-t border-border/50 pt-3">
           <Field label="Employee Name" required><Input value={employeeName} onChange={(e) => setEmployeeName(e.target.value)} /></Field>
           <Field label="Employee Contact (email or phone)"><Input value={employeeContact} onChange={(e) => setEmployeeContact(e.target.value)} /></Field>
-          <Field label="Social Security Number" hint="9 digits, with or without dashes. Encrypted immediately; only ever shown in full via an explicit, audited reveal.">
-            <Input value={ssn} onChange={(e) => setSsn(e.target.value)} placeholder="XXX-XX-XXXX" />
+          <Field label="Social Security Number" required hint="9 digits, with or without dashes. Encrypted immediately; only ever shown in full via an explicit, audited reveal.">
+            <Input value={ssn} onChange={(e) => setSsn(e.target.value)} placeholder="XXX-XX-XXXX" required />
+          </Field>
+          <Field label="Date of Birth" required hint="Encrypted immediately, same as SSN.">
+            <Input type="date" value={dateOfBirth} onChange={(e) => setDateOfBirth(e.target.value)} required />
+          </Field>
+          <Field label="Employee Home Address" required hint="Encrypted immediately, same as SSN.">
+            <Input value={employeeAddress} onChange={(e) => setEmployeeAddress(e.target.value)} required />
           </Field>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <Field label="List B Document"><Input value={listB} onChange={(e) => setListB(e.target.value)} placeholder="e.g. Driver's License" /></Field>
@@ -471,7 +486,7 @@ function ProtectedDataSection({ requestId, role, summary, onChanged }: { request
           </div>
           {writeError && <ErrorBanner message={writeError} />}
           <div className="flex gap-2">
-            <Button type="submit" size="sm" disabled={saving || !employeeName} className="text-white" style={{ backgroundColor: NAVY }}>
+            <Button type="submit" size="sm" disabled={saving || !employeeName || !ssn || !dateOfBirth || !employeeAddress} className="text-white" style={{ backgroundColor: NAVY }}>
               {saving ? "Saving..." : "Save Protected Data"}
             </Button>
             {summary?.hasData && <Button type="button" size="sm" variant="outline" onClick={() => setShowForm(false)}>Cancel</Button>}
@@ -501,6 +516,8 @@ function ProtectedDataSection({ requestId, role, summary, onChanged }: { request
               <p><span className="text-xs text-muted-foreground">Name:</span> {revealed.employeeName}</p>
               {revealed.employeeContact && <p><span className="text-xs text-muted-foreground">Contact:</span> {revealed.employeeContact}</p>}
               {revealed.ssn && <p className="font-mono"><span className="text-xs text-muted-foreground font-sans">SSN:</span> {revealed.ssn}</p>}
+              {revealed.dateOfBirth && <p><span className="text-xs text-muted-foreground">Date of Birth:</span> {revealed.dateOfBirth}</p>}
+              {revealed.employeeAddress && <p><span className="text-xs text-muted-foreground">Address:</span> {revealed.employeeAddress}</p>}
               {revealed.documentInfo && (
                 <div>
                   <span className="text-xs text-muted-foreground">Documents:</span>

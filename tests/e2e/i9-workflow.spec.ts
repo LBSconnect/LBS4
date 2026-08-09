@@ -90,9 +90,22 @@ const ONBOARDING_CHAIN = [
 ];
 
 /** Walks a freshly-registered company all the way to `active`, as an LBS
- *  Program Admin — the only role permitted to change onboarding status. */
+ *  Program Admin — the only role permitted to change onboarding status.
+ *  Leaving business_intake_pending now requires EIN, physical address, and
+ *  authorized signer email to actually be on file (see the completeness
+ *  gate in server/i9Routes.ts's status route) — fill those in here, right
+ *  before that transition, so every test using this helper doesn't need to
+ *  know about the gate itself. */
 async function advanceCompanyToActive(admin: I9Session, companyId: string) {
   for (const status of ONBOARDING_CHAIN) {
+    if (status === "business_intake_pending") {
+      const intake = await req(admin, "PATCH", `/api/i9/companies/${companyId}/business-intake`, {
+        ein: "123456789",
+        physicalAddress: "616 FM 1960 Road West, Suite 101, Houston, TX 77090",
+        authorizedSignerEmail: `signer-${randSuffix()}@lbstest.internal`,
+      });
+      expect(intake.status, "business-intake fill-in before advancing").toBe(200);
+    }
     const r = await req(admin, "POST", `/api/i9/companies/${companyId}/status`, { status });
     expect(r.status, `advance to ${status}`).toBe(200);
   }
@@ -359,13 +372,15 @@ test.describe.serial("New-hire request workflow: attestations, drafts, and the c
       employeeName: "John Q. Testworker",
       employeeContact: "john@example.com",
       ssn: "123-45-6789",
+      dateOfBirth: "1990-01-15",
+      employeeAddress: "42 Testworker Ln, Houston, TX 77090",
       documentInfo: { listB: "Driver's License" },
     });
     expect(write.status).toBe(200);
 
     const billingCreds = await createInternalUser(admin, "lbs_intake_billing");
     const billing = await loginAs(billingCreds.email, billingCreds.password, "billing");
-    const billingAttempt = await req(billing, "POST", `/api/i9/new-hire-requests/${requestId}/protected-data`, { employeeName: "Should Be Blocked", ssn: "111-22-3333" });
+    const billingAttempt = await req(billing, "POST", `/api/i9/new-hire-requests/${requestId}/protected-data`, { employeeName: "Should Be Blocked", ssn: "111-22-3333", dateOfBirth: "1990-01-15", employeeAddress: "1 Nowhere Rd" });
     expect(billingAttempt.status, "lbs_intake_billing is barred from writing protected employee data").toBe(403);
 
     const get = await req(client, "GET", `/api/i9/new-hire-requests/${requestId}`);
@@ -380,6 +395,8 @@ test.describe.serial("New-hire request workflow: attestations, drafts, and the c
     const reveal = await req(processor, "POST", `/api/i9/new-hire-requests/${requestId}/protected-data/reveal`, { reason: "Manual E-Verify case entry" });
     expect(reveal.status).toBe(200);
     expect(reveal.json.data.ssn).toBe("123-45-6789");
+    expect(reveal.json.data.dateOfBirth).toBe("1990-01-15");
+    expect(reveal.json.data.employeeAddress).toBe("42 Testworker Ln, Houston, TX 77090");
 
     const audit = await req(admin, "GET", "/api/i9/reports/audit");
     expect(audit.status).toBe(200);

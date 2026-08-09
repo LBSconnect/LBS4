@@ -490,6 +490,14 @@ export async function runI9Migrations(): Promise<void> {
     ALTER TABLE i9_client_agreements ADD COLUMN IF NOT EXISTS signer_ip_address VARCHAR(45);
     ALTER TABLE i9_client_agreements ADD COLUMN IF NOT EXISTS signer_user_agent TEXT;
   `);
+
+  // Date of birth and employee home address, added to protected employee
+  // data alongside SSN — same encrypted-column treatment (see
+  // createOrUpdateI9ProtectedEmployeeData/revealI9ProtectedEmployeeData).
+  await pg.query(`
+    ALTER TABLE i9_protected_employee_data ADD COLUMN IF NOT EXISTS date_of_birth_encrypted TEXT;
+    ALTER TABLE i9_protected_employee_data ADD COLUMN IF NOT EXISTS employee_address_encrypted TEXT;
+  `);
 }
 
 /** Seeds the 3 monthly plans + 8 add-ons if the table is empty. Prices match
@@ -563,7 +571,14 @@ export async function createI9EmployerLead(data: InsertI9EmployerLead) {
 // ClientCompany
 // ─────────────────────────────────────────────────────────────────────────────
 
-export async function createI9ClientCompany(data: InsertI9ClientCompany): Promise<I9ClientCompany> {
+// Called once, at registration, with only legalBusinessName known — EIN,
+// physical address, and everything else in InsertI9ClientCompany is filled
+// in later via updateI9ClientCompany (business intake). Those fields are
+// required in the base schema (see shared/i9Schema.ts) because that same
+// schema doubles as the completeness gate before a company can leave
+// business_intake_pending — but they obviously can't exist yet at the
+// moment a brand-new company is created, hence the Partial<> here.
+export async function createI9ClientCompany(data: Partial<InsertI9ClientCompany> & { legalBusinessName: string }): Promise<I9ClientCompany> {
   const database = getDb();
   const { ein, ...rest } = data;
   const [row] = await database
@@ -1081,7 +1096,9 @@ export async function listI9CaseActivity(requestId: string) {
 export interface ProtectedEmployeeInput {
   employeeName: string;
   employeeContact?: string;
-  ssn?: string;
+  ssn: string;
+  dateOfBirth: string;
+  employeeAddress: string;
   documentInfo?: Record<string, unknown>;
 }
 
@@ -1103,8 +1120,10 @@ export async function createOrUpdateI9ProtectedEmployeeData(
     newHireRequestId: requestId,
     employeeNameEncrypted: encryptToColumn(input.employeeName),
     employeeContactEncrypted: input.employeeContact ? encryptToColumn(input.employeeContact) : null,
-    ssnEncrypted: input.ssn ? encryptToColumn(input.ssn) : null,
-    ssnLastFour: input.ssn ? input.ssn.replace(/\D/g, "").slice(-4) : null,
+    ssnEncrypted: encryptToColumn(input.ssn),
+    ssnLastFour: input.ssn.replace(/\D/g, "").slice(-4),
+    dateOfBirthEncrypted: encryptToColumn(input.dateOfBirth),
+    employeeAddressEncrypted: encryptToColumn(input.employeeAddress),
     documentInfoEncrypted: input.documentInfo ? encryptToColumn(JSON.stringify(input.documentInfo)) : null,
     createdByUserId,
     updatedAt: new Date(),
@@ -1147,6 +1166,8 @@ export async function revealI9ProtectedEmployeeData(requestId: string) {
     employeeName: decryptFromColumn(row.employeeNameEncrypted),
     employeeContact: row.employeeContactEncrypted ? decryptFromColumn(row.employeeContactEncrypted) : null,
     ssn: row.ssnEncrypted ? decryptFromColumn(row.ssnEncrypted) : null,
+    dateOfBirth: row.dateOfBirthEncrypted ? decryptFromColumn(row.dateOfBirthEncrypted) : null,
+    employeeAddress: row.employeeAddressEncrypted ? decryptFromColumn(row.employeeAddressEncrypted) : null,
     documentInfo: row.documentInfoEncrypted ? JSON.parse(decryptFromColumn(row.documentInfoEncrypted)) : null,
   };
 }

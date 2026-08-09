@@ -17,6 +17,7 @@
 import { pgTable, text, varchar, timestamp, integer, boolean, jsonb } from "drizzle-orm/pg-core";
 import { sql } from "drizzle-orm";
 import { z } from "zod";
+import { phoneSchema, optionalPhoneSchema } from "./phone";
 
 const uuidPk = (name = "id") => varchar(name).primaryKey().default(sql`gen_random_uuid()`);
 
@@ -114,7 +115,7 @@ export const insertI9EmployerLeadSchema = z.object({
   contactName: z.string().min(1).max(200),
   companyName: z.string().min(1).max(200),
   businessEmail: z.string().email().max(200),
-  businessPhone: z.string().min(1).max(40),
+  businessPhone: phoneSchema,
   companyAddress: z.string().min(1).max(300),
   industry: z.string().min(1).max(150),
   employeeCount: z.string().min(1).max(50),
@@ -145,6 +146,8 @@ export const FORBIDDEN_SENSITIVE_FIELD_NAMES = [
   "dateOfBirth",
   "dob",
   "date_of_birth",
+  "employeeAddress",
+  "employee_address",
   "documentNumber",
   "document_number",
   "alienNumber",
@@ -220,12 +223,20 @@ export const I9_CLIENT_COMPANY_STATUSES = [
 ] as const;
 export type I9ClientCompanyStatus = (typeof I9_CLIENT_COMPANY_STATUSES)[number];
 
+// EIN, physical address, and the authorized signer's email are treated as
+// required here in the canonical (non-partial) schema — the actual PATCH
+// endpoint (server/i9Routes.ts) still applies `.partial()` on top of this so
+// the wizard can keep saving incrementally field-by-field, but this full
+// schema is also used, unmodified, as the completeness gate before a company
+// can advance past business_intake_pending (see the status-transition route),
+// so "required" is enforced somewhere real rather than only implied by the
+// form UI.
 export const insertI9ClientCompanySchema = z.object({
   legalBusinessName: z.string().min(1).max(200),
   dba: z.string().max(200).optional(),
-  ein: z.string().length(9).regex(/^\d{9}$/).optional(), // 9 digits, no dash; plaintext in, encrypted before storage — never persisted as-is
+  ein: z.string().length(9).regex(/^\d{9}$/), // 9 digits, no dash; plaintext in, encrypted before storage — never persisted as-is
   entityType: z.string().max(100).optional(),
-  physicalAddress: z.string().max(500).optional(),
+  physicalAddress: z.string().min(1).max(500),
   mailingAddress: z.string().max(500).optional(),
   website: z.string().max(300).optional(),
   industry: z.string().max(150).optional(),
@@ -242,8 +253,8 @@ export const insertI9ClientCompanySchema = z.object({
   currentEmployerAgent: z.string().max(200).optional(),
   authorizedSignerName: z.string().max(200).optional(),
   authorizedSignerTitle: z.string().max(150).optional(),
-  authorizedSignerEmail: z.string().email().max(200).optional(),
-  authorizedSignerPhone: z.string().max(40).optional(),
+  authorizedSignerEmail: z.string().email().max(200),
+  authorizedSignerPhone: optionalPhoneSchema,
   billingContactName: z.string().max(200).optional(),
   billingContactEmail: z.string().email().max(200).optional(),
   selectedPlanId: z.string().max(100).optional(),
@@ -572,6 +583,8 @@ export const i9ProtectedEmployeeData = pgTable("i9_protected_employee_data", {
   employeeNameEncrypted: text("employee_name_encrypted").notNull(),
   employeeContactEncrypted: text("employee_contact_encrypted"),
   ssnEncrypted: text("ssn_encrypted"),
+  dateOfBirthEncrypted: text("date_of_birth_encrypted"),
+  employeeAddressEncrypted: text("employee_address_encrypted"),
   documentInfoEncrypted: text("document_info_encrypted"), // JSON blob of I-9 List A/B/C fields needed for the work packet
   ssnLastFour: varchar("ssn_last_four", { length: 4 }), // derived at write time, safe to show in masked form
   createdByUserId: varchar("created_by_user_id", { length: 100 }).notNull(),

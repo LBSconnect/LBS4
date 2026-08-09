@@ -4,6 +4,7 @@ import { apiRequest } from "@/lib/queryClient";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import SEO from "@/components/SEO";
+import { sanitizePhoneInput } from "@/lib/phone";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -369,12 +370,13 @@ export default function Contact() {
                           <Input
                             id="phone"
                             type="tel"
-                            placeholder="(xxx) xxx-xxxx"
+                            inputMode="numeric"
+                            placeholder="2815551234"
                             value={formData.phone}
                             onChange={(e) =>
                               setFormData({
                                 ...formData,
-                                phone: e.target.value,
+                                phone: sanitizePhoneInput(e.target.value),
                               })
                             }
                             data-testid="input-phone"

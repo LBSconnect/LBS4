@@ -785,6 +785,23 @@ export function registerI9Routes(app: Express): void {
       if (!allowed.includes(status)) {
         return res.status(400).json({ error: `Cannot move from '${company.status}' to '${status}'. Allowed: ${allowed.join(", ") || "none"}.` });
       }
+      // Business intake fields (EIN, physical address, authorized signer
+      // email) are required in insertI9ClientCompanySchema, but the PATCH
+      // .../business-intake route applies .partial() on top of it so the
+      // wizard can keep saving one field at a time — meaning nothing before
+      // this point ever actually enforces that a company finished intake
+      // with those fields filled in. Gate the one transition that matters
+      // (leaving business_intake_pending) instead, so an LBS staffer can't
+      // advance an incomplete file to E-Verify enrollment.
+      if (company.status === "business_intake_pending" && status === "ready_for_everify_enrollment") {
+        const missing: string[] = [];
+        if (!company.einEncrypted) missing.push("EIN");
+        if (!company.physicalAddress) missing.push("Physical Address");
+        if (!company.authorizedSignerEmail) missing.push("Authorized Signer Email");
+        if (missing.length > 0) {
+          return res.status(400).json({ error: `Business intake is incomplete. Missing: ${missing.join(", ")}.` });
+        }
+      }
       await store.updateI9ClientCompanyStatus(pstr(req.params.id), status);
       await store.logI9Audit({ actorUserId: req.i9User!.id, actorRole: req.i9User!.role, action: "company.status_change", entityType: "ClientCompany", entityId: pstr(req.params.id), clientCompanyId: pstr(req.params.id), details: { from: company.status, to: status }, ipAddress: req.ip });
 
@@ -1241,7 +1258,15 @@ export function registerI9Routes(app: Express): void {
   const protectedDataInputSchema = z.object({
     employeeName: z.string().min(1).max(200),
     employeeContact: z.string().max(300).optional(),
-    ssn: z.string().regex(/^\d{3}-?\d{2}-?\d{4}$/, "SSN must be 9 digits").optional(),
+    // SSN, date of birth, and the employee's home address are treated as
+    // sensitive data requiring the same encrypted-column handling as EIN
+    // (see i9Storage.ts) — all three are required here, not optional, since
+    // this is the one dedicated, audited, role-gated entry point for them
+    // (every other route in this file rejects these field names outright —
+    // see rejectForbiddenFields/FORBIDDEN_SENSITIVE_FIELD_NAMES).
+    ssn: z.string().regex(/^\d{3}-?\d{2}-?\d{4}$/, "SSN must be 9 digits"),
+    dateOfBirth: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "Date of birth must be a valid date"),
+    employeeAddress: z.string().min(1, "Employee address is required").max(500),
     documentInfo: z.record(z.string(), z.unknown()).optional(),
   });
 

@@ -38,6 +38,11 @@ async function apiPost(request: APIRequestContext, path: string, data: unknown) 
   return request.post(BASE_URL + path, { data, headers: csrf ? { "X-CSRF-Token": csrf } : {} });
 }
 
+async function apiPatch(request: APIRequestContext, path: string, data: unknown) {
+  const csrf = (await request.storageState()).cookies.find((c) => c.name === "i9_csrf")?.value;
+  return request.patch(BASE_URL + path, { data, headers: csrf ? { "X-CSRF-Token": csrf } : {} });
+}
+
 async function readJson(res: Awaited<ReturnType<APIRequestContext["post"]>>) {
   return res.json();
 }
@@ -118,6 +123,17 @@ test.describe.serial("I-9 portal — browser UI", () => {
       "mou_signature_pending", "mou_signed", "hiring_sites_confirmed", "workflow_training_pending", "active",
     ];
     for (const status of chain) {
+      // Leaving business_intake_pending requires EIN, physical address, and
+      // authorized signer email on file (see the completeness gate in
+      // server/i9Routes.ts's status route) — fill those in first.
+      if (status === "business_intake_pending") {
+        const intake = await apiPatch(adminRequest, `/api/i9/companies/${companyId}/business-intake`, {
+          ein: "123456789",
+          physicalAddress: "616 FM 1960 Road West, Suite 101, Houston, TX 77090",
+          authorizedSignerEmail: `ui-signer-${rand()}@lbstest.internal`,
+        });
+        expect(intake.ok(), "business-intake fill-in before advancing").toBeTruthy();
+      }
       const r = await apiPost(adminRequest, `/api/i9/companies/${companyId}/status`, { status });
       expect(r.ok(), `advance to ${status}`).toBeTruthy();
     }
@@ -179,6 +195,8 @@ test.describe.serial("I-9 portal — browser UI", () => {
     // accessible name), so match on the prefix rather than an exact string.
     await page.getByLabel(/^Employee Name/).fill("Browser Test Employee");
     await page.getByLabel(/Social Security Number/).fill("123-45-6789");
+    await page.getByLabel(/^Date of Birth/).fill("1990-01-15");
+    await page.getByLabel(/^Employee Home Address/).fill("42 Testworker Ln, Houston, TX 77090");
     await page.click("text=Save Protected Data");
     await expect(page.getByText("saved securely")).toBeVisible({ timeout: 5000 });
 

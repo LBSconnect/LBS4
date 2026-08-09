@@ -2,6 +2,7 @@ import { useEffect, useState, forwardRef, useImperativeHandle } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Save } from "lucide-react";
+import { sanitizePhoneInput } from "@/lib/phone";
 import {
   i9Api,
   I9ApiError,
@@ -216,8 +217,8 @@ export const BusinessIntakeForm = forwardRef<BusinessIntakeFormHandle, { company
           <Field label="DBA (if applicable)">
             <Input value={form.dba} onChange={(e) => set("dba", e.target.value)} />
           </Field>
-          <Field label="EIN" hint={einMasked ? `Currently on file: ${einMasked}` : "9 digits. Enter to set or replace. Stored encrypted; never displayed in full."}>
-            <Input value={form.ein} onChange={(e) => set("ein", e.target.value.replace(/\D/g, "").slice(0, 9))} maxLength={9} placeholder="XXXXXXXXX" />
+          <Field label="EIN" required={!einMasked} hint={einMasked ? `Currently on file: ${einMasked}` : "9 digits. Required before this company can move past business intake. Stored encrypted; never displayed in full."}>
+            <Input value={form.ein} onChange={(e) => set("ein", e.target.value.replace(/\D/g, "").slice(0, 9))} maxLength={9} placeholder="XXXXXXXXX" required={!einMasked} />
           </Field>
           <Field label="Entity Type">
             <select className="w-full h-9 px-3 text-sm border border-input rounded-md bg-background" value={form.entityType} onChange={(e) => set("entityType", e.target.value)}>
@@ -260,8 +261,8 @@ export const BusinessIntakeForm = forwardRef<BusinessIntakeFormHandle, { company
 
       <PortalCard title="Addresses">
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <Field label="Physical Address">
-            <Input value={form.physicalAddress} onChange={(e) => set("physicalAddress", e.target.value)} />
+          <Field label="Physical Address" required>
+            <Input value={form.physicalAddress} onChange={(e) => set("physicalAddress", e.target.value)} required />
           </Field>
           <Field label="Mailing Address">
             <Input value={form.mailingAddress} onChange={(e) => set("mailingAddress", e.target.value)} />
@@ -273,8 +274,8 @@ export const BusinessIntakeForm = forwardRef<BusinessIntakeFormHandle, { company
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <Field label="Name"><Input value={form.authorizedSignerName} onChange={(e) => set("authorizedSignerName", e.target.value)} /></Field>
           <Field label="Title"><Input value={form.authorizedSignerTitle} onChange={(e) => set("authorizedSignerTitle", e.target.value)} /></Field>
-          <Field label="Email"><Input type="email" value={form.authorizedSignerEmail} onChange={(e) => set("authorizedSignerEmail", e.target.value)} /></Field>
-          <Field label="Phone"><Input type="tel" value={form.authorizedSignerPhone} onChange={(e) => set("authorizedSignerPhone", e.target.value)} /></Field>
+          <Field label="Email" required><Input type="email" value={form.authorizedSignerEmail} onChange={(e) => set("authorizedSignerEmail", e.target.value)} required /></Field>
+          <Field label="Phone"><Input type="tel" inputMode="numeric" value={form.authorizedSignerPhone} onChange={(e) => set("authorizedSignerPhone", sanitizePhoneInput(e.target.value))} placeholder="2815551234" /></Field>
         </div>
       </PortalCard>
 

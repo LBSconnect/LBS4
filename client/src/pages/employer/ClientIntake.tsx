@@ -40,7 +40,6 @@ import {
 const emptyForm = {
   companyLegalName: "",
   dba: "",
-  ein: "",
   companyAddress: "",
   mailingAddress: "",
   hiringLocations: "",
@@ -223,10 +222,6 @@ export default function ClientIntake() {
                     <div className="space-y-2">
                       <Label htmlFor="ci-dba">DBA (if applicable)</Label>
                       <Input id="ci-dba" value={formData.dba} onChange={(e) => setFormData({ ...formData, dba: e.target.value })} data-testid="input-dba" />
-                    </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="ci-ein">EIN</Label>
-                      <Input id="ci-ein" placeholder="XX-XXXXXXX" value={formData.ein} onChange={(e) => setFormData({ ...formData, ein: e.target.value })} data-testid="input-ein" />
                     </div>
                     <div className="space-y-2">
                       <Label htmlFor="ci-industry">Industry *</Label>

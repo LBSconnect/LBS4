@@ -2,6 +2,7 @@ import { pgTable, text, varchar, timestamp, integer, serial, boolean, jsonb } fr
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 import { sql } from "drizzle-orm";
+import { optionalPhoneSchema } from "./phone";
 
 export const contactSubmissions = pgTable("contact_submissions", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
@@ -159,7 +160,7 @@ export const insertCorporateAppointmentSchema = z.object({
   accountCode: z.string().min(1),
   employeeName: z.string().min(2),
   employeeEmail: z.string().email(),
-  employeePhone: z.string().optional(),
+  employeePhone: optionalPhoneSchema,
   appointmentDatetime: z.string().refine((v) => !isNaN(new Date(v).getTime()), "Invalid date"),
   numSigners: z.number().int().min(1).max(10).default(1),
   numDocuments: z.number().int().min(1).max(50).default(1),
@@ -182,7 +183,7 @@ export const insertCorporateAccountSchema = z.object({
   zip: z.string().min(5),
   primaryContactName: z.string().min(2),
   primaryContactEmail: z.string().email(),
-  primaryContactPhone: z.string().optional(),
+  primaryContactPhone: optionalPhoneSchema,
   primaryContactTitle: z.string().optional(),
   apContactName: z.string().optional(),
   apContactEmail: z.string().email().optional(),

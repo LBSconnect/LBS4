@@ -9,6 +9,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent } from "@/components/ui/card";
+import { sanitizePhoneInput } from "@/lib/phone";
 import {
   Select,
   SelectContent,
@@ -209,8 +210,11 @@ export default function PrivacyRequest() {
                           <Label htmlFor="pr-phone">Telephone (optional)</Label>
                           <Input
                             id="pr-phone"
+                            type="tel"
+                            inputMode="numeric"
+                            placeholder="2815551234"
                             value={formData.phone}
-                            onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+                            onChange={(e) => setFormData({ ...formData, phone: sanitizePhoneInput(e.target.value) })}
                             data-testid="input-privacy-phone"
                           />
                         </div>

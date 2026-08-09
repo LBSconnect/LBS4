@@ -8,6 +8,7 @@ import { Badge } from "@/components/ui/badge";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import SEO from "@/components/SEO";
+import { sanitizePhoneInput } from "@/lib/phone";
 import {
   CheckCircle2,
   Building2,
@@ -347,7 +348,7 @@ export default function CorporateBook() {
                     {errors.employeeEmail && <p className="text-red-500 text-xs mt-1">{errors.employeeEmail}</p>}
                   </Field>
                   <Field label="Phone Number">
-                    <Input type="tel" value={form.employeePhone} onChange={(e) => set("employeePhone", e.target.value)} placeholder="281-555-1234" />
+                    <Input type="tel" inputMode="numeric" value={form.employeePhone} onChange={(e) => set("employeePhone", sanitizePhoneInput(e.target.value))} placeholder="2815551234" />
                   </Field>
                 </div>
 
