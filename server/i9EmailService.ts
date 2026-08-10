@@ -104,7 +104,7 @@ export async function sendI9NotificationEmail(data: {
     <h2 style="margin:0 0 6px;color:#0d1b35;font-size:22px;font-weight:700;">${label}</h2>
     <p style="margin:0 0 24px;color:#64748b;font-size:14px;">Hi ${escapeHtml(data.recipientName)}, there's an update on your ${escapeHtml(data.companyName)} account in the secure LBS employer portal.</p>
     <div style="text-align:center;margin:28px 0;">
-      <a href="${PORTAL_LOGIN_URL}" style="display:inline-block;background:linear-gradient(90deg,#FF6A00,#FF2D55);color:#ffffff;font-weight:700;font-size:14px;padding:14px 32px;border-radius:999px;text-decoration:none;">
+      <a href="${PORTAL_LOGIN_URL}" style="display:inline-block;background-color:#FF6A00;background:linear-gradient(90deg,#FF6A00,#FF2D55);color:#ffffff;font-weight:700;font-size:14px;padding:14px 32px;border-radius:999px;text-decoration:none;">
         Log In to the Secure Portal
       </a>
     </div>
@@ -126,7 +126,7 @@ export async function sendI9PasswordResetEmail(data: {
     <h2 style="margin:0 0 6px;color:#0d1b35;font-size:22px;font-weight:700;">Reset your password</h2>
     <p style="margin:0 0 24px;color:#64748b;font-size:14px;">Hi ${escapeHtml(data.recipientName)}, we received a request to reset the password on your LBS employer portal account. This link expires in 1 hour and can only be used once.</p>
     <div style="text-align:center;margin:28px 0;">
-      <a href="${data.resetUrl}" style="display:inline-block;background:linear-gradient(90deg,#FF6A00,#FF2D55);color:#ffffff;font-weight:700;font-size:14px;padding:14px 32px;border-radius:999px;text-decoration:none;">
+      <a href="${data.resetUrl}" style="display:inline-block;background-color:#FF6A00;background:linear-gradient(90deg,#FF6A00,#FF2D55);color:#ffffff;font-weight:700;font-size:14px;padding:14px 32px;border-radius:999px;text-decoration:none;">
         Reset Password
       </a>
     </div>
@@ -163,7 +163,7 @@ export async function sendI9AgreementAcceptedEmail(data: {
       <tr><td style="padding:6px 0;font-weight:600;">Accepted (Central Time)</td><td style="padding:6px 0;">${escapeHtml(acceptedAtDisplay)}</td></tr>
     </table>
     <div style="text-align:center;margin:28px 0;">
-      <a href="${agreementUrl}" style="display:inline-block;background:linear-gradient(90deg,#FF6A00,#FF2D55);color:#ffffff;font-weight:700;font-size:14px;padding:14px 32px;border-radius:999px;text-decoration:none;">
+      <a href="${agreementUrl}" style="display:inline-block;background-color:#FF6A00;background:linear-gradient(90deg,#FF6A00,#FF2D55);color:#ffffff;font-weight:700;font-size:14px;padding:14px 32px;border-radius:999px;text-decoration:none;">
         View the Agreement
       </a>
     </div>
@@ -196,7 +196,7 @@ export async function sendI9SubscriptionActivatedEmail(data: {
     </table>
     <p style="margin:0 0 16px;color:#374151;font-size:14px;">Pick up right where you left off — the rest of your onboarding (service agreement and hiring sites) is a couple of quick steps in your secure employer portal.</p>
     <div style="text-align:center;margin:28px 0;">
-      <a href="${onboardingUrl}" style="display:inline-block;background:linear-gradient(90deg,#FF6A00,#FF2D55);color:#ffffff;font-weight:700;font-size:14px;padding:14px 32px;border-radius:999px;text-decoration:none;">
+      <a href="${onboardingUrl}" style="display:inline-block;background-color:#FF6A00;background:linear-gradient(90deg,#FF6A00,#FF2D55);color:#ffffff;font-weight:700;font-size:14px;padding:14px 32px;border-radius:999px;text-decoration:none;">
         Continue Onboarding
       </a>
     </div>
