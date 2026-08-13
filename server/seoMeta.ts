@@ -46,66 +46,66 @@ function withSuffix(title: string): string {
 export const SEO_ROUTES: Record<string, RouteMeta> = {
   "/": {
     title: `${SITE_SUFFIX} Houston TX | Notary, Testing & More`,
-    description: "LBS Business Services Center provides notary services, passport photos, and website design in Houston, Texas, plus authorized Pearson VUE & Certiport exam testing.",
+    description: "Notary services, passport photos, and website design in Houston, Texas, plus authorized Pearson VUE & Certiport exam testing at LBS.",
   },
   "/services": {
     title: withSuffix("Business Services in Houston TX"),
-    description: "Notary services, passport photos, and website design at LBS Business Services Center. Authorized Pearson VUE & Certiport exam testing also available at 616 FM 1960 Road West. Call 281-836-5357.",
+    description: "Notary, passport photos, and website design at LBS Business Services Center. Pearson VUE & Certiport exam testing also available. Call 281-836-5357.",
   },
   "/about": {
-    title: withSuffix("About LBS Business Services Center | Linton Business Solutions Houston TX"),
-    description: "LBS4 is the Skilling Services & Business Center for Linton Business Solutions LLC, offering notary services, passport photos, website design, and authorized Pearson VUE & Certiport testing in Houston, Texas.",
+    title: withSuffix("About Linton Business Solutions LLC"),
+    description: "Linton Business Solutions LLC (LBS4): notary services, passport photos, website design, and authorized Pearson VUE & Certiport testing in Houston, TX.",
   },
   "/contact": {
-    title: withSuffix("Contact LBS Business Services Center Houston TX | 281-836-5357"),
-    description: "Contact LBS Business Services Center at 616 FM 1960 Road West, Suite 101, Houston, Texas 77090. Call 281-836-5357 or email info@lbsconnect.net. Open Mon–Fri 8 AM–5 PM, Sat 8 AM–4 PM.",
+    title: withSuffix("Contact Us | 281-836-5357"),
+    description: "Contact LBS at 616 FM 1960 Road West, Suite 101, Houston, TX 77090. Call 281-836-5357. Open Mon–Fri 8 AM–5 PM, Sat 8 AM–4 PM.",
   },
   "/book": {
-    title: withSuffix("Book an Appointment | LBS Business Services Center Houston TX"),
-    description: "Book notary service, passport photos, an exam testing appointment, or an insurance exam boot camp at LBS Business Services Center in Houston, Texas. Online scheduling available 24/7. Call 281-836-5357.",
+    title: withSuffix("Book an Appointment, Houston TX"),
+    description: "Book notary service, passport photos, exam testing, or an insurance exam boot camp at LBS in Houston, Texas. Online scheduling 24/7. Call 281-836-5357.",
   },
   "/resources": {
     title: withSuffix("Resources"),
     description: "Helpful resources from LBS Business Services Center: FAQs, exam prep links, service overviews, and contact information.",
   },
   "/website-design-houston-77090": {
-    title: withSuffix("Website Design in Houston TX | Free Custom Quote"),
+    title: withSuffix("Website Design in Houston TX"),
     description: "Practical website design for Houston small businesses and entrepreneurs. Request a free custom quote from LBS Business Services Center near FM 1960.",
   },
   "/for-businesses": {
-    title: withSuffix("Business Services in Houston TX | For Businesses"),
-    description: "LBS Business Services Center helps Houston small businesses with Corporate Notary subscriptions, New-Hire Verification & Form I-9 support, website & application design, notary services, and passport photos.",
+    title: withSuffix("For Businesses: Notary, I-9 & Website Design"),
+    description: "LBS helps Houston small businesses with Corporate Notary subscriptions, New-Hire Verification & Form I-9 support, website design, notary, and passport photos.",
   },
   "/texas-insurance-exam-prep-houston": {
-    title: withSuffix("Texas Insurance Exam Prep in Houston TX | Life Insurance & P&C Boot Camps"),
-    description: "Texas insurance exam prep in Houston: Saturday morning Life Insurance and Property & Casualty license exam Boot Camps, $99/session, near FM 1960. Expert instructors, small classes.",
+    title: withSuffix("Insurance Exam Prep, Houston TX"),
+    description: "Texas insurance exam prep in Houston: Saturday Life Insurance and Property & Casualty license Boot Camps, $99/session, near FM 1960.",
   },
   "/notary-houston-77090": {
     title: withSuffix("Notary Service in Houston TX"),
-    description: "Certified notary public services for documents, affidavits, and legal papers at LBS Business Services Center, 616 FM 1960 Road West, Houston, TX. Walk-ins welcome.",
+    description: "Certified notary public services for documents, affidavits, and legal papers at LBS, 616 FM 1960 Road West, Houston, TX. Walk-ins welcome.",
   },
   "/passport-photos-houston-77090": {
     title: withSuffix("Passport Photos in Houston TX"),
     description: "Compliant U.S. passport and visa photos at LBS Business Services Center, 616 FM 1960 Road West, Houston, TX. Walk-ins welcome, no appointment needed.",
   },
   "/certiport-testing-center-houston": {
-    title: withSuffix("Testing Center | Pearson VUE & Certiport Exam Testing in Houston TX"),
-    description: "The LBS Testing Center offers authorized Pearson VUE & Certiport exam testing, Texas insurance license Boot Camps, and MyEasyPass exam prep in Houston, Texas.",
+    title: withSuffix("Pearson VUE & Certiport Testing Center"),
+    description: "The LBS Testing Center offers authorized Pearson VUE & Certiport exam testing, Texas insurance license Boot Camps, and exam prep in Houston, Texas.",
   },
   "/services/life-insurance-boot-camp": {
-    title: withSuffix("Texas Life Insurance Exam Boot Camp in Houston TX"),
-    description: "Prepare for your Texas Life Insurance license exam with our intensive Saturday morning Boot Camp at LBS Business Services Center in Houston, Texas.",
+    title: withSuffix("Texas Life Insurance Exam Boot Camp"),
+    description: "Prepare for your Texas Life Insurance license exam with our intensive Saturday morning Boot Camp at LBS in Houston, Texas.",
   },
   "/services/property-casualty-boot-camp": {
-    title: withSuffix("Texas Property & Casualty Exam Boot Camp in Houston TX"),
-    description: "Prepare for your Texas Property & Casualty insurance license exam with our intensive Saturday morning Boot Camp at LBS Business Services Center in Houston, Texas.",
+    title: withSuffix("Texas Property & Casualty Exam Boot Camp"),
+    description: "Prepare for your Texas Property & Casualty insurance exam with our Saturday morning Boot Camp at LBS in Houston, Texas.",
   },
   "/employer-services/new-hire-verification": {
-    title: withSuffix("New-Hire Verification & Form I-9 Support | LBS Houston"),
-    description: "LBS helps Houston employers manage Form I-9 administrative workflows, E-Verify cases, case tracking, employee document examination, mismatch notices, and monthly onboarding reports.",
+    title: withSuffix("New-Hire Verification & Form I-9 Support"),
+    description: "LBS helps Houston employers manage Form I-9 workflows, E-Verify cases, case tracking, document examination, and monthly onboarding reports.",
   },
   "/employer-services/new-hire-verification/pricing-sheet": {
-    title: withSuffix("Employer Services Pricing Sheet | LBS Houston"),
+    title: withSuffix("Employer Services Pricing Sheet"),
     description: "Print-friendly pricing sheet for LBS New-Hire Verification & Form I-9 Support: monthly plans, pay-as-you-go rates, setup fees, and mobile travel notes.",
   },
   "/employer-services/new-hire-verification/intake": {
@@ -119,36 +119,36 @@ export const SEO_ROUTES: Record<string, RouteMeta> = {
     noIndex: true,
   },
   "/corporate": {
-    title: withSuffix("LBS Enterprise Corporate Notary Services Houston TX"),
-    description: "Dedicated corporate notary services for Houston businesses. Monthly subscription plans: Bronze, Silver, Gold. Priority scheduling, account management, scan-to-email.",
+    title: withSuffix("Corporate Notary Services, Houston TX"),
+    description: "Dedicated corporate notary services for Houston businesses. Monthly plans: Bronze, Silver, Gold. Priority scheduling, account management, scan-to-email.",
   },
   "/corporate/programs": {
-    title: withSuffix("Corporate Notary Plans: Bronze, Silver, Gold | LBS Houston"),
-    description: "Compare LBS corporate notary subscription plans. Bronze $250/mo (15 acts), Silver $400/mo (25 acts), Gold $750/mo (100 acts). Serving Houston, Texas businesses.",
+    title: withSuffix("Corporate Notary Plans: Bronze, Silver, Gold"),
+    description: "Compare LBS corporate notary plans: Bronze $250/mo (15 acts), Silver $400/mo (25 acts), Gold $750/mo (100 acts). Serving Houston, Texas.",
   },
   "/privacy-policy": {
     title: withSuffix("Privacy Policy"),
-    description: "Privacy Policy for Linton Business Solutions LLC (LBS), covering lbsconnect.net, myeasypass.net, workabeez.net, and lbs4.com. How we collect, use, disclose, retain, and protect information.",
+    description: "Privacy Policy for Linton Business Solutions LLC (LBS): how we collect, use, disclose, retain, and protect information across lbsconnect.net and lbs4.com.",
   },
   "/terms-of-use": {
     title: withSuffix("Terms of Service"),
-    description: "LBS4 Test, Exam, and Business Center Terms of Service: testing-center appointments, sponsored examinations, boot camps, notary services, passport photos, and website design services.",
+    description: "LBS4 Terms of Service: testing-center appointments, sponsored exams, boot camps, notary services, passport photos, and website design services.",
   },
   "/cookie-policy": {
     title: withSuffix("Cookie Policy"),
-    description: "Cookie Policy for Linton Business Solutions LLC (LBS), covering lbsconnect.net, myeasypass.net, workabeez.net, and lbs4.com. What cookies and similar technologies we use and your choices.",
+    description: "Cookie Policy for Linton Business Solutions LLC (LBS): what cookies and similar technologies we use across our sites and your choices.",
   },
   "/notice-at-collection": {
     title: withSuffix("Notice at Collection"),
-    description: "Notice at Collection for Linton Business Solutions LLC (LBS): categories of personal information we collect, our purposes for collecting it, and your rights.",
+    description: "Notice at Collection for Linton Business Solutions LLC (LBS): categories of personal information we collect and our purposes for collecting it.",
   },
   "/accessibility-statement": {
     title: withSuffix("Accessibility Statement"),
-    description: "Linton Business Solutions LLC (LBS) is committed to making its websites, applications, digital products, and physical services reasonably accessible to people with disabilities.",
+    description: "Linton Business Solutions LLC (LBS) is committed to making its websites, apps, and physical services reasonably accessible to people with disabilities.",
   },
   "/copyright-dmca-policy": {
     title: withSuffix("Copyright and DMCA Policy"),
-    description: "Copyright and DMCA Policy for Linton Business Solutions LLC (LBS): ownership of LBS content, customer content rights, and the process for copyright complaints and counter-notices.",
+    description: "Copyright and DMCA Policy for Linton Business Solutions LLC (LBS): ownership of LBS content, customer content rights, and the complaint process.",
   },
   "/electronic-communications-terms": {
     title: withSuffix("Electronic Communications, Email, and SMS Terms"),
@@ -168,7 +168,7 @@ export const SEO_ROUTES: Record<string, RouteMeta> = {
   },
   "/privacy-request": {
     title: withSuffix("Privacy Request Procedure and Form"),
-    description: "Submit a privacy request to Linton Business Solutions LLC (LBS): access, correction, deletion, opt-out, or appeal requests for lbsconnect.net, myeasypass.net, workabeez.net, and lbs4.com.",
+    description: "Submit a privacy request to Linton Business Solutions LLC (LBS): access, correction, deletion, opt-out, or appeal requests for your personal information.",
   },
   "/legal-notices": {
     title: withSuffix("Legal Notices & Agreements"),
@@ -221,15 +221,25 @@ export function injectSeoMeta(html: string, pathname: string): string {
   );
   // No static <link rel="canonical"> exists in the base template (it was
   // client-only, same problem as everything else here) — insert one right
-  // after the description meta tag.
+  // after the description meta tag. Tagged data-ssr so client/src/components/
+  // SEO.tsx (react-helmet-async) can find and remove it on mount: Helmet's
+  // reconciliation only tracks elements it previously rendered itself (via
+  // its own data-rh attribute), so without this it can't see this
+  // server-injected tag and would append a second, duplicate canonical
+  // rather than replacing it once React hydrates.
   out = out.replace(
     /(<meta name="description" content="[^"]*" \/>)/,
-    `$1\n    <link rel="canonical" href="${url}" />`
+    `$1\n    <link rel="canonical" href="${url}" data-ssr-canonical="true" />`
   );
   if (meta.noIndex) {
+    // Replace the base template's permissive robots directive rather than
+    // appending a second, conflicting <meta name="robots"> tag — the two
+    // pages that set noIndex (business-intake checklist, service agreement)
+    // otherwise ended up with both "index, follow, ..." and
+    // "noindex, nofollow" in the same document.
     out = out.replace(
-      /(<link rel="canonical"[^>]*\/>)/,
-      `$1\n    <meta name="robots" content="noindex, nofollow" />`
+      /<meta name="robots" content="[^"]*" \/>/,
+      `<meta name="robots" content="noindex, nofollow" />`
     );
   }
   return out;

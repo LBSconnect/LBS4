@@ -189,7 +189,7 @@ export default function Contact() {
       <Header />
 
       <section className="relative py-12 bg-gradient-to-br from-[#0D1B3D] to-[#1A237E]" data-testid="section-contact-hero">
-        <div className="absolute inset-0 bg-[url('/images/hero-testing-center.png')] bg-cover bg-center opacity-10" />
+        <div className="absolute inset-0 bg-[url('/images/hero-testing-center.webp')] bg-cover bg-center opacity-10" />
         <div className="relative z-10 max-w-7xl mx-auto px-6 text-center space-y-4">
           <h1 className="text-4xl md:text-5xl font-bold text-white" data-testid="text-contact-title">
             Contact Us

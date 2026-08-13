@@ -8,6 +8,16 @@ Disallow: /checkout/cancel
 # Disallow internal account areas
 Disallow: /admin/
 Disallow: /corporate/portal
+Disallow: /corporate/enroll
+Disallow: /corporate/activated
+Disallow: /corporate/book
+
+# Disallow the I-9 employer portal (login, dashboard, billing, case data,
+# etc.) — a growing tree of session-gated, thin/duplicate pages that have no
+# business being indexed. The public marketing pages under
+# /employer-services/new-hire-verification/ (and its own noindex pages,
+# see server/seoMeta.ts) are NOT under this prefix and stay crawlable.
+Disallow: /employer-services/new-hire-verification/portal/
 
 # Sitemap location
 Sitemap: https://www.lbs4.com/sitemap.xml
