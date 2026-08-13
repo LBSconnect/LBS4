@@ -58,7 +58,7 @@ export default function Services() {
       <Header />
 
       <section className="relative py-12 bg-gradient-to-br from-[#0D1B3D] to-[#1A237E]" data-testid="section-services-hero">
-        <div className="absolute inset-0 bg-[url('/images/hero-testing-center.png')] bg-cover bg-center opacity-10" />
+        <div className="absolute inset-0 bg-[url('/images/hero-testing-center.webp')] bg-cover bg-center opacity-10" />
         <div className="relative z-10 max-w-7xl mx-auto px-6 text-center space-y-4">
           <div className="inline-flex items-center gap-2 bg-white/10 backdrop-blur-sm border border-white/20 rounded-full px-4 py-1.5 text-sm text-white/90">
             <Shield className="w-4 h-4 text-[#FF2D55]" />
@@ -120,7 +120,7 @@ export default function Services() {
                 slug="testing-center"
                 title="Testing Center"
                 description="Authorized Pearson VUE & Certiport exam testing, insurance license Boot Camps, and exam prep."
-                image="/images/hero-testing-center.png"
+                image="/images/hero-testing-center.webp"
                 href="/certiport-testing-center-houston"
               />
             )}

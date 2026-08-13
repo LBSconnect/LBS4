@@ -22,7 +22,7 @@ import Footer from "@/components/Footer";
 import SEO from "@/components/SEO";
 import { services } from "@/lib/services";
 import { testimonials } from "@/lib/testimonials";
-import heroImg from "@assets/hero.png";
+import heroImg from "@assets/hero.webp";
 
 const businessServices = services.filter((s) => s.category === "business");
 
@@ -101,6 +101,19 @@ const faqs = [
   },
 ];
 
+// Mirrors the FAQ accordion rendered below verbatim — schema.org requires
+// structured data to match visible page content, so this is built from the
+// same `faqs` array rather than a separately maintained copy.
+const faqSchema = {
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": faqs.map((faq) => ({
+    "@type": "Question",
+    "name": faq.q,
+    "acceptedAnswer": { "@type": "Answer", "text": faq.a },
+  })),
+};
+
 export default function Home() {
   const [openFaq, setOpenFaq] = useState<number | null>(null);
 
@@ -109,6 +122,7 @@ export default function Home() {
       <SEO
         canonical="/"
         description="LBS Business Services Center provides notary services, passport photos, and website design in Houston, Texas, plus authorized Pearson VUE & Certiport exam testing."
+        schema={faqSchema}
       />
       <Header />
 
@@ -129,7 +143,7 @@ export default function Home() {
                 <span className="bg-gradient-to-r from-[#FF6A00] via-[#FF2D55] to-[#8A2BE2] bg-clip-text text-transparent">
                   Business.
                 </span>
-                <br className="hidden sm:block" /> Our Solutions.
+                <br className="hidden sm:block" /> Our Solutions in Houston, TX.
               </h1>
               <p
                 className="text-lg md:text-xl text-white/80 leading-relaxed max-w-lg"

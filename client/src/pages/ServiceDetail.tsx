@@ -21,6 +21,14 @@ import {
 import { Skeleton } from "@/components/ui/skeleton";
 import { Calendar } from "@/components/ui/calendar";
 import {
+  Breadcrumb,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbList,
+  BreadcrumbPage,
+  BreadcrumbSeparator,
+} from "@/components/ui/breadcrumb";
+import {
   ArrowLeft,
   CheckCircle2,
   Phone,
@@ -305,9 +313,25 @@ export default function ServiceDetail({ slugOverride }: { slugOverride?: string 
   }
 
   const canonicalPath = service.link ?? `/services/${service.slug}`;
+  const detailTitle = isCertiport ? "Pearson VUE & Certiport Exam Testing" : service.title;
 
-  const serviceSchema = {
-    "@context": "https://schema.org",
+  // Boot-camp session schedule — this used to live as two sitewide Event
+  // JSON-LD blocks in client/index.html, served on every page regardless of
+  // content (a real structured-data problem: schema.org markup is supposed
+  // to describe the page it's on). Scoped down here to only the two pages
+  // it actually matches.
+  const BOOTCAMP_SCHEDULE: Record<string, { startTime: string; endTime: string }> = {
+    "life-insurance-bootcamp": { startTime: "08:00", endTime: "10:00" },
+    "property-casualty-bootcamp": { startTime: "10:30", endTime: "12:30" },
+  };
+  const bootcampSchedule = service.id ? BOOTCAMP_SCHEDULE[service.id] : undefined;
+
+  // FAQ content actually rendered on this page (see the accordions further
+  // down) — reused here rather than duplicated so the FAQPage schema always
+  // matches what's visible, per Google's structured-data policy.
+  const pageFaqs = isCertiport ? TESTING_CENTER_FAQS : service.faqs;
+
+  const serviceEntity = {
     "@type": "Service",
     "name": service.title,
     "description": service.longDescription,
@@ -341,6 +365,65 @@ export default function ServiceDetail({ slugOverride }: { slugOverride?: string 
     } : {})
   };
 
+  const schema = {
+    "@context": "https://schema.org",
+    "@graph": [
+      serviceEntity,
+      ...(pageFaqs && pageFaqs.length > 0 ? [{
+        "@type": "FAQPage",
+        "mainEntity": pageFaqs.map((faq) => ({
+          "@type": "Question",
+          "name": faq.q,
+          "acceptedAnswer": { "@type": "Answer", "text": faq.a },
+        })),
+      }] : []),
+      ...(bootcampSchedule ? [{
+        "@type": "Event",
+        "name": service.title,
+        "description": service.longDescription,
+        "eventSchedule": {
+          "@type": "Schedule",
+          "byDay": "https://schema.org/Saturday",
+          "repeatFrequency": "P1W",
+          "startTime": bootcampSchedule.startTime,
+          "endTime": bootcampSchedule.endTime,
+          "scheduleTimezone": "America/Chicago",
+        },
+        "eventStatus": "https://schema.org/EventScheduled",
+        "eventAttendanceMode": "https://schema.org/OfflineEventAttendanceMode",
+        "location": {
+          "@type": "Place",
+          "name": "LBS Test & Exam Center",
+          "address": {
+            "@type": "PostalAddress",
+            "streetAddress": "616 FM 1960 Rd W, Ste 101",
+            "addressLocality": "Houston",
+            "addressRegion": "TX",
+            "postalCode": "77090-3048",
+            "addressCountry": "US",
+          },
+        },
+        "offers": {
+          "@type": "Offer",
+          "price": service.price.replace("$", ""),
+          "priceCurrency": "USD",
+          "availability": "https://schema.org/InStock",
+          "url": `https://www.lbs4.com${canonicalPath}`,
+        },
+        "organizer": { "@type": "LocalBusiness", "@id": "https://www.lbs4.com/#business" },
+        "url": `https://www.lbs4.com${canonicalPath}`,
+      }] : []),
+      {
+        "@type": "BreadcrumbList",
+        "itemListElement": [
+          { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://www.lbs4.com/" },
+          { "@type": "ListItem", "position": 2, "name": "Services", "item": "https://www.lbs4.com/services" },
+          { "@type": "ListItem", "position": 3, "name": detailTitle, "item": `https://www.lbs4.com${canonicalPath}` },
+        ],
+      },
+    ],
+  };
+
   return (
     <div className="min-h-screen flex flex-col bg-background">
       <SEO
@@ -351,7 +434,7 @@ export default function ServiceDetail({ slugOverride }: { slugOverride?: string 
             ? "The LBS Testing Center offers authorized Pearson VUE & Certiport exam testing, Texas insurance license Boot Camps, and MyEasyPass exam prep in Houston, Texas."
             : `${service.longDescription.slice(0, 155)}…`
         }
-        schema={serviceSchema}
+        schema={schema}
       />
       <Header />
 
@@ -363,6 +446,25 @@ export default function ServiceDetail({ slugOverride }: { slugOverride?: string 
           />
         )}
         <div className="relative z-10 max-w-7xl mx-auto px-6">
+          <Breadcrumb>
+            <BreadcrumbList className="mb-4 text-white/60">
+              <BreadcrumbItem>
+                <BreadcrumbLink asChild>
+                  <Link href="/" className="hover:text-white transition-colors">Home</Link>
+                </BreadcrumbLink>
+              </BreadcrumbItem>
+              <BreadcrumbSeparator className="text-white/40" />
+              <BreadcrumbItem>
+                <BreadcrumbLink asChild>
+                  <Link href="/services" className="hover:text-white transition-colors">Services</Link>
+                </BreadcrumbLink>
+              </BreadcrumbItem>
+              <BreadcrumbSeparator className="text-white/40" />
+              <BreadcrumbItem>
+                <BreadcrumbPage className="text-white/90">{detailTitle}</BreadcrumbPage>
+              </BreadcrumbItem>
+            </BreadcrumbList>
+          </Breadcrumb>
           <Link href="/services">
             <Button
               variant="ghost"
@@ -383,7 +485,7 @@ export default function ServiceDetail({ slugOverride }: { slugOverride?: string 
                 className="text-3xl md:text-4xl font-bold text-white"
                 data-testid="text-detail-title"
               >
-                {isCertiport ? "Pearson VUE & Certiport Exam Testing" : service.title}
+                {detailTitle}
               </h1>
               <p className="text-lg text-white/80 max-w-2xl">
                 {isCertiport

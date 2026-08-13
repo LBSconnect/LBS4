@@ -17,7 +17,7 @@ export default function Book() {
       <Header />
 
       <section className="relative py-12 bg-gradient-to-br from-[#0D1B3D] to-[#1A237E]">
-        <div className="absolute inset-0 bg-[url('/images/hero-testing-center.png')] bg-cover bg-center opacity-10" />
+        <div className="absolute inset-0 bg-[url('/images/hero-testing-center.webp')] bg-cover bg-center opacity-10" />
         <div className="relative z-10 max-w-7xl mx-auto px-6 text-center space-y-4">
           <div className="inline-flex items-center gap-2 bg-white/10 backdrop-blur-sm border border-white/20 rounded-full px-4 py-1.5 text-sm text-white/90">
             <CalendarCheck className="w-4 h-4 text-[#FF2D55]" />
