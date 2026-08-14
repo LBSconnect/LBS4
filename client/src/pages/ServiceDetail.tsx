@@ -544,7 +544,11 @@ export default function ServiceDetail({ slugOverride }: { slugOverride?: string 
                   licenses, and academic admissions exams.
                 </p>
                 <a href="https://home.pearsonvue.com" target="_blank" rel="noopener noreferrer">
-                  <Button variant="outline" size="sm" data-testid="link-pearson-vue-info">
+                  <Button
+                    size="sm"
+                    className="bg-gradient-to-r from-[#FF6A00] to-[#FF2D55] text-white rounded-full"
+                    data-testid="link-pearson-vue-info"
+                  >
                     Pearson VUE Information
                     <ExternalLink className="w-3.5 h-3.5 ml-1.5" />
                   </Button>
@@ -562,8 +566,8 @@ export default function ServiceDetail({ slugOverride }: { slugOverride?: string 
                   certifications. $35 per session.
                 </p>
                 <Button
-                  variant="outline"
                   size="sm"
+                  className="bg-gradient-to-r from-[#FF6A00] to-[#FF2D55] text-white rounded-full"
                   data-testid="link-certiport-info"
                   onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
                 >
@@ -582,7 +586,11 @@ export default function ServiceDetail({ slugOverride }: { slugOverride?: string 
                   instructors.
                 </p>
                 <Link href="/services?filter=bootcamp">
-                  <Button variant="outline" size="sm" data-testid="link-bootcamp-info">
+                  <Button
+                    size="sm"
+                    className="bg-gradient-to-r from-[#FF6A00] to-[#FF2D55] text-white rounded-full"
+                    data-testid="link-bootcamp-info"
+                  >
                     View Bootcamps
                   </Button>
                 </Link>
@@ -598,7 +606,11 @@ export default function ServiceDetail({ slugOverride }: { slugOverride?: string 
                   help candidates study with greater confidence.
                 </p>
                 <a href="https://www.myeasypass.net" target="_blank" rel="noopener noreferrer">
-                  <Button variant="outline" size="sm" data-testid="link-myeasypass-info">
+                  <Button
+                    size="sm"
+                    className="bg-gradient-to-r from-[#FF6A00] to-[#FF2D55] text-white rounded-full"
+                    data-testid="link-myeasypass-info"
+                  >
                     Visit MyEasyPass.net
                     <ExternalLink className="w-3.5 h-3.5 ml-1.5" />
                   </Button>
@@ -971,9 +983,8 @@ export default function ServiceDetail({ slugOverride }: { slugOverride?: string 
                     </div>
                     <a href={MAPS_URL} target="_blank" rel="noopener noreferrer" className="block">
                       <Button
-                        variant="outline"
                         size="sm"
-                        className="w-full gap-1.5"
+                        className="w-full gap-1.5 bg-gradient-to-r from-[#FF6A00] to-[#FF2D55] text-white rounded-full"
                         data-testid="button-map-directions"
                       >
                         <MapPin className="w-4 h-4" />
