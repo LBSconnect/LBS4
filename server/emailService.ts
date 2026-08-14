@@ -723,9 +723,42 @@ export async function sendAppointmentCalendarInvite(data: {
     const startISO = appointmentDateTime.toISOString();
     const endISO = new Date(appointmentDateTime.getTime() + durationMins * 60 * 1000).toISOString();
 
+    // Create the event directly on the Outlook calendar (requires Calendars.ReadWrite
+    // on the Azure AD app) *before* composing the admin email below, so the email can
+    // tell the reader whether it actually worked. This used to run fire-and-forget
+    // after the email had already been sent, with its result going nowhere but a
+    // server console line nobody watches in production — meaning "the calendar add
+    // quietly failed" and "it succeeded" looked identical from the inbox. A missing
+    // Calendars.ReadWrite grant (a separate permission from whatever lets mail send)
+    // is the most common way this fails, and it fails the same way for every booking,
+    // not just this one — so silently, that it can go unnoticed indefinitely.
+    const calendarEventCreated = await createOutlookCalendarEvent({
+      subject: `${data.serviceName}: ${data.customerName}`,
+      bodyHtml: `
+        <p><strong>Service:</strong> ${escapeHtml(data.serviceName)}</p>
+        <p><strong>Customer:</strong> ${escapeHtml(data.customerName)}</p>
+        <p><strong>Email:</strong> ${escapeHtml(data.customerEmail)}</p>
+        ${data.customerPhone ? `<p><strong>Phone:</strong> ${escapeHtml(data.customerPhone)}</p>` : ''}
+        ${exam ? `<p><strong>Exam:</strong> ${escapeHtml(exam)}</p>` : ''}
+        ${remainingNotes ? `<p><strong>Notes:</strong> ${escapeHtml(remainingNotes)}</p>` : ''}
+        <p><strong>Payment:</strong> ${data.paymentStatus === 'paid' ? 'Paid Online' : 'Pay at Visit'}</p>
+      `,
+      startDateTime: appointmentDateTime,
+      durationMinutes: durationMins,
+      attendeeEmail: data.customerEmail,
+      attendeeName: data.customerName,
+    });
+
+    const calendarStatusBanner = calendarEventCreated
+      ? `<p style="margin:0 0 20px;color:#166534;font-size:14px;">✓ Added to the Outlook calendar automatically. The attached .ics file is also included below if you'd like a copy for another calendar.</p>`
+      : `<div style="background:#fef2f2;border-radius:8px;padding:14px 18px;margin-bottom:20px;border-left:4px solid #dc2626;">
+          <p style="margin:0;color:#991b1b;font-size:14px;font-weight:600;">⚠ This appointment was NOT added to the Outlook calendar automatically.</p>
+          <p style="margin:6px 0 0;color:#991b1b;font-size:13px;">Open the attached .ics file below to add it manually. If this keeps happening, the Azure AD app used for email/calendar likely has mail permission but is missing the separate Calendars.ReadWrite permission (or hasn't had admin consent granted for it).</p>
+        </div>`;
+
     const adminContent = `
       <h2 style="margin:0 0 6px;color:#0d1b35;font-size:22px;font-weight:700;">New Appointment Booked</h2>
-      <p style="margin:0 0 20px;color:#64748b;font-size:14px;">A new appointment has been scheduled. Open the attached .ics file to add it to your calendar.</p>
+      ${calendarStatusBanner}
 
       <div style="background:#fff7ed;border-radius:8px;padding:20px 24px;margin-bottom:20px;border-left:4px solid #c9a84c;">
         <div style="color:#92400e;font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:0.8px;margin-bottom:12px;">Appointment Summary</div>
@@ -758,25 +791,7 @@ export async function sendAppointmentCalendarInvite(data: {
         },
       ],
     });
-    console.log('Calendar invite email sent to', NOTIFICATION_EMAIL);
-
-    // Create the event directly on the Outlook calendar (requires Calendars.ReadWrite on the Azure AD app)
-    createOutlookCalendarEvent({
-      subject: `${data.serviceName}: ${data.customerName}`,
-      bodyHtml: `
-        <p><strong>Service:</strong> ${escapeHtml(data.serviceName)}</p>
-        <p><strong>Customer:</strong> ${escapeHtml(data.customerName)}</p>
-        <p><strong>Email:</strong> ${escapeHtml(data.customerEmail)}</p>
-        ${data.customerPhone ? `<p><strong>Phone:</strong> ${escapeHtml(data.customerPhone)}</p>` : ''}
-        ${exam ? `<p><strong>Exam:</strong> ${escapeHtml(exam)}</p>` : ''}
-        ${remainingNotes ? `<p><strong>Notes:</strong> ${escapeHtml(remainingNotes)}</p>` : ''}
-        <p><strong>Payment:</strong> ${data.paymentStatus === 'paid' ? 'Paid Online' : 'Pay at Visit'}</p>
-      `,
-      startDateTime: appointmentDateTime,
-      durationMinutes: durationMins,
-      attendeeEmail: data.customerEmail,
-      attendeeName: data.customerName,
-    });
+    console.log('Calendar invite email sent to', NOTIFICATION_EMAIL, '— Outlook calendar auto-add:', calendarEventCreated ? 'succeeded' : 'failed');
   } catch (error: any) {
     console.error('Failed to send calendar invite email:', error.message);
   }
